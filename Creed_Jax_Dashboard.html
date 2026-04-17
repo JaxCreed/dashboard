@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jax's Dashboard</title>
+<style>
+:root {
+  --primary: #2F5496; --primary-light: #D6E4F0;
+  --primary-dark: #183a73; --primary-ink: #244f9e;
+  --blue-soft: #eef4ff; --blue-mist: #e1ecff; --blue-line: #c7d9fb;
+  --accent: #C9A227; --success: #00B050;
+  --danger: #FF4444; --warning: #FF9800;
+  --bg: #F5F7FA; --card: #FFFFFF; --text: #1A1A2E;
+  --muted: #6B7280; --border: #E5E7EB;
+  --shadow: 0 12px 28px rgba(30, 60, 114, 0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(104, 149, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+  color: var(--text);
+}
+
+/* ── Header ── */
+.app-header {
+  background:
+    radial-gradient(circle at top right, rgba(140, 182, 255, 0.34), transparent 26%),
+    linear-gradient(135deg, #0d1f3c, #244f9e 52%, #3a6bc2 100%);
+  color: white; padding: 20px 32px;
+  display: flex; justify-content: flex-start; align-items: center;
+  text-align: left;
+  box-shadow: 0 18px 40px rgba(24, 58, 115, 0.24);
+}
+.app-header > div {
+  width: min(920px, 100%);
+}
+.app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.app-header .subtitle {
+  opacity: 0.75; font-size: 13px; margin-top: 3px;
+}
+.header-badge {
+  background: rgba(232,241,255,0.14); border: 1px solid rgba(197,220,255,0.34);
+  color: #e8f2ff; padding: 6px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Tabs ── */
+.tab-nav {
+  background: rgba(255,255,255,0.9); border-bottom: 1px solid #dce8fb;
+  display: flex; padding: 0 32px; gap: 0; overflow-x: auto;
+  scrollbar-width: none;
+  box-shadow: 0 8px 22px rgba(34, 71, 140, 0.06);
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 13px 18px; border: none; background: none;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; border-bottom: 3px solid transparent;
+  margin-bottom: -2px; white-space: nowrap; transition: all 0.2s;
+}
+.tab-btn.active { color: var(--primary-dark); border-bottom-color: var(--primary); background: linear-gradient(180deg, rgba(235,243,255,0.95), rgba(255,255,255,0)); }
+.tab-btn:hover:not(.active) { color: var(--text); background: var(--blue-soft); }
+.tab-count {
+  display: inline-block; background: var(--primary-light); color: var(--primary);
+  border-radius: 12px; padding: 1px 7px; font-size: 11px; margin-left: 5px;
+}
+.tab-btn.active .tab-count { background: var(--primary); color: white; }
+
+.tab-content {
+  display: none; padding: 24px 32px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0));
+}
+.tab-content.active { display: block; }
+
+/* ── Toolbar ── */
+.toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.header-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.header-tools .btn { background: rgba(255,255,255,0.9); }
+.header-tools .btn:hover { background: #fff; }
+.search-box {
+  flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #d2e0fb;
+  border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
+  background: rgba(255,255,255,0.96); box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(77,127,213,0.12); }
+
+/* ── Buttons ── */
+.btn {
+  padding: 9px 16px; border: none; border-radius: 8px; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn-primary { background: linear-gradient(135deg, var(--primary), #4979d1); color: white; box-shadow: 0 10px 20px rgba(47,84,150,0.18); }
+.btn-primary:hover { background: linear-gradient(135deg, #244983, #3d68b6); }
+.btn-outline { background: rgba(255,255,255,0.96); border: 1px solid #d3e1fb; color: var(--text); }
+.btn-outline:hover { background: var(--blue-soft); border-color: var(--blue-line); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+
+/* ── Stats ── */
+.stats-row { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat-card {
+  flex: 1; min-width: 110px; background: linear-gradient(180deg, #ffffff, #f6faff);
+  border-radius: 14px; padding: 14px 18px; box-shadow: var(--shadow); text-align: center;
+  border: 1px solid #dbe6fb;
+}
+.stat-card .number { font-size: 26px; font-weight: 700; color: var(--primary-dark); }
+.stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.3px; }
+
+/* ── Table ── */
+.table-container {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,250,255,0.96));
+  border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid #dbe6fb;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: linear-gradient(135deg, #244983, #3a68b9); color: white; padding: 12px 14px;
+  text-align: left; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+}
+tbody td { padding: 11px 14px; border-bottom: 1px solid #e4ecfa; font-size: 13px; vertical-align: middle; }
+tbody tr { cursor: pointer; transition: background 0.15s; }
+tbody tr:nth-child(even) { background: rgba(244,248,255,0.72); }
+tbody tr:hover { background: #eaf2ff; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.badge-high   { background: #F4CCCC; color: #9C0006; }
+.badge-medium { background: #FFD9B3; color: #B85C00; }
+.badge-low    { background: #FFF1A8; color: #8A6A00; }
+.badge-small  { background: #E8F1FF; color: #1E4E8C; }
+.badge-mediumcreator { background: #FFF4CC; color: #9C6500; }
+.badge-large  { background: #FDE2E4; color: #B42318; }
+.badge-artist { background: #EEE5FF; color: #6B46C1; }
+.badge-brand  { background: #E3F6EC; color: #1F7A4D; }
+.badge-church { background: #E8F1FF; color: #1E4E8C; }
+.badge-camp   { background: #FFF4CC; color: #9C6500; }
+.badge-ministry { background: #F3E8FF; color: #7C3AED; }
+.badge-othertype { background: #F3F4F6; color: #4B5563; }
+.badge-script-creator { background: #E7F0FF; color: #24529E; }
+.badge-script-brand { background: #E9F7EF; color: #1F7A4D; }
+.badge-script-partnership { background: #FFF4CC; color: #9C6500; }
+.badge-script-ad { background: #DCEBFF; color: #214D90; }
+.badge-script-email { background: #EDE7FF; color: #5B42B3; }
+.badge-script-outreach { background: #E6F8F2; color: #146C59; }
+
+.status-cell { text-align: center; }
+.status-dot {
+  display: inline-block; width: 12px; height: 12px; border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 3px rgba(26,26,46,0.08);
+}
+.status-initial  { background: #3B82F6; }
+.status-pending  { background: #F59E0B; }
+.status-active   { background: #22C55E; }
+.status-declined { background: #EF4444; }
+
+/* ── Modals ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(14,28,53,0.52);
+  z-index: 1000; align-items: flex-start; justify-content: center;
+  padding: 40px 20px; overflow-y: auto;
+  backdrop-filter: blur(8px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background:
+    radial-gradient(circle at top right, rgba(131, 171, 255, 0.16), transparent 24%),
+    linear-gradient(180deg, #ffffff, #f7faff);
+  border-radius: 20px; width: 100%; max-width: 680px;
+  box-shadow: 0 28px 70px rgba(15,40,84,0.24); animation: slideUp 0.25s ease;
+  border: 1px solid #d9e6fb;
+}
+@keyframes slideUp { from { transform: translateY(18px); opacity: 0; } }
+.modal-header {
+  padding: 18px 22px; border-bottom: 1px solid #dde8fb;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h2 { font-size: 17px; color: var(--primary-dark); font-weight: 700; }
+.modal-close {
+  width: 30px; height: 30px; border: none; background: #eef4ff;
+  border-radius: 7px; font-size: 20px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--primary-dark); line-height: 1;
+}
+.modal-body { padding: 22px; max-height: 72vh; overflow-y: auto; }
+.modal-footer {
+  padding: 14px 22px; border-top: 1px solid #dde8fb;
+  display: flex; justify-content: flex-end; gap: 10px; align-items: center;
+}
+
+/* ── Forms ── */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 11px; font-weight: 600; color: var(--muted);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #d4e1fb;
+  border-radius: 12px; font-size: 14px; outline: none; font-family: inherit; color: var(--text);
+  background: rgba(255,255,255,0.98); box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--primary); box-shadow: 0 0 0 4px rgba(77,127,213,0.12);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ── Task Checklist ── */
+.task-list { display: flex; flex-direction: column; gap: 8px; }
+.task-item {
+  background: linear-gradient(180deg, #ffffff, #f8fbff); border-radius: 14px; padding: 14px 16px;
+  box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 12px;
+  transition: all 0.2s; border-left: 4px solid var(--border); border: 1px solid #dbe6fb;
+}
+.task-item:hover { transform: translateY(-1px); box-shadow: 0 16px 34px rgba(30, 60, 114, 0.12); }
+.task-item.done, .task-item.completed { opacity: 0.72; background: linear-gradient(180deg, #eef5ff, #e8f0fb); }
+.task-item.done .task-title, .task-item.completed .task-title { text-decoration: line-through; color: var(--muted); }
+.task-item.done, .task-item.completed { border-left-color: var(--success) !important; }
+.task-item.in-progress { border-left-color: #4f83d8 !important; background: linear-gradient(180deg, #f7fbff, #edf5ff); }
+.task-item.recurring-task { border-left-color: #4d7fd5 !important; background: linear-gradient(180deg, #f8fbff, #eef5ff); }
+.task-item.pri-high   { border-left-color: #FF4444; }
+.task-item.pri-medium { border-left-color: #F28C28; }
+.task-item.pri-low    { border-left-color: #E1B900; }
+
+.task-checkbox {
+  width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+  cursor: pointer; flex-shrink: 0; margin-top: 1px;
+  background: white; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.task-checkbox.checked { background: var(--success); border-color: var(--success); }
+.task-checkbox.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+
+.task-title { font-size: 14px; font-weight: 500; }
+.task-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.task-sub { font-size: 12px; color: #53709d; margin-top: 4px; }
+.task-notes-text { font-size: 12px; color: #58708f; margin-top: 6px; font-style: italic; }
+.task-content { flex: 1; min-width: 0; }
+.task-meta {
+  margin-left: auto; display: flex; flex-direction: column; gap: 10px;
+  align-items: flex-end; justify-content: center; flex-shrink: 0; min-width: 320px;
+}
+.task-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; margin-top: 0; }
+.task-status-group {
+  display: inline-flex; border: 1px solid #cfe0ff; border-radius: 999px;
+  overflow: hidden; background: linear-gradient(180deg, #ffffff, #f4f8ff);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.task-status-btn {
+  border: none; background: transparent; color: #63748c; cursor: pointer;
+  font-size: 11px; font-weight: 600; padding: 6px 10px; transition: all 0.18s;
+}
+.task-status-btn + .task-status-btn { border-left: 1px solid #d7e5ff; }
+.task-status-btn:hover { background: #eef5ff; color: var(--primary-dark); }
+.task-status-btn.active { background: linear-gradient(135deg, var(--primary), #4d7fd5); color: white; }
+.task-status-btn.active.in-progress { background: linear-gradient(135deg, #4f83d8, #6e9cea); }
+.task-status-btn.active.completed { background: linear-gradient(135deg, #3a71c3, #5f95e4); }
+.task-chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px;
+  border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: linear-gradient(180deg, #f6faff, #ebf3ff); color: #35527f; border: 1px solid #d1e1fb;
+}
+.task-chip.recurring { background: linear-gradient(180deg, #edf5ff, #deebff); color: #275190; border-color: #c6d9ff; }
+.task-chip.status { background: linear-gradient(180deg, #eff6ff, #e0edff); color: #1e4e8c; border-color: #c9ddff; }
+.task-divider {
+  display: flex; align-items: center; gap: 12px; margin: 10px 0 4px;
+  color: #58719a; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.task-divider.recurring { color: #2f5fae; }
+.task-divider.one-time { color: #5e7090; }
+.task-divider.completed { color: #58719a; }
+.task-divider::before,
+.task-divider::after {
+  content: ''; height: 1px; background: linear-gradient(90deg, rgba(120, 152, 204, 0.12), rgba(120, 152, 204, 0.75), rgba(120, 152, 204, 0.12));
+  flex: 1;
+}
+
+/* Progress bar */
+.progress-wrap {
+  background:
+    radial-gradient(circle at top right, rgba(124, 168, 255, 0.22), transparent 28%),
+    linear-gradient(180deg, #ffffff, #f4f8ff);
+  border-radius: 16px; padding: 16px 20px; box-shadow: var(--shadow); margin-bottom: 20px;
+  border: 1px solid #d8e5fb;
+}
+.progress-bar-bg { background: #dfe9f8; border-radius: 999px; height: 12px; overflow: hidden; margin: 8px 0 4px; }
+.progress-bar-fill { background: linear-gradient(90deg, #2f5496, #4d7fd5, #75a3f0); height: 100%; border-radius: 999px; transition: width 0.4s ease; box-shadow: 0 6px 14px rgba(77,127,213,0.35); }
+
+/* Category filter chips */
+.cat-chips { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.cat-chip {
+  padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid #d7e4fb; background: rgba(255,255,255,0.92); transition: all 0.2s;
+}
+.cat-chip.active { background: linear-gradient(135deg, var(--primary), #4e7ed3); color: white; border-color: var(--primary); box-shadow: 0 10px 18px rgba(47,84,150,0.16); }
+.cat-chip:hover:not(.active) { background: var(--blue-soft); border-color: var(--blue-line); }
+
+/* Section header */
+.section-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;
+  padding: 18px 20px; border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(122, 167, 255, 0.18), transparent 26%),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(242,247,255,0.94));
+  border: 1px solid #dbe6fb; box-shadow: var(--shadow);
+}
+.section-header h2 { font-size: 18px; font-weight: 700; color: var(--primary-dark); }
+.section-header p { font-size: 13px; color: #5f7697; margin-top: 4px; max-width: 760px; }
+
+/* Links */
+.ext-link { color: var(--primary-ink); text-decoration: none; font-size: 12px; font-weight: 600; }
+.ext-link:hover { text-decoration: underline; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, #16315e, #3567b5); color: white;
+  padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 2000;
+  animation: toastIn 0.3s ease; pointer-events: none; box-shadow: 0 18px 30px rgba(29,61,115,0.24);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+.toast.ok  { background: var(--success); }
+.toast.err { background: var(--danger); }
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 50px 20px; color: var(--muted);
+  background: linear-gradient(180deg, rgba(247,250,255,0.9), rgba(239,245,255,0.9));
+}
+.empty-state .icon { font-size: 38px; margin-bottom: 10px; color: var(--primary-dark); font-weight: 700; }
+.empty-state h3 { font-size: 15px; color: var(--text); margin-bottom: 6px; }
+.script-preview {
+  max-width: 280px; font-size: 12px; color: #5d7290;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.script-sections { display: flex; flex-direction: column; gap: 18px; }
+.script-section {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,250,255,0.96));
+  border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid #dbe6fb;
+}
+.script-section-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 18px; border-bottom: 1px solid #dfe9fb;
+  background: linear-gradient(180deg, rgba(242,247,255,0.96), rgba(255,255,255,0.98));
+}
+.script-section-head h3 { font-size: 15px; color: var(--primary-dark); }
+.script-section-head p { font-size: 12px; color: #637a99; margin-top: 3px; }
+.outreach-preview {
+  white-space: pre-wrap; font-size: 13px; line-height: 1.55; color: #46607f;
+  background: linear-gradient(180deg, #f8fbff, #eef5ff); border: 1px solid #d6e4fb;
+  border-radius: 14px; padding: 14px;
+}
+
+@media (max-width: 760px) {
+  .app-header { padding: 16px 20px; }
+  .tab-nav { padding: 0 16px; }
+  .tab-content { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-row { flex-direction: column; }
+  .task-item { flex-wrap: wrap; }
+  .task-meta { min-width: 0; width: 100%; margin-left: 0; align-items: flex-start; }
+  .task-actions { justify-content: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="app-header">
+  <div>
+    <h1>✝ Jax's Dashboard</h1>
+    <div class="subtitle">Month 1 Tracker · April 2026</div>
+  </div>
+  <div class="header-tools">
+    <button class="btn btn-outline" onclick="exportDashboardBackup()">Export Backup</button>
+    <button class="btn btn-outline" onclick="document.getElementById('backup-import').click()">Import Backup</button>
+    <input type="file" id="backup-import" accept="application/json" style="display:none" onchange="importDashboardBackup(event)">
+  </div>
+</div>
+
+<!-- ══ TAB NAV ══ -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')">✅ Task Checklist</button>
+  <button class="tab-btn" onclick="switchTab('creators')">📱 Creator Outreach <span class="tab-count" id="cnt-creators">0</span></button>
+  <button class="tab-btn" onclick="switchTab('partners')">🎵 Artists &amp; Brands <span class="tab-count" id="cnt-partners">0</span></button>
+  <button class="tab-btn" onclick="switchTab('orgPartners')">⛪ Partnerships <span class="tab-count" id="cnt-orgPartners">0</span></button>
+  <button class="tab-btn" onclick="switchTab('scripts')">📝 Scripts <span class="tab-count" id="cnt-scripts">0</span></button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — TASK CHECKLIST
+══════════════════════════════════════════ -->
+<div class="tab-content active" id="tab-overview">
+  <div class="section-header">
+    <div>
+      <h2>Month 1 Task Checklist</h2>
+      <p>All onboarding next steps in one place. Check them off as you finish.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openTaskModal(-1)">+ Add Task</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;">
+        <span>Overall Progress</span>
+        <span id="progCount" style="font-size:13px;color:var(--muted);">0 / 0</span>
+      </span>
+      <span id="progLabel" style="font-size:13px;color:var(--muted);">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="cat-chips" id="catChips">
+    <div class="cat-chip active" data-cat="All" onclick="filterTasks(this)">All</div>
+    <div class="cat-chip" data-cat="Instagram" onclick="filterTasks(this)">📸 Instagram</div>
+    <div class="cat-chip" data-cat="Paid Ads" onclick="filterTasks(this)">🎬 Paid Ads</div>
+    <div class="cat-chip" data-cat="Creator Outreach" onclick="filterTasks(this)">📱 Creator Outreach</div>
+    <div class="cat-chip" data-cat="Partnerships" onclick="filterTasks(this)">🤝 Partnerships</div>
+  </div>
+  <div class="cat-chips" id="taskSectionChips">
+    <div class="cat-chip active" data-section="All" onclick="filterTaskSection(this)">All Sections</div>
+    <div class="cat-chip" data-section="Recurring" onclick="filterTaskSection(this)">Recurring</div>
+    <div class="cat-chip" data-section="One Time" onclick="filterTaskSection(this)">One Time</div>
+    <div class="cat-chip" data-section="Completed" onclick="filterTaskSection(this)">Completed</div>
+  </div>
+
+  <div class="task-list" id="taskList"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — CREATOR OUTREACH
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-creators">
+  <div class="section-header">
+    <div>
+      <h2>📱 Creator Outreach</h2>
+      <p>Track creator outreach and app creator partnerships in one place. Creator size is labeled automatically from follower count.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
+  </div>
+  <div class="stats-row" id="stats-creators"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-creators" placeholder="Search name, style, notes…" oninput="renderTable('creators')">
+    <select class="btn btn-outline" id="flt-creators-status" onchange="renderTable('creators')">
+      <option value="">Status: All</option>
+      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr>
+        <th>Creator / Handle</th><th>Email / Phone</th><th>Platform</th><th>Followers</th><th>Tag</th>
+        <th>Status</th><th>Terms</th><th>Last Contact</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-creators"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — ARTIST PARTNERSHIPS
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-partners">
+  <div class="section-header">
+    <div>
+      <h2>🎵 Artists &amp; Brands</h2>
+      <p>Combine artist and brand outreach in one tracker. Each record is labeled as an artist or brand when you add it.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('partners',-1)">+ Add Partner</button>
+  </div>
+  <div class="stats-row" id="stats-partners"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-partners" placeholder="Search name, phone, email, notes…" oninput="renderTable('partners')">
+    <select class="btn btn-outline" id="flt-partners-status" onchange="renderTable('partners')">
+      <option value="">Status: All</option>
+      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr>
+        <th>Partner</th><th>Type</th><th>Company / Label</th><th>Email / Phone</th>
+        <th>Channel / Website</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-partners"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4 — MERCH BRANDS
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-merch">
+  <div class="section-header">
+    <div>
+      <h2>📖 Bible Merch Brand Partnerships</h2>
+      <p>Outreach to premium Christian brands — Alabaster, Byble, journals, clothing, rosaries, etc.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('merch',-1)">+ Add Brand</button>
+  </div>
+  <div class="stats-row" id="stats-merch"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-merch" placeholder="Search brand, contact, notes…" oninput="renderTable('merch')">
+    <select class="btn btn-outline" id="flt-merch-status" onchange="renderTable('merch')">
+      <option value="">Status: All</option>
+      <option>Not Contacted</option><option>Reached Out</option><option>Replied</option>
+      <option>In Talks</option><option>Agreed</option><option>Declined</option>
+    </select>
+    <select class="btn btn-outline" id="flt-merch-type" onchange="renderTable('merch')">
+      <option value="">Type: All</option>
+      <option>Bible Study</option><option>Journal</option><option>Clothing</option>
+      <option>Rosary / Jewelry</option><option>Books</option><option>Other</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr>
+        <th>Brand Name</th><th>Contact</th><th>Email</th><th>Title</th>
+        <th>Type</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-merch"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5 — APP CREATORS
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-appCreators">
+  <div class="section-header">
+    <div>
+      <h2>🎥 App Creator Partnerships</h2>
+      <p>DM creators (50K+ followers) to make devotionals and content inside Creed. Mixed payout model.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('appCreators',-1)">+ Add Creator</button>
+  </div>
+  <div class="stats-row" id="stats-appCreators"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-appCreators" placeholder="Search creator, platform, notes…" oninput="renderTable('appCreators')">
+    <select class="btn btn-outline" id="flt-appCreators-status" onchange="renderTable('appCreators')">
+      <option value="">Status: All</option>
+      <option>Not Contacted</option><option>DM Sent</option><option>Replied</option>
+      <option>In Talks</option><option>Agreed</option><option>Declined</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr>
+        <th>Creator</th><th>Platform</th><th>Followers</th><th>Content Type</th>
+        <th>Status</th><th>Payout Model</th><th>Creator Code</th><th>Last Contact</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-appCreators"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6 — AMBASSADORS
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-orgPartners">
+  <div class="section-header">
+    <div>
+      <h2>⛪ Partnerships</h2>
+      <p>Track churches and church camps like Pine Cove or Sky Ranch for broader Creed partnerships and outreach.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('orgPartners',-1)">+ Add Partnership</button>
+  </div>
+  <div class="stats-row" id="stats-orgPartners"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-orgPartners" placeholder="Search partner, email, phone, location, notes…" oninput="renderTable('orgPartners')">
+    <select class="btn btn-outline" id="flt-orgPartners-status" onchange="renderTable('orgPartners')">
+      <option value="">Status: All</option>
+      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr>
+        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Status</th>
+        <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Notes</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-orgPartners"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-scripts">
+  <div class="section-header">
+    <div>
+      <h2>📝 Scripts</h2>
+      <p>Save ad scripts, creator emails, and outreach drafts in one place. Each script is labeled for Creator, Brands, or Partnerships.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('scripts',-1)">+ Add Script</button>
+  </div>
+  <div class="stats-row" id="stats-scripts"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-scripts" placeholder="Search title, hook, CTA, body, notes…" oninput="renderScripts()">
+    <select class="btn btn-outline" id="flt-scripts-kind" onchange="renderTable('scripts')">
+      <option value="">Use: All</option>
+      <option>Ad Script</option>
+      <option>Email</option>
+      <option>Outreach</option>
+    </select>
+  </div>
+  <div class="script-sections">
+    <div class="script-section">
+      <div class="script-section-head">
+        <div>
+          <h3>Creator Scripts</h3>
+          <p>Ad scripts, emails, and creator outreach drafts.</p>
+        </div>
+        <span class="tab-count" id="cnt-scripts-creator">0</span>
+      </div>
+      <div class="table-container" style="border:none;border-radius:0;box-shadow:none;">
+        <table>
+          <thead><tr>
+            <th>Title</th><th>Use</th><th>Hook / Subject</th><th>Preview</th><th>Last Updated</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="tbl-scripts-creator"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">
+        <div>
+          <h3>Brand Scripts</h3>
+          <p>Brand emails, ad concepts, and outreach templates.</p>
+        </div>
+        <span class="tab-count" id="cnt-scripts-brand">0</span>
+      </div>
+      <div class="table-container" style="border:none;border-radius:0;box-shadow:none;">
+        <table>
+          <thead><tr>
+            <th>Title</th><th>Use</th><th>Hook / Subject</th><th>Preview</th><th>Last Updated</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="tbl-scripts-brand"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="script-section">
+      <div class="script-section-head">
+        <div>
+          <h3>Partnership Scripts</h3>
+          <p>Church, camp, and ministry outreach drafts.</p>
+        </div>
+        <span class="tab-count" id="cnt-scripts-partnership">0</span>
+      </div>
+      <div class="table-container" style="border:none;border-radius:0;box-shadow:none;">
+        <table>
+          <thead><tr>
+            <th>Title</th><th>Use</th><th>Hook / Subject</th><th>Preview</th><th>Last Updated</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="tbl-scripts-partnership"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+
+<!-- Task Modal -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="task-mtitle">Add Task</h2>
+      <button class="modal-close" onclick="closeModal('modal-task')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="task-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Task Name *</label>
+          <input type="text" id="t-title" placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="t-category">
+            <option>Instagram</option><option>Paid Ads</option><option>Creator Outreach</option>
+            <option>Partnerships</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="t-priority">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="t-due">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Checklist Type</label>
+          <select id="t-cadence">
+            <option>One Time</option>
+            <option>Recurring</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="t-status">
+            <option>Not Yet Started</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes / Context</label>
+        <textarea id="t-notes" rows="3" placeholder="Reference links, context, instructions…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="task-del-btn" style="display:none;margin-right:auto;" onclick="deleteTask()">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-task')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Creator Modal -->
+<div class="modal-overlay" id="modal-creator">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="creator-mtitle">Add Creator</h2>
+      <button class="modal-close" onclick="closeModal('modal-creator')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="creator-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Name / Handle *</label><input type="text" id="cr-name" placeholder="@handle or full name"></div>
+        <div class="form-group"><label>Platform</label>
+          <select id="cr-platform"><option>TikTok</option><option>Instagram</option><option>YouTube</option><option>TikTok + IG</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Follower Count</label><input type="text" id="cr-followers" placeholder="e.g. 8,500"></div>
+        <div class="form-group"><label>Content Style</label><input type="text" id="cr-style" placeholder="e.g. Speaking, devotional, worship"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Status</label>
+          <select id="cr-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+        </div>
+        <div class="form-group"><label>Offer ($/video)</label><input type="number" id="cr-offer" placeholder="15" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Payout Model</label><input type="text" id="cr-payout" placeholder="e.g. $500 base + $2/signup"></div>
+        <div class="form-group"><label>Creator Code</label><input type="text" id="cr-code" placeholder="Assigned referral code"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Target Videos/Week</label><input type="number" id="cr-vids" placeholder="3" min="0"></div>
+        <div class="form-group"><label>Last Contact</label><input type="date" id="cr-date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="cr-email" placeholder="creator@email.com"></div>
+        <div class="form-group"><label>Phone Number</label><input type="text" id="cr-phone" placeholder="(555) 555-5555"></div>
+      </div>
+      <div class="form-group"><label>Profile URL</label><input type="text" id="cr-url" placeholder="https://www.tiktok.com/@handle"></div>
+      <div class="form-group"><label>Notes</label><textarea id="cr-notes" rows="3" placeholder="Content quality, conversation notes, fit for Creed…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="creator-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('creator')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-creator')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('creator')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Artist + Brand Modal -->
+<div class="modal-overlay" id="modal-partners">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="partners-mtitle">Add Partner</h2>
+      <button class="modal-close" onclick="closeModal('modal-partners')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="partners-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Type</label>
+          <select id="pa-kind"><option>Artist</option><option>Brand</option></select>
+        </div>
+        <div class="form-group"><label>Name *</label><input type="text" id="pa-name" placeholder="Artist or brand name"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="pa-email" placeholder="contact@email.com"></div>
+        <div class="form-group"><label>Company / Label</label><input type="text" id="pa-company" placeholder="e.g. Elevation Worship"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone Number</label><input type="text" id="pa-phone" placeholder="(555) 555-5555"></div>
+        <div class="form-group"><label>Title / Role</label><input type="text" id="pa-title" placeholder="e.g. Artist, Manager, Partnerships Lead"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Platform / Website</label><input type="text" id="pa-platform" placeholder="e.g. Spotify, TikTok, brand website"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="pa-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Last Contact</label><input type="date" id="pa-date"></div>
+        <div class="form-group"><label>Adi Reviewed?</label>
+          <select id="pa-adi"><option value="No">No</option><option value="Yes">Yes</option><option value="N/A">N/A</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="pa-notes" rows="3" placeholder="Partnership ideas, conversation details, warm / cold…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="partners-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('partners')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-partners')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('partners')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Merch Modal -->
+<div class="modal-overlay" id="modal-merch">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="merch-mtitle">Add Brand</h2>
+      <button class="modal-close" onclick="closeModal('modal-merch')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="merch-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Brand Name *</label><input type="text" id="me-brand" placeholder="e.g. Alabaster Co."></div>
+        <div class="form-group"><label>Contact Name</label><input type="text" id="me-contact" placeholder="Person you're reaching out to"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="me-email" placeholder="contact@brand.com"></div>
+        <div class="form-group"><label>Title</label><input type="text" id="me-title" placeholder="e.g. Partnerships Director"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Brand Type</label>
+          <select id="me-type"><option>Bible Study</option><option>Journal</option><option>Clothing</option><option>Rosary / Jewelry</option><option>Books</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="me-status"><option>Not Contacted</option><option>Reached Out</option><option>Replied</option><option>In Talks</option><option>Agreed</option><option>Declined</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Last Contact</label><input type="date" id="me-date"></div>
+        <div class="form-group"><label>Adi Reviewed First Draft?</label>
+          <select id="me-adi"><option value="No">No</option><option value="Yes">Yes</option><option value="N/A">N/A</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Website</label><input type="text" id="me-website" placeholder="https://…"></div>
+      <div class="form-group"><label>Notes</label><textarea id="me-notes" rows="3" placeholder="Partnership ideas, premium fit, conversation notes…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="merch-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('merch')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-merch')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('merch')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- App Creator Modal -->
+<div class="modal-overlay" id="modal-appCreators">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="appCreators-mtitle">Add App Creator</h2>
+      <button class="modal-close" onclick="closeModal('modal-appCreators')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="appCreators-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Name / Handle *</label><input type="text" id="ac-name" placeholder="@handle or full name"></div>
+        <div class="form-group"><label>Platform</label>
+          <select id="ac-platform"><option>TikTok</option><option>Instagram</option><option>YouTube</option><option>Multiple</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Follower Count</label><input type="text" id="ac-followers" placeholder="e.g. 85,000"></div>
+        <div class="form-group"><label>Content Type</label><input type="text" id="ac-content" placeholder="e.g. Devotionals, Bible study, worship"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Status</label>
+          <select id="ac-status"><option>Not Contacted</option><option>DM Sent</option><option>Replied</option><option>In Talks</option><option>Agreed</option><option>Declined</option></select>
+        </div>
+        <div class="form-group"><label>Creator Code</label><input type="text" id="ac-code" placeholder="Assigned referral code"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Payout Model</label><input type="text" id="ac-payout" placeholder="e.g. $500 base + $2/signup"></div>
+        <div class="form-group"><label>Last Contact</label><input type="date" id="ac-date"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="ac-notes" rows="3" placeholder="Partnership details, content ideas, conversation notes…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="appCreators-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('appCreators')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-appCreators')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('appCreators')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Church + Camp Partnerships Modal -->
+<div class="modal-overlay" id="modal-orgPartners">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="orgPartners-mtitle">Add Partnership</h2>
+      <button class="modal-close" onclick="closeModal('modal-orgPartners')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="orgPartners-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Partnership Name *</label><input type="text" id="op-name" placeholder="e.g. Pine Cove, Sky Ranch, Watermark Church"></div>
+        <div class="form-group"><label>Type</label>
+          <select id="op-type"><option>Church</option><option>Church Camp</option><option>Ministry</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Location</label><input type="text" id="op-location" placeholder="e.g. Dallas, TX"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="op-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>People Reached (est.)</label><input type="number" id="op-members" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Last Contact</label><input type="date" id="op-date"></div>
+      </div>
+      <div class="form-group"><label>Partnership Package</label><input type="text" id="op-incentive" placeholder="e.g. free Creed access, merch package, camp activation"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="op-email" placeholder="contact@organization.org"></div>
+        <div class="form-group"><label>Phone Number</label><input type="text" id="op-phone" placeholder="(555) 555-5555"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="op-notes" rows="3" placeholder="Camp size, conversations, key decision-makers, partnership ideas…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="orgPartners-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('orgPartners')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-orgPartners')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('orgPartners')">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-scripts">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="scripts-mtitle">Add Script</h2>
+      <button class="modal-close" onclick="closeModal('modal-scripts')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="scripts-idx" value="-1">
+      <div class="form-row">
+        <div class="form-group"><label>Script Title *</label><input type="text" id="sc-title" placeholder="e.g. Creator intro email v1"></div>
+        <div class="form-group"><label>Label</label>
+          <select id="sc-label"><option>Creator</option><option>Brands</option><option>Partnerships</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Use</label>
+          <select id="sc-use"><option>Ad Script</option><option>Email</option><option>Outreach</option></select>
+        </div>
+        <div class="form-group"><label>Hook / Subject</label><input type="text" id="sc-hook" placeholder="First line, subject line, or lead-in"></div>
+      </div>
+      <div class="form-group"><label>Script Body</label><textarea id="sc-body" rows="7" placeholder="Write the full ad script, email, or outreach draft here…"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>CTA</label><input type="text" id="sc-cta" placeholder="e.g. Would you be open to a quick call next week?"></div>
+        <div class="form-group"><label>Notes</label><input type="text" id="sc-notes" placeholder="Audience angle, personalization ideas, follow-up notes"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="scripts-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('scripts')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-scripts')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec('scripts')">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-outreach">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="outreach-mtitle">Message Contact</h2>
+      <button class="modal-close" onclick="closeModal('modal-outreach')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>To</label>
+        <input type="text" id="outreach-recipient" readonly>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Script Label</label>
+          <input type="text" id="outreach-label" readonly>
+        </div>
+        <div class="form-group">
+          <label>Select Script</label>
+          <select id="outreach-script" onchange="updateOutreachPreview()"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Subject / Hook</label>
+        <input type="text" id="outreach-subject" readonly>
+      </div>
+      <div class="form-group">
+        <label>Preview</label>
+        <div class="outreach-preview" id="outreach-preview">Select a script to preview it here.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-outreach')">Cancel</button>
+      <button class="btn btn-primary" onclick="launchOutreachEmail()">Open in Outlook</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const LEGACY_STORE = {
+  tasks:        'creed_tasks_v1',
+  creators:     'creed_creators_v1',
+  artists:      'creed_artists_v1',
+  merch:        'creed_merch_v1',
+  appCreators:  'creed_appCreators_v1',
+  ambassadors:  'creed_ambassadors_v1',
+};
+
+const STORE = {
+  tasks:        'creed_tasks_v1',
+  creators:     'creed_creators_current',
+  partners:     'creed_partners_current',
+  orgPartners:  'creed_org_partners_current',
+  scripts:      'creed_scripts_current',
+};
+
+const DEFAULT_TASKS = [
+  { id:1,  title:'Create new Instagram account for Creed Bible App', category:'Instagram',        priority:'High',   done:false, due:'', notes:'Warm up for 3 days on Christian content before any branded posts.' },
+  { id:2,  title:'Warm up Instagram account (3 days on Christian content)', category:'Instagram', priority:'High',   done:false, due:'', notes:'Like, comment, follow Christian accounts; post from existing Christian content.' },
+  { id:3,  title:'Post 1 video/day — Matthaios Levy format', category:'Instagram',               priority:'High',   done:false, due:'', notes:'Ref: @matthaioslevy — same format/content, swap your face + change music.' },
+  { id:4,  title:'Write paid ad scripts (hook → Creed intro in ≤15 sec → demo)', category:'Paid Ads', priority:'High', done:false, due:'', notes:'Reference Anna\'s top TikToks. Scripts should start with catchy hook, then app demo/overlays.' },
+  { id:5,  title:'Create shared Google Doc with ad scripts for creators', category:'Paid Ads',    priority:'High',   done:false, due:'', notes:'Catchy hook → Creed app intro → iPad / overlay demo format.' },
+  { id:6,  title:'Get Crux platform walkthrough from Adi', category:'Paid Ads',                  priority:'Medium', done:false, due:'', notes:'Crux = monitor and copy competitor ads. Adi will schedule walkthrough.' },
+  { id:7,  title:'Start TikTok creator outreach tracker (goal: 3–5 signed)', category:'Creator Outreach', priority:'High', done:false, due:'', notes:'Target <10K–20K followers, Christian inspirational speaking style. DM template provided.' },
+  { id:8,  title:'Start artist partnership tracker', category:'Partnerships',                     priority:'Medium', done:false, due:'', notes:'Columns: Name, Email, Company, Title, Status. Run first draft by Adi before sending.' },
+  { id:9,  title:'Start Bible merch brand partnership tracker', category:'Partnerships',           priority:'Medium', done:false, due:'', notes:'Alabaster, Byble, Christian journals, clothing, rosaries — focus on premium brands.' },
+  { id:10, title:'Start app creator partnership tracker (devotionals)', category:'Creator Outreach', priority:'Medium', done:false, due:'', notes:'Target creators with 50K+ followers. Mixed payout: base + per signup + code for followers.' },
+  { id:11, title:'Draft church and camp partnership document', category:'Partnerships',            priority:'Medium', done:false, due:'', notes:'Think through churches and camps like Pine Cove or Sky Ranch, plus incentives, events, and effort vs. cost.' },
+];
+
+const REMOTE_STATE_URL = '/api/state';
+let db = {};
+let sharedSyncAvailable = false;
+let syncTimer = null;
+function parseStore(key) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null'); }
+  catch { return null; }
+}
+function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+function hasSyncApi() {
+  return window.location.protocol !== 'file:';
+}
+function taskCycleKey(date = new Date()) {
+  const cycleDate = new Date(date);
+  if (cycleDate.getHours() < 2) cycleDate.setDate(cycleDate.getDate() - 1);
+  const year = cycleDate.getFullYear();
+  const month = String(cycleDate.getMonth() + 1).padStart(2, '0');
+  const day = String(cycleDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+function todayStamp(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+function normalizeTaskStatus(val, fallbackDone = false) {
+  if (val === 'Completed' || val === 'In Progress' || val === 'Not Yet Started') return val;
+  return fallbackDone ? 'Completed' : 'Not Yet Started';
+}
+function normalizeTaskItem(task = {}) {
+  const cadence = task.cadence === 'Recurring' ? 'Recurring' : 'One Time';
+  const status = normalizeTaskStatus(task.status, !!task.done);
+  return {
+    ...task,
+    cadence,
+    status,
+    done: status === 'Completed',
+    lastCompletedCycle: task.lastCompletedCycle || '',
+  };
+}
+function firstStored(keys) {
+  for (const key of keys) {
+    const val = parseStore(key);
+    if (val) return val;
+  }
+  return null;
+}
+function normalizeTaskCategory(val) {
+  if (val === 'App Creators') return 'Creator Outreach';
+  if (val === 'Ambassadors') return 'Partnerships';
+  return val || 'Other';
+}
+function normalizeStatus(val) {
+  if (!val) return 'Not Sent';
+  if (['Active', 'Agreed'].includes(val)) return 'Active';
+  if (['Declined', 'Inactive'].includes(val)) return 'Declined';
+  if (['Interested', 'In Talks', 'Contract Sent', 'Replied', 'Invited', 'Pending', 'DM Sent', 'Reached Out', 'Initial Reach'].includes(val)) return 'Pending';
+  if (['Not Sent', 'Not Contacted', 'Prospect'].includes(val)) return 'Not Sent';
+  return 'Not Sent';
+}
+function normalizeScriptLabel(val) {
+  return ['Creator', 'Brands', 'Partnerships'].includes(val) ? val : 'Creator';
+}
+function normalizeScriptUse(val) {
+  return ['Ad Script', 'Email', 'Outreach'].includes(val) ? val : 'Email';
+}
+function normalizeScriptItem(script = {}) {
+  return {
+    title: script.title || '',
+    label: normalizeScriptLabel(script.label),
+    use: normalizeScriptUse(script.use),
+    hook: script.hook || '',
+    body: script.body || '',
+    cta: script.cta || '',
+    notes: script.notes || '',
+    updatedAt: script.updatedAt || todayStamp(),
+  };
+}
+function normalizeCreatorItem(record = {}) {
+  return {
+    ...record,
+    email: record.email || '',
+    phone: record.phone || '',
+  };
+}
+function normalizePartnerItem(record = {}) {
+  return {
+    ...record,
+    phone: record.phone || record.contact || '',
+  };
+}
+function normalizeOrgPartnerItem(record = {}) {
+  return {
+    ...record,
+    email: record.email || '',
+    phone: record.phone || '',
+  };
+}
+function normalizeDbState(state = {}) {
+  return {
+    version: 1,
+    updatedAt: state.updatedAt || '',
+    tasks: (Array.isArray(state.tasks) ? state.tasks : []).map(t => normalizeTaskItem({ ...t, category: normalizeTaskCategory(t.category) })),
+    creators: (Array.isArray(state.creators) ? state.creators : []).map(normalizeCreatorItem),
+    partners: (Array.isArray(state.partners) ? state.partners : []).map(normalizePartnerItem),
+    orgPartners: (Array.isArray(state.orgPartners) ? state.orgPartners : []).map(normalizeOrgPartnerItem),
+    scripts: (Array.isArray(state.scripts) ? state.scripts : []).map(normalizeScriptItem),
+  };
+}
+function snapshotDbState() {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    tasks: db.tasks.map(normalizeTaskItem),
+    creators: db.creators.map(normalizeCreatorItem),
+    partners: db.partners.map(normalizePartnerItem),
+    orgPartners: db.orgPartners.map(normalizeOrgPartnerItem),
+    scripts: db.scripts.map(normalizeScriptItem),
+  };
+}
+function downloadTextFile(filename, content, mimeType = 'application/json') {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+function applyDbState(state = {}) {
+  const normalized = normalizeDbState(state);
+  db.tasks = normalized.tasks;
+  db.creators = normalized.creators;
+  db.partners = normalized.partners;
+  db.orgPartners = normalized.orgPartners;
+  db.scripts = normalized.scripts;
+}
+function persistLocalState() {
+  localStorage.setItem(STORE.tasks, JSON.stringify(db.tasks));
+  localStorage.setItem(STORE.creators, JSON.stringify(db.creators));
+  localStorage.setItem(STORE.partners, JSON.stringify(db.partners));
+  localStorage.setItem(STORE.orgPartners, JSON.stringify(db.orgPartners));
+  localStorage.setItem(STORE.scripts, JSON.stringify(db.scripts));
+}
+function isRemoteStateEmpty(state = {}) {
+  return ['tasks', 'creators', 'partners', 'orgPartners', 'scripts'].every(key => !Array.isArray(state[key]) || state[key].length === 0);
+}
+function exportDashboardBackup() {
+  const stamp = new Date().toISOString().slice(0, 10);
+  downloadTextFile(`jax-dashboard-backup-${stamp}.json`, JSON.stringify(snapshotDbState(), null, 2));
+  toast('Dashboard backup exported.');
+}
+async function importDashboardBackup(event) {
+  const input = event.target;
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const state = normalizeDbState(JSON.parse(text));
+    applyDbState(state);
+    persistLocalState();
+    renderAll();
+    await pushSharedState(true);
+    toast('Dashboard backup imported.');
+  } catch (err) {
+    toast('That backup file could not be imported.', 'err');
+  } finally {
+    input.value = '';
+  }
+}
+function migrateCreators() {
+  const creators = parseStore(LEGACY_STORE.creators) || [];
+  const appCreators = parseStore(LEGACY_STORE.appCreators) || [];
+  return [
+    ...creators.map(r => ({
+      name: r.name || '',
+      platform: r.platform || '',
+      followers: r.followers || '',
+      style: r.style || '',
+      email: r.email || '',
+      phone: r.phone || '',
+      status: normalizeStatus(r.status),
+      offer: r.offer || '',
+      payout: '',
+      code: '',
+      vids: r.vids || '',
+      date: r.date || '',
+      url: r.url || '',
+      notes: r.notes || '',
+    })),
+    ...appCreators.map(r => ({
+      name: r.name || '',
+      platform: r.platform || '',
+      followers: r.followers || '',
+      style: r.content || '',
+      email: r.email || '',
+      phone: r.phone || '',
+      status: normalizeStatus(r.status),
+      offer: '',
+      payout: r.payout || '',
+      code: r.code || '',
+      vids: '',
+      date: r.date || '',
+      url: '',
+      notes: r.notes || '',
+    })),
+  ];
+}
+function migratePartners() {
+  const artists = parseStore(LEGACY_STORE.artists) || [];
+  const merch = parseStore(LEGACY_STORE.merch) || [];
+  return [
+    ...artists.map(r => ({
+      kind: 'Artist',
+      name: r.name || '',
+      email: r.email || '',
+      company: r.company || '',
+      phone: r.phone || r.contact || '',
+      title: r.title || '',
+      platform: r.platform || '',
+      status: normalizeStatus(r.status),
+      date: r.date || '',
+      adi: r.adi || 'No',
+      notes: r.notes || '',
+    })),
+    ...merch.map(r => ({
+      kind: 'Brand',
+      name: r.brand || '',
+      email: r.email || '',
+      company: r.type || '',
+      phone: r.phone || r.contact || '',
+      title: r.title || '',
+      platform: r.website || '',
+      status: normalizeStatus(r.status),
+      date: r.date || '',
+      adi: r.adi || 'No',
+      notes: r.notes || '',
+    })),
+  ];
+}
+function migrateOrgPartners() {
+  const ambassadors = parseStore(LEGACY_STORE.ambassadors) || [];
+  return ambassadors.map(r => ({
+    name: r.church || r.name || '',
+    type: 'Church',
+    location: r.location || '',
+    status: normalizeStatus(r.status),
+    members: r.members || '',
+    date: r.date || '',
+    incentive: r.incentive || '',
+    email: r.email || '',
+    phone: r.phone || '',
+    notes: [r.name && r.church && r.name !== r.church ? `Primary contact: ${r.name}` : '', r.notes || ''].filter(Boolean).join(' | '),
+  }));
+}
+function load() {
+  const storedTasks = parseStore(STORE.tasks) || JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  db.tasks = storedTasks.map(t => normalizeTaskItem({ ...t, category: normalizeTaskCategory(t.category) }));
+  db.creators = (firstStored([STORE.creators, 'creed_creators_v2']) || migrateCreators()).map(normalizeCreatorItem);
+  db.partners = (firstStored([STORE.partners, 'creed_partners_v2']) || migratePartners()).map(normalizePartnerItem);
+  db.orgPartners = (firstStored([STORE.orgPartners, 'creed_org_partners_v2']) || migrateOrgPartners()).map(normalizeOrgPartnerItem);
+  db.scripts = (firstStored([STORE.scripts, 'creed_scripts_v1']) || []).map(normalizeScriptItem);
+}
+async function fetchSharedState() {
+  if (!hasSyncApi()) return null;
+  try {
+    const res = await fetch(REMOTE_STATE_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Shared load failed (${res.status})`);
+    sharedSyncAvailable = true;
+    return normalizeDbState(await res.json());
+  } catch (err) {
+    sharedSyncAvailable = false;
+    return null;
+  }
+}
+async function pushSharedState(showToastOnError = false) {
+  if (!hasSyncApi()) return false;
+  try {
+    const res = await fetch(REMOTE_STATE_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(snapshotDbState()),
+    });
+    if (!res.ok) throw new Error(`Shared save failed (${res.status})`);
+    sharedSyncAvailable = true;
+    return true;
+  } catch (err) {
+    sharedSyncAvailable = false;
+    if (showToastOnError) toast('Shared sync is offline. Your changes are still saved on this device.', 'warn');
+    return false;
+  }
+}
+function queueSharedSync() {
+  if (!hasSyncApi()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    pushSharedState();
+  }, 300);
+}
+function save(key) {
+  localStorage.setItem(STORE[key], JSON.stringify(db[key]));
+  queueSharedSync();
+}
+async function initDashboard() {
+  load();
+  const localSnapshot = deepClone(snapshotDbState());
+  const remoteState = await fetchSharedState();
+
+  if (remoteState && !isRemoteStateEmpty(remoteState)) {
+    applyDbState(remoteState);
+    persistLocalState();
+  } else {
+    applyDbState(localSnapshot);
+    persistLocalState();
+    if (hasSyncApi()) await pushSharedState(true);
+  }
+
+  renderAll();
+}
+
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.getAttribute('onclick') === `switchTab('${tab}')`) btn.classList.add('active');
+  });
+}
+
+
+// ══════════════════════════════════════════
+//  BADGES
+// ══════════════════════════════════════════
+const STATUS_CLS = {
+  'Not Contacted':'badge-notcontacted','DM Sent':'badge-dmsent','Interested':'badge-interested',
+  'In Talks':'badge-intalk','Reached Out':'badge-dmsent','Replied':'badge-interested',
+  'Contract Sent':'badge-contractsent','Active':'badge-active','Agreed':'badge-agreed',
+  'Declined':'badge-declined','Prospect':'badge-prospect','Invited':'badge-invited','Inactive':'badge-inactive',
+};
+function badge(val) {
+  if (!val) return '—';
+  return `<span class="badge ${STATUS_CLS[val]||'badge-notcontacted'}">${val}</span>`;
+}
+function priBadge(p) {
+  const c = p==='High'?'badge-high':p==='Medium'?'badge-medium':'badge-low';
+  return `<span class="badge ${c}">${p}</span>`;
+}
+
+function parseFollowerCount(val) {
+  const num = parseInt(String(val || '').replace(/[^0-9]/g, ''), 10);
+  return Number.isFinite(num) ? num : NaN;
+}
+function creatorTier(val) {
+  const followers = parseFollowerCount(val);
+  if (!Number.isFinite(followers) || followers < 5000) return '';
+  if (followers < 20000) return 'Small Creator';
+  if (followers < 50000) return 'Medium Creator';
+  return 'Large Creator';
+}
+function creatorTierBadge(val) {
+  const tier = creatorTier(val);
+  if (!tier) return '-';
+  const cls = tier === 'Small Creator' ? 'badge-small' : tier === 'Medium Creator' ? 'badge-mediumcreator' : 'badge-large';
+  return `<span class="badge ${cls}">${tier}</span>`;
+}
+function typeBadge(val) {
+  if (!val) return '-';
+  const clsMap = {
+    Artist: 'badge-artist',
+    Brand: 'badge-brand',
+    Church: 'badge-church',
+    'Church Camp': 'badge-camp',
+    Ministry: 'badge-ministry',
+    Other: 'badge-othertype',
+  };
+  return `<span class="badge ${clsMap[val] || 'badge-othertype'}">${val}</span>`;
+}
+function scriptLabelBadge(val) {
+  const clsMap = {
+    Creator: 'badge-script-creator',
+    Brands: 'badge-script-brand',
+    Partnerships: 'badge-script-partnership',
+  };
+  return `<span class="badge ${clsMap[normalizeScriptLabel(val)] || 'badge-script-creator'}">${normalizeScriptLabel(val)}</span>`;
+}
+function scriptUseBadge(val) {
+  const clsMap = {
+    'Ad Script': 'badge-script-ad',
+    Email: 'badge-script-email',
+    Outreach: 'badge-script-outreach',
+  };
+  return `<span class="badge ${clsMap[normalizeScriptUse(val)] || 'badge-script-email'}">${normalizeScriptUse(val)}</span>`;
+}
+function statusDot(val) {
+  const status = normalizeStatus(val);
+  const clsMap = {
+    'Not Sent': 'status-initial',
+    Pending: 'status-pending',
+    Active: 'status-active',
+    Declined: 'status-declined',
+  };
+  return `<span class="status-dot ${clsMap[status] || 'status-initial'}" title="${status}" aria-label="${status}"></span>`;
+}
+function creatorTerms(r) {
+  const parts = [];
+  if (r.offer) parts.push(`$${r.offer}/video`);
+  if (r.payout) parts.push(r.payout);
+  if (r.code) parts.push(`Code: ${r.code}`);
+  if (r.vids) parts.push(`${r.vids} vids/wk`);
+  return parts.length ? parts.join('<br>') : '-';
+}
+function applyOutreachTemplate(str, record = {}) {
+  const fullName = String(record.name || '').trim();
+  const firstName = fullName ? fullName.split(/\s+/)[0].replace(/^@/, '') : '';
+  const company = String(record.company || '').trim();
+  const contact = String(record.contact || record.phone || '').trim();
+  return String(str || '')
+    .replace(/\{\{\s*name\s*\}\}/gi, fullName)
+    .replace(/\{\{\s*firstName\s*\}\}/gi, firstName)
+    .replace(/\{\{\s*company\s*\}\}/gi, company)
+    .replace(/\{\{\s*contact\s*\}\}/gi, contact || fullName);
+}
+
+
+// ══════════════════════════════════════════
+//  TASK CHECKLIST
+// ══════════════════════════════════════════
+let taskCatFilter = 'All';
+let taskSectionFilter = 'All';
+function filterTasks(chip) {
+  document.querySelectorAll('#catChips .cat-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  taskCatFilter = chip.dataset.cat;
+  renderTasks();
+}
+
+function filterTaskSection(chip) {
+  document.querySelectorAll('#taskSectionChips .cat-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  taskSectionFilter = chip.dataset.section || 'All';
+  renderTasks();
+}
+
+function getTaskStatus(task) {
+  if (task.cadence === 'Recurring' && task.status === 'Completed' && task.lastCompletedCycle !== taskCycleKey()) {
+    return 'Not Yet Started';
+  }
+  return normalizeTaskStatus(task.status, !!task.done);
+}
+
+function compareTaskImportance(a, b) {
+  const rank = { High: 0, Medium: 1, Low: 2 };
+  const priorityDiff = (rank[a.priority] ?? 99) - (rank[b.priority] ?? 99);
+  if (priorityDiff !== 0) return priorityDiff;
+
+  const aDue = a.due ? Date.parse(a.due) : Number.POSITIVE_INFINITY;
+  const bDue = b.due ? Date.parse(b.due) : Number.POSITIVE_INFINITY;
+  if (aDue !== bDue) return aDue - bDue;
+
+  return String(a.title || '').localeCompare(String(b.title || ''));
+}
+
+function setTaskStatus(idx, nextStatus) {
+  const task = normalizeTaskItem(db.tasks[idx]);
+  task.status = normalizeTaskStatus(nextStatus);
+  task.done = task.status === 'Completed';
+  if (task.cadence === 'Recurring') {
+    task.lastCompletedCycle = task.status === 'Completed' ? taskCycleKey() : '';
+  } else {
+    task.lastCompletedCycle = '';
+  }
+  db.tasks[idx] = task;
+  save('tasks');
+  renderTasks();
+}
+
+function renderTasks() {
+  const total = db.tasks.length;
+  const done  = db.tasks.filter(t => getTaskStatus(t) === 'Completed').length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById('progBar').style.width   = pct + '%';
+  document.getElementById('progLabel').textContent = pct + '%';
+
+  document.getElementById('overviewStats').innerHTML = [
+    { n: total, l: 'Total Tasks' },
+    { n: done, l: 'Completed' },
+    { n: db.tasks.filter(t => getTaskStatus(t) === 'In Progress').length, l: 'In Progress' },
+    { n: db.tasks.filter(t => t.priority==='High' && getTaskStatus(t) !== 'Completed').length, l: 'High Priority Left' },
+  ].map(s => `<div class="stat-card"><div class="number">${s.n}</div><div class="label">${s.l}</div></div>`).join('');
+
+  const visible = taskCatFilter === 'All' ? db.tasks : db.tasks.filter(t => t.category === taskCatFilter);
+  if (!visible.length) {
+    document.getElementById('taskList').innerHTML = '<div class="empty-state"><div class="icon">✅</div><h3>All clear in this category!</h3></div>';
+    return;
+  }
+  document.getElementById('taskList').innerHTML = visible.map(t => {
+    const ri = db.tasks.indexOf(t);
+    return `
+    <div class="task-item ${t.done ? 'done' : 'pri-'+t.priority.toLowerCase()}">
+      <div class="task-checkbox ${t.done?'checked':''}" onclick="toggleTask(${ri})"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="task-title">${t.title}</div>
+        <div class="task-sub">📂 ${t.category}${t.due ? ' &nbsp;·&nbsp; Due: '+t.due : ''}</div>
+        ${t.notes ? `<div class="task-notes-text">💡 ${t.notes}</div>` : ''}
+      </div>
+      <div class="task-meta">
+        ${priBadge(t.priority)}
+        <button class="btn btn-outline btn-sm" onclick="openTaskModal(${ri})">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTask(idx) {
+  db.tasks[idx].done = !db.tasks[idx].done;
+  save('tasks');
+  renderTasks();
+}
+
+function openTaskModal(idx) {
+  const isNew = idx === -1;
+  document.getElementById('task-mtitle').textContent     = isNew ? 'Add Task' : 'Edit Task';
+  document.getElementById('task-idx').value              = idx;
+  document.getElementById('task-del-btn').style.display  = isNew ? 'none' : 'inline-flex';
+  if (!isNew) {
+    const t = db.tasks[idx];
+    document.getElementById('t-title').value    = t.title;
+    document.getElementById('t-category').value = t.category;
+    document.getElementById('t-priority').value = t.priority;
+    document.getElementById('t-due').value       = t.due || '';
+    document.getElementById('t-notes').value     = t.notes || '';
+  } else {
+    ['t-title','t-due','t-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('t-category').value = 'Instagram';
+    document.getElementById('t-priority').value = 'High';
+  }
+  document.getElementById('modal-task').classList.add('active');
+}
+
+function saveTask() {
+  const title = document.getElementById('t-title').value.trim();
+  if (!title) { toast('Task name is required', 'err'); return; }
+  const idx = parseInt(document.getElementById('task-idx').value);
+  const obj = {
+    id:       idx === -1 ? Date.now() : db.tasks[idx].id,
+    title,
+    category: document.getElementById('t-category').value,
+    priority: document.getElementById('t-priority').value,
+    due:      document.getElementById('t-due').value,
+    notes:    document.getElementById('t-notes').value,
+    done:     idx === -1 ? false : db.tasks[idx].done,
+  };
+  if (idx === -1) db.tasks.push(obj); else db.tasks[idx] = obj;
+  save('tasks');
+  closeModal('modal-task');
+  renderTasks();
+  toast(idx === -1 ? '✅ Task added!' : '✅ Task updated!', 'ok');
+}
+
+function deleteTask() {
+  const idx = parseInt(document.getElementById('task-idx').value);
+  if (idx < 0) return;
+  db.tasks.splice(idx, 1);
+  save('tasks');
+  closeModal('modal-task');
+  renderTasks();
+  toast('Task deleted');
+}
+
+// Override checklist behavior with recurring support and richer statuses.
+function renderTasks() {
+  const total = db.tasks.length;
+  const done  = db.tasks.filter(t => getTaskStatus(t) === 'Completed').length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('progBar').style.width   = pct + '%';
+  document.getElementById('progLabel').textContent = pct + '%';
+  document.getElementById('progCount').textContent = `${done} / ${total}`;
+
+  const visible = taskCatFilter === 'All' ? db.tasks : db.tasks.filter(t => t.category === taskCatFilter);
+  if (!visible.length) {
+    document.getElementById('taskList').innerHTML = '<div class="empty-state"><div class="icon">Done</div><h3>All clear in this category!</h3></div>';
+    return;
+  }
+
+  const recurringTasks = visible
+    .filter(t => getTaskStatus(t) !== 'Completed' && t.cadence === 'Recurring')
+    .sort((a, b) => {
+      const aStatus = getTaskStatus(a);
+      const bStatus = getTaskStatus(b);
+      if (aStatus !== bStatus) return aStatus === 'In Progress' ? -1 : 1;
+      const aDue = a.due ? Date.parse(a.due) : Number.POSITIVE_INFINITY;
+      const bDue = b.due ? Date.parse(b.due) : Number.POSITIVE_INFINITY;
+      if (aDue !== bDue) return aDue - bDue;
+      return String(a.title || '').localeCompare(String(b.title || ''));
+    });
+  const oneTimeTasks = visible
+    .filter(t => getTaskStatus(t) !== 'Completed' && t.cadence !== 'Recurring')
+    .sort(compareTaskImportance);
+  const completedTasks = visible
+    .filter(t => getTaskStatus(t) === 'Completed')
+    .sort((a, b) => {
+      if (a.cadence !== b.cadence) return a.cadence === 'Recurring' ? -1 : 1;
+      return compareTaskImportance(a, b);
+    });
+  const renderTaskCard = (t) => {
+    const ri = db.tasks.indexOf(t);
+    const status = getTaskStatus(t);
+    const stateClass = status === 'Completed'
+      ? 'completed'
+      : status === 'In Progress'
+        ? 'in-progress'
+        : t.cadence === 'Recurring'
+          ? 'recurring-task'
+          : `pri-${t.priority.toLowerCase()}`;
+    const titleLead = t.cadence === 'Recurring' ? '' : priBadge(t.priority);
+    return `
+    <div class="task-item ${stateClass}">
+      <div class="task-content">
+        <div class="task-title-row">
+          ${titleLead}
+          <div class="task-title">${t.title}</div>
+        </div>
+        <div class="task-sub">${t.category}${t.due ? ' &nbsp;|&nbsp; Due: ' + t.due : ''}</div>
+        ${t.notes ? `<div class="task-notes-text">Note: ${t.notes}</div>` : ''}
+      </div>
+      <div class="task-meta">
+        <div class="task-actions">
+          <div class="task-status-group">
+            <button class="task-status-btn ${status === 'Not Yet Started' ? 'active' : ''}" onclick="event.stopPropagation();setTaskStatus(${ri}, 'Not Yet Started')">Not Yet Started</button>
+            <button class="task-status-btn ${status === 'In Progress' ? 'active in-progress' : ''}" onclick="event.stopPropagation();setTaskStatus(${ri}, 'In Progress')">In Progress</button>
+            <button class="task-status-btn ${status === 'Completed' ? 'active completed' : ''}" onclick="event.stopPropagation();setTaskStatus(${ri}, 'Completed')">Completed</button>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openTaskModal(${ri})">Edit</button>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  const sections = [];
+  const showRecurring = taskSectionFilter === 'All' || taskSectionFilter === 'Recurring';
+  const showOneTime = taskSectionFilter === 'All' || taskSectionFilter === 'One Time';
+  const showCompleted = taskSectionFilter === 'All' || taskSectionFilter === 'Completed';
+
+  if (showRecurring && recurringTasks.length) {
+    sections.push(`<div class="task-divider recurring">Recurring Tasks (${recurringTasks.length})</div>`);
+    sections.push(recurringTasks.map(renderTaskCard).join(''));
+  }
+
+  if (showOneTime && oneTimeTasks.length) {
+    sections.push(`<div class="task-divider one-time">One-Time Tasks (${oneTimeTasks.length})</div>`);
+    sections.push(oneTimeTasks.map(renderTaskCard).join(''));
+  }
+
+  if (showCompleted && completedTasks.length) {
+    sections.push(`<div class="task-divider completed">Completed Tasks (${completedTasks.length})</div>`);
+    sections.push(completedTasks.map(renderTaskCard).join(''));
+  }
+
+  if (!sections.length) {
+    document.getElementById('taskList').innerHTML = '<div class="empty-state"><div class="icon">Done</div><h3>No tasks in this section yet.</h3></div>';
+    return;
+  }
+
+  document.getElementById('taskList').innerHTML = sections.join('');
+}
+
+function toggleTask(idx) {
+  const effectiveStatus = getTaskStatus(db.tasks[idx]);
+  setTaskStatus(idx, effectiveStatus === 'Completed' ? 'Not Yet Started' : 'Completed');
+}
+
+function openTaskModal(idx) {
+  const isNew = idx === -1;
+  document.getElementById('task-mtitle').textContent     = isNew ? 'Add Task' : 'Edit Task';
+  document.getElementById('task-idx').value              = idx;
+  document.getElementById('task-del-btn').style.display  = isNew ? 'none' : 'inline-flex';
+  if (!isNew) {
+    const t = normalizeTaskItem(db.tasks[idx]);
+    document.getElementById('t-title').value    = t.title;
+    document.getElementById('t-category').value = t.category;
+    document.getElementById('t-priority').value = t.priority;
+    document.getElementById('t-due').value      = t.due || '';
+    document.getElementById('t-cadence').value  = t.cadence || 'One Time';
+    document.getElementById('t-status').value   = getTaskStatus(t);
+    document.getElementById('t-notes').value    = t.notes || '';
+  } else {
+    ['t-title', 't-due', 't-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('t-category').value = 'Instagram';
+    document.getElementById('t-priority').value = 'High';
+    document.getElementById('t-cadence').value  = 'One Time';
+    document.getElementById('t-status').value   = 'Not Yet Started';
+  }
+  document.getElementById('modal-task').classList.add('active');
+}
+
+function saveTask() {
+  const title = document.getElementById('t-title').value.trim();
+  if (!title) { toast('Task name is required', 'err'); return; }
+
+  const idx = parseInt(document.getElementById('task-idx').value);
+  const obj = {
+    id:       idx === -1 ? Date.now() : db.tasks[idx].id,
+    title,
+    category: document.getElementById('t-category').value,
+    priority: document.getElementById('t-priority').value,
+    due:      document.getElementById('t-due').value,
+    cadence:  document.getElementById('t-cadence').value,
+    status:   document.getElementById('t-status').value,
+    notes:    document.getElementById('t-notes').value,
+    lastCompletedCycle: idx === -1 ? '' : (db.tasks[idx].lastCompletedCycle || ''),
+  };
+
+  if (obj.cadence === 'Recurring') {
+    obj.lastCompletedCycle = obj.status === 'Completed' ? taskCycleKey() : '';
+  } else {
+    obj.lastCompletedCycle = '';
+  }
+  obj.done = obj.status === 'Completed';
+
+  if (idx === -1) db.tasks.push(normalizeTaskItem(obj));
+  else db.tasks[idx] = normalizeTaskItem(obj);
+
+  save('tasks');
+  closeModal('modal-task');
+  renderTasks();
+  toast(idx === -1 ? 'Task added!' : 'Task updated!', 'ok');
+}
+
+
+// ══════════════════════════════════════════
+//  GENERIC TABLE CONFIG
+// ══════════════════════════════════════════
+const TABLES = {
+  creators: {
+    search: ['name','style','notes','platform','url'],
+    statsEl: 'stats-creators', countEl: 'cnt-creators',
+    stats: d => [
+      { n: d.length,                                                              l: 'Total'       },
+      { n: d.filter(r=>r.status==='Active').length,                              l: 'Active'      },
+      { n: d.filter(r=>['DM Sent','Interested','In Talks','Contract Sent'].includes(r.status)).length, l: 'In Pipeline' },
+      { n: d.filter(r=>r.status==='Declined').length,                            l: 'Declined'    },
+    ],
+    renderRow: (r,i) => `
+      <tr onclick="openModal('creator',${i})">
+        <td><strong>${r.name||'—'}</strong>${r.url?`<br><a href="${r.url}" target="_blank" class="ext-link" onclick="event.stopPropagation()">View Profile ↗</a>`:''}
+        </td>
+        <td>${r.platform||'—'}</td>
+        <td>${r.followers||'—'}</td>
+        <td>${r.style||'—'}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.offer?'$'+r.offer:'—'}</td>
+        <td>${r.vids||'—'}</td>
+        <td>${r.date||'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('creator',${i})">Edit</button></td>
+      </tr>`,
+    empty: 'No creators yet. Start your outreach — goal is 3–5 signed this month!',
+  },
+  artists: {
+    search: ['name','email','company','title','notes','platform'],
+    statsEl: 'stats-artists', countEl: 'cnt-artists',
+    stats: d => [
+      { n: d.length,                                                        l: 'Total'       },
+      { n: d.filter(r=>r.status==='Agreed').length,                        l: 'Agreed'      },
+      { n: d.filter(r=>['Reached Out','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
+      { n: d.filter(r=>r.status==='Declined').length,                      l: 'Declined'    },
+    ],
+    renderRow: (r,i) => `
+      <tr onclick="openModal('artists',${i})">
+        <td><strong>${r.name||'—'}</strong></td>
+        <td>${r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'—'}</td>
+        <td>${r.company||'—'}</td>
+        <td>${r.title||'—'}</td>
+        <td>${r.platform||'—'}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.date||'—'}</td>
+        <td>${r.adi==='Yes'?'✅ Yes':r.adi==='No'?'❌ No':'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('artists',${i})">Edit</button></td>
+      </tr>`,
+    empty: 'No artists tracked yet. Find Christian artists to partner with!',
+  },
+  merch: {
+    search: ['brand','contact','email','title','notes'],
+    extraFilter: (r) => {
+      const t = document.getElementById('flt-merch-type').value;
+      return !t || r.type === t;
+    },
+    statsEl: 'stats-merch', countEl: 'cnt-merch',
+    stats: d => [
+      { n: d.length,                                                        l: 'Total'       },
+      { n: d.filter(r=>r.status==='Agreed').length,                        l: 'Agreed'      },
+      { n: d.filter(r=>['Reached Out','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
+      { n: d.filter(r=>r.status==='Declined').length,                      l: 'Declined'    },
+    ],
+    renderRow: (r,i) => `
+      <tr onclick="openModal('merch',${i})">
+        <td><strong>${r.brand||'—'}</strong>${r.website?`<br><a href="${r.website.startsWith('http')?r.website:'https://'+r.website}" target="_blank" class="ext-link" onclick="event.stopPropagation()">Website ↗</a>`:''}
+        </td>
+        <td>${r.contact||'—'}</td>
+        <td>${r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'—'}</td>
+        <td>${r.title||'—'}</td>
+        <td>${r.type||'—'}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.date||'—'}</td>
+        <td>${r.adi==='Yes'?'✅ Yes':r.adi==='No'?'❌ No':'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('merch',${i})">Edit</button></td>
+      </tr>`,
+    empty: 'No brands tracked yet. Start with Alabaster, Byble, and other premium Christian brands!',
+  },
+  appCreators: {
+    search: ['name','platform','content','notes','code'],
+    statsEl: 'stats-appCreators', countEl: 'cnt-appCreators',
+    stats: d => [
+      { n: d.length,                                                    l: 'Total'           },
+      { n: d.filter(r=>r.status==='Agreed').length,                    l: 'Agreed'          },
+      { n: d.filter(r=>['DM Sent','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
+      { n: d.filter(r=>r.code).length,                                 l: 'Codes Assigned'  },
+    ],
+    renderRow: (r,i) => `
+      <tr onclick="openModal('appCreators',${i})">
+        <td><strong>${r.name||'—'}</strong></td>
+        <td>${r.platform||'—'}</td>
+        <td>${r.followers||'—'}</td>
+        <td>${r.content||'—'}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.payout||'—'}</td>
+        <td>${r.code?`<code style="font-size:12px;background:#f0f0f0;padding:2px 6px;border-radius:4px;">${r.code}</code>`:'—'}</td>
+        <td>${r.date||'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('appCreators',${i})">Edit</button></td>
+      </tr>`,
+    empty: 'No app creators yet. Target creators with 50K+ followers for devotionals!',
+  },
+  ambassadors: {
+    search: ['name','church','location','notes','email'],
+    statsEl: 'stats-ambassadors', countEl: 'cnt-ambassadors',
+    stats: d => [
+      { n: d.length,                                                  l: 'Total'           },
+      { n: d.filter(r=>r.status==='Active').length,                  l: 'Active'          },
+      { n: d.reduce((s,r)=>s+(parseInt(r.members)||0),0),           l: 'Members Reached' },
+      { n: d.filter(r=>r.status==='Prospect').length,                l: 'Prospects'       },
+    ],
+    renderRow: (r,i) => `
+      <tr onclick="openModal('ambassadors',${i})">
+        <td><strong>${r.name||'—'}</strong>${r.email?`<br><a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:''}
+        </td>
+        <td>${r.church||'—'}</td>
+        <td>${r.location||'—'}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.members||'—'}</td>
+        <td>${r.date||'—'}</td>
+        <td>${r.incentive||'—'}</td>
+        <td style="max-width:150px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes||'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('ambassadors',${i})">Edit</button></td>
+      </tr>`,
+    empty: 'No ambassadors tracked yet. Start logging the current ~15 ambassadors!',
+  },
+};
+
+function renderTable(key) {
+  if (key === 'scripts') {
+    renderScripts();
+    return;
+  }
+  const cfg = TABLES[key];
+  const srch   = (document.getElementById('srch-'+key)||{}).value?.toLowerCase() || '';
+  const statF  = (document.getElementById('flt-'+key+'-status')||{}).value || '';
+  const filterField = cfg.filterField || 'status';
+  const rows = db[key].filter(r => {
+    const ms = !srch || cfg.search.some(f => (r[f]||'').toLowerCase().includes(srch));
+    const mv = !statF || (r[filterField] || '') === statF;
+    const me = cfg.extraFilter ? cfg.extraFilter(r) : true;
+    return ms && mv && me;
+  });
+
+  const tbody = document.getElementById('tbl-'+key);
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="99"><div class="empty-state"><div class="icon">📋</div><h3>${cfg.empty}</h3></div></td></tr>`
+    : rows.map(r => cfg.renderRow(r, db[key].indexOf(r))).join('');
+
+  // Stats cards
+  const stats = cfg.stats(db[key]);
+  document.getElementById(cfg.statsEl).innerHTML = stats.map(s =>
+    `<div class="stat-card"><div class="number">${typeof s.n==='number'?s.n.toLocaleString():s.n}</div><div class="label">${s.l}</div></div>`
+  ).join('');
+
+  // Tab count badge
+  const cnt = document.getElementById(cfg.countEl);
+  if (cnt) cnt.textContent = db[key].length;
+}
+
+function renderAll() {
+  renderTasks();
+  Object.keys(TABLES).forEach(k => renderTable(k));
+}
+
+
+// ══════════════════════════════════════════
+//  MODAL FIELD MAPS
+// ══════════════════════════════════════════
+const FIELDS = {
+  creator:     { ids:['cr-name','cr-platform','cr-followers','cr-style','cr-status','cr-offer','cr-vids','cr-date','cr-url','cr-notes'],       keys:['name','platform','followers','style','status','offer','vids','date','url','notes'],       nameKey:'name' },
+  artists:     { ids:['ar-name','ar-email','ar-company','ar-title','ar-platform','ar-status','ar-date','ar-adi','ar-notes'],                   keys:['name','email','company','title','platform','status','date','adi','notes'],               nameKey:'name' },
+  merch:       { ids:['me-brand','me-contact','me-email','me-title','me-type','me-status','me-date','me-adi','me-website','me-notes'],         keys:['brand','contact','email','title','type','status','date','adi','website','notes'],       nameKey:'brand' },
+  appCreators: { ids:['ac-name','ac-platform','ac-followers','ac-content','ac-status','ac-code','ac-payout','ac-date','ac-notes'],            keys:['name','platform','followers','content','status','code','payout','date','notes'],       nameKey:'name' },
+  ambassadors: { ids:['am-name','am-church','am-location','am-status','am-members','am-date','am-incentive','am-email','am-notes'],           keys:['name','church','location','status','members','date','incentive','email','notes'],     nameKey:'name' },
+};
+
+// Map modal type to data key
+const MODAL_TO_KEY = { creator:'creators', artists:'artists', merch:'merch', appCreators:'appCreators', ambassadors:'ambassadors' };
+const MODAL_LABELS = {
+  creator:'Creator', artists:'Artist', merch:'Brand', appCreators:'App Creator', ambassadors:'Ambassador',
+};
+
+TABLES.creators = {
+  search: ['name','style','notes','platform','url','payout','code','email','phone'],
+  statsEl: 'stats-creators', countEl: 'cnt-creators',
+  stats: d => [
+    { n: d.length, l: 'Total' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
+    { n: d.filter(r => creatorTier(r.followers) === 'Large Creator').length, l: 'Large Creators' },
+  ],
+  renderRow: (r,i) => `
+    <tr onclick="openModal('creator',${i})">
+      <td><strong>${r.name||'-'}</strong>${r.url?`<br><a href="${r.url}" target="_blank" class="ext-link" onclick="event.stopPropagation()">View Profile</a>`:''}${r.style?`<br><span style="font-size:12px;color:var(--muted);">${r.style}</span>`:''}</td>
+      <td>${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
+      <td>${r.platform||'-'}</td>
+      <td>${r.followers||'-'}</td>
+      <td>${creatorTierBadge(r.followers)}</td>
+      <td class="status-cell">${statusDot(r.status)}</td>
+      <td>${creatorTerms(r)}</td>
+      <td>${r.date||'-'}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('creators',${i})">Message</button> <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('creator',${i})">Edit</button></td>
+    </tr>`,
+  empty: 'No creators yet. Add creator outreach or app creator partnerships here.',
+};
+TABLES.partners = {
+  search: ['kind','name','email','company','phone','title','platform','notes'],
+  statsEl: 'stats-partners', countEl: 'cnt-partners',
+  stats: d => [
+    { n: d.length, l: 'Total' },
+    { n: d.filter(r => r.kind === 'Artist').length, l: 'Artists' },
+    { n: d.filter(r => r.kind === 'Brand').length, l: 'Brands' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+  ],
+  renderRow: (r,i) => `
+    <tr onclick="openModal('partners',${i})">
+      <td><strong>${r.name||'-'}</strong></td>
+      <td>${typeBadge(r.kind)}</td>
+      <td>${r.company||'-'}</td>
+      <td>${[r.email ? `<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>` : '', r.phone].filter(Boolean).join('<br>') || '-'}</td>
+      <td>${r.platform||'-'}</td>
+      <td class="status-cell">${statusDot(r.status)}</td>
+      <td>${r.date||'-'}</td>
+      <td>${r.adi=='Yes'?'Yes':r.adi=='No'?'No':'-'}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('partners',${i})">Message</button> <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('partners',${i})">Edit</button></td>
+    </tr>`,
+  empty: 'No artist or brand partnerships tracked yet.',
+};
+TABLES.orgPartners = {
+  search: ['name','type','location','notes','email','phone','incentive'],
+  statsEl: 'stats-orgPartners', countEl: 'cnt-orgPartners',
+  stats: d => [
+    { n: d.length, l: 'Total' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+    { n: d.reduce((sum, r) => sum + (parseInt(r.members, 10) || 0), 0), l: 'People Reached' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
+  ],
+  renderRow: (r,i) => `
+    <tr onclick="openModal('orgPartners',${i})">
+      <td><strong>${r.name||'-'}</strong></td>
+      <td>${typeBadge(r.type)}</td>
+      <td>${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
+      <td>${r.location||'-'}</td>
+      <td class="status-cell">${statusDot(r.status)}</td>
+      <td>${r.members||'-'}</td>
+      <td>${r.date||'-'}</td>
+      <td>${r.incentive||'-'}</td>
+      <td style="max-width:170px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes||'-'}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></td>
+    </tr>`,
+  empty: 'No church or camp partnerships tracked yet.',
+};
+TABLES.scripts = {
+  search: ['title','label','use','hook','body','cta','notes'],
+  extraFilter: (r) => {
+    const use = document.getElementById('flt-scripts-kind').value;
+    return !use || normalizeScriptUse(r.use) === use;
+  },
+  statsEl: 'stats-scripts', countEl: 'cnt-scripts',
+  stats: d => [
+    { n: d.length, l: 'Total' },
+    { n: d.filter(r => normalizeScriptLabel(r.label) === 'Creator').length, l: 'Creator' },
+    { n: d.filter(r => normalizeScriptLabel(r.label) === 'Brands').length, l: 'Brands' },
+    { n: d.filter(r => normalizeScriptLabel(r.label) === 'Partnerships').length, l: 'Partnerships' },
+  ],
+  empty: 'No scripts saved yet. Add creator ads, brand emails, or partnership outreach drafts here.',
+};
+delete TABLES.artists;
+delete TABLES.merch;
+delete TABLES.appCreators;
+delete TABLES.ambassadors;
+
+const SCRIPT_SECTIONS = [
+  {
+    label: 'Creator',
+    tbodyId: 'tbl-scripts-creator',
+    countId: 'cnt-scripts-creator',
+    empty: 'No creator scripts yet. Add ad scripts, creator emails, or outreach drafts here.',
+  },
+  {
+    label: 'Brands',
+    tbodyId: 'tbl-scripts-brand',
+    countId: 'cnt-scripts-brand',
+    empty: 'No brand scripts yet. Save brand outreach emails and campaign ideas here.',
+  },
+  {
+    label: 'Partnerships',
+    tbodyId: 'tbl-scripts-partnership',
+    countId: 'cnt-scripts-partnership',
+    empty: 'No partnership scripts yet. Save church, camp, and ministry outreach drafts here.',
+  },
+];
+
+function renderScriptRow(r, i) {
+  return `
+    <tr onclick="openModal('scripts',${i})">
+      <td><strong>${r.title||'-'}</strong>${r.cta?`<br><span style="font-size:12px;color:var(--muted);">CTA: ${r.cta}</span>`:''}</td>
+      <td>${scriptUseBadge(r.use)}</td>
+      <td>${r.hook||'-'}</td>
+      <td><div class="script-preview">${r.body||'-'}</div></td>
+      <td>${r.updatedAt||'-'}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('scripts',${i})">Edit</button></td>
+    </tr>`;
+}
+
+function renderScripts() {
+  const cfg = TABLES.scripts;
+  const srch = (document.getElementById('srch-scripts') || {}).value?.toLowerCase() || '';
+  const rows = db.scripts.filter(r => {
+    const ms = !srch || cfg.search.some(f => String(r[f] || '').toLowerCase().includes(srch));
+    const me = cfg.extraFilter ? cfg.extraFilter(r) : true;
+    return ms && me;
+  });
+
+  document.getElementById(cfg.statsEl).innerHTML = cfg.stats(db.scripts).map(s =>
+    `<div class="stat-card"><div class="number">${typeof s.n==='number'?s.n.toLocaleString():s.n}</div><div class="label">${s.l}</div></div>`
+  ).join('');
+
+  const tabCount = document.getElementById(cfg.countEl);
+  if (tabCount) tabCount.textContent = db.scripts.length;
+
+  SCRIPT_SECTIONS.forEach(section => {
+    const sectionRows = rows.filter(r => normalizeScriptLabel(r.label) === section.label);
+    const tbody = document.getElementById(section.tbodyId);
+    if (tbody) {
+      tbody.innerHTML = sectionRows.length
+        ? sectionRows.map(r => renderScriptRow(r, db.scripts.indexOf(r))).join('')
+        : `<tr><td colspan="99"><div class="empty-state"><div class="icon">📝</div><h3>${section.empty}</h3></div></td></tr>`;
+    }
+    const countEl = document.getElementById(section.countId);
+    if (countEl) countEl.textContent = sectionRows.length;
+  });
+}
+
+FIELDS.creator = {
+  ids:['cr-name','cr-platform','cr-followers','cr-style','cr-status','cr-offer','cr-payout','cr-code','cr-vids','cr-date','cr-email','cr-phone','cr-url','cr-notes'],
+  keys:['name','platform','followers','style','status','offer','payout','code','vids','date','email','phone','url','notes'],
+  nameKey:'name'
+};
+FIELDS.partners = {
+  ids:['pa-kind','pa-name','pa-email','pa-company','pa-phone','pa-title','pa-platform','pa-status','pa-date','pa-adi','pa-notes'],
+  keys:['kind','name','email','company','phone','title','platform','status','date','adi','notes'],
+  nameKey:'name'
+};
+FIELDS.orgPartners = {
+  ids:['op-name','op-type','op-location','op-status','op-members','op-date','op-incentive','op-email','op-phone','op-notes'],
+  keys:['name','type','location','status','members','date','incentive','email','phone','notes'],
+  nameKey:'name'
+};
+FIELDS.scripts = {
+  ids:['sc-title','sc-label','sc-use','sc-hook','sc-body','sc-cta','sc-notes'],
+  keys:['title','label','use','hook','body','cta','notes'],
+  nameKey:'title'
+};
+delete FIELDS.artists;
+delete FIELDS.merch;
+delete FIELDS.appCreators;
+delete FIELDS.ambassadors;
+
+MODAL_TO_KEY.partners = 'partners';
+MODAL_TO_KEY.orgPartners = 'orgPartners';
+MODAL_TO_KEY.scripts = 'scripts';
+delete MODAL_TO_KEY.artists;
+delete MODAL_TO_KEY.merch;
+delete MODAL_TO_KEY.appCreators;
+delete MODAL_TO_KEY.ambassadors;
+
+MODAL_LABELS.creator = 'Creator';
+MODAL_LABELS.partners = 'Partner';
+MODAL_LABELS.orgPartners = 'Partnership';
+MODAL_LABELS.scripts = 'Script';
+delete MODAL_LABELS.artists;
+delete MODAL_LABELS.merch;
+delete MODAL_LABELS.appCreators;
+delete MODAL_LABELS.ambassadors;
+
+function openModal(type, idx) {
+  const isNew = idx === -1;
+  const key   = MODAL_TO_KEY[type] || type;
+  const cfg   = FIELDS[type];
+  if (!cfg) { console.error('No field cfg for', type); return; }
+
+  document.getElementById(`${type}-mtitle`).textContent    = isNew ? `Add ${MODAL_LABELS[type]||type}` : `Edit ${MODAL_LABELS[type]||type}`;
+  document.getElementById(`${type}-idx`).value             = idx;
+  document.getElementById(`${type}-del-btn`).style.display = isNew ? 'none' : 'inline-flex';
+
+  if (isNew) {
+    cfg.ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      else el.value = '';
+    });
+  } else {
+    const r = db[key][idx];
+    cfg.ids.forEach((id,i) => { const el=document.getElementById(id); if(el) el.value=r[cfg.keys[i]]||''; });
+  }
+  document.getElementById(`modal-${type}`).classList.add('active');
+}
+
+function saveRec(type) {
+  const key = MODAL_TO_KEY[type] || type;
+  const cfg = FIELDS[type];
+  const idx = parseInt(document.getElementById(`${type}-idx`).value);
+  const obj = {};
+  cfg.ids.forEach((id,i) => {
+    const el = document.getElementById(id);
+    obj[cfg.keys[i]] = el ? el.value : '';
+  });
+  if ('status' in obj) obj.status = normalizeStatus(obj.status);
+  if (key === 'scripts') {
+    obj.label = normalizeScriptLabel(obj.label);
+    obj.use = normalizeScriptUse(obj.use);
+    obj.updatedAt = todayStamp();
+  }
+  const primaryField = cfg.nameKey || 'name';
+  if (!String(obj[primaryField] || '').trim()) {
+    toast(primaryField === 'title' ? 'Title is required' : 'Name is required', 'err');
+    return;
+  }
+
+  if (idx === -1) db[key].push(key === 'scripts' ? normalizeScriptItem(obj) : obj);
+  else db[key][idx] = key === 'scripts' ? normalizeScriptItem(obj) : obj;
+  save(key);
+  closeModal(`modal-${type}`);
+  renderTable(key);
+  toast(idx === -1 ? '✅ Added!' : '✅ Updated!', 'ok');
+}
+
+let outreachContext = null;
+
+function getOutreachLabelForKey(key) {
+  if (key === 'creators') return 'Creator';
+  if (key === 'partners') return 'Brands';
+  if (key === 'orgPartners') return 'Partnerships';
+  return '';
+}
+
+function getOutreachEmail(record = {}, key = '') {
+  if (key === 'creators') return String(record.email || '').trim();
+  if (key === 'partners') return String(record.email || '').trim();
+  if (key === 'orgPartners') return String(record.email || '').trim();
+  return '';
+}
+
+function openOutreachModal(key, idx) {
+  const record = (db[key] || [])[idx];
+  if (!record) return;
+
+  const email = getOutreachEmail(record, key);
+  if (!email) {
+    toast('Add an email first before sending a message.', 'err');
+    return;
+  }
+
+  const label = getOutreachLabelForKey(key);
+  const scripts = db.scripts.filter(s => normalizeScriptLabel(s.label) === label);
+  if (!scripts.length) {
+    toast(`Add a ${label.toLowerCase()} script first in the Scripts tab.`, 'err');
+    return;
+  }
+
+  outreachContext = { key, idx, label, email };
+  document.getElementById('outreach-mtitle').textContent = `Message ${record.name || 'Contact'}`;
+  document.getElementById('outreach-recipient').value = `${record.name || 'Contact'} <${email}>`;
+  document.getElementById('outreach-label').value = label;
+
+  const select = document.getElementById('outreach-script');
+  select.innerHTML = scripts.map((script, scriptIdx) =>
+    `<option value="${scriptIdx}">${script.title || `Script ${scriptIdx + 1}`}</option>`
+  ).join('');
+
+  updateOutreachPreview();
+  document.getElementById('modal-outreach').classList.add('active');
+}
+
+function getSelectedOutreachScript() {
+  if (!outreachContext) return null;
+  const scripts = db.scripts.filter(s => normalizeScriptLabel(s.label) === outreachContext.label);
+  const select = document.getElementById('outreach-script');
+  const idx = parseInt(select.value, 10);
+  return scripts[Number.isFinite(idx) ? idx : 0] || null;
+}
+
+function updateOutreachPreview() {
+  if (!outreachContext) return;
+  const script = getSelectedOutreachScript();
+  const record = db[outreachContext.key][outreachContext.idx];
+  if (!script || !record) return;
+
+  const subject = applyOutreachTemplate(script.hook || script.title || '', record);
+  const bodyParts = [
+    applyOutreachTemplate(script.body || '', record),
+    applyOutreachTemplate(script.cta || '', record),
+  ].filter(Boolean);
+  document.getElementById('outreach-subject').value = subject;
+  document.getElementById('outreach-preview').textContent = bodyParts.join('\n\n') || 'This script has no body yet.';
+}
+
+function launchOutreachEmail() {
+  if (!outreachContext) return;
+  const script = getSelectedOutreachScript();
+  const record = db[outreachContext.key][outreachContext.idx];
+  if (!script || !record) {
+    toast('Select a script first.', 'err');
+    return;
+  }
+
+  const subject = applyOutreachTemplate(script.hook || script.title || '', record);
+  const body = [
+    applyOutreachTemplate(script.body || '', record),
+    applyOutreachTemplate(script.cta || '', record),
+  ].filter(Boolean).join('\n\n');
+
+  const mailto = `mailto:${outreachContext.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+  closeModal('modal-outreach');
+}
+
+function deleteRec(type) {
+  const key = MODAL_TO_KEY[type] || type;
+  const idx = parseInt(document.getElementById(`${type}-idx`).value);
+  if (idx < 0) return;
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  db[key].splice(idx, 1);
+  save(key);
+  closeModal(`modal-${type}`);
+  renderTable(key);
+  toast('Deleted');
+}
+
+
+// ══════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('active'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(ov => ov.classList.remove('active'));
+});
+
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast' + (type?' '+type:'');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2800);
+}
+
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+initDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "jax-dashboard-shared",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Shared dashboard server for Jax's Dashboard",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
