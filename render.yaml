@@ -18,3 +18,7 @@ services:
         value: dashboard_state
       - key: SUPABASE_WORKSPACE_ID
         value: main
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3-flash-preview

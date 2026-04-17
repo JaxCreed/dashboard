@@ -117,6 +117,75 @@ body {
   background: #0f1b2f; color: #dbe9ff; font-size: 11px;
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
+.research-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+.research-card {
+  border: 1px solid #dce7fb;
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+.research-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.research-card h4 {
+  font-size: 14px;
+  color: #173d72;
+  font-weight: 700;
+}
+.research-card p {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #617a99;
+  line-height: 1.55;
+}
+.research-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.research-chip {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #24508a;
+  background: #edf4ff;
+  border: 1px solid #d8e5fb;
+}
+.research-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.source-item {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f8fbff;
+  border: 1px solid #dce7fb;
+}
+.source-item a {
+  color: #2668cf;
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+}
+.source-item a:hover { text-decoration: underline; }
 .search-box {
   flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #d2e0fb;
   border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
@@ -480,6 +549,7 @@ tbody tr:last-child td { border-bottom: none; }
       <p>Track creator outreach and app creator partnerships in one place. Creator size is labeled automatically from follower count.</p>
     </div>
     <div class="import-actions">
+      <button class="btn btn-outline" onclick="openCreatorResearchModal()">Research with Gemini</button>
       <button class="btn btn-outline" onclick="openCreatorImportModal()">Import AI Leads</button>
       <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
     </div>
@@ -856,6 +926,53 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="document.getElementById('creator-import-json').value=''">Clear</button>
       <button class="btn btn-primary" onclick="importCreatorLeads()">Import Leads</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-creator-research">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Research Creators with Gemini</h2>
+      <button class="modal-close" onclick="closeModal('modal-creator-research')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Platforms</label>
+          <input type="text" id="creator-research-platforms" value="TikTok, Instagram" placeholder="TikTok, Instagram">
+        </div>
+        <div class="form-group">
+          <label>Size Buckets</label>
+          <input type="text" id="creator-research-buckets" value="Small Creator, Medium Creator" placeholder="Small Creator, Medium Creator">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>How Many Leads</label>
+          <input type="number" id="creator-research-count" min="1" max="20" value="8">
+        </div>
+        <div class="form-group">
+          <label>Extra Guidance</label>
+          <input type="text" id="creator-research-brief" placeholder="Speaking-style, Christian inspirational, strong hooks…">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>What Gemini Should Look For</label>
+        <textarea id="creator-research-notes" rows="4" placeholder="Find Christian creators who feel strong for paid ads, devotional videos, or outreach partnerships. Prefer clean brand fit, direct-to-camera presence, and good hooks."></textarea>
+      </div>
+      <div class="research-results" id="creator-research-results">
+        <div class="empty-state">
+          <div class="icon">Search</div>
+          <h3>Run research to review creator suggestions here.</h3>
+          <p>Gemini will search, summarize, and let you accept or deny each lead before it gets added.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="acceptAllCreatorResearchLeads()">Accept All</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-creator-research')">Close</button>
+      <button class="btn btn-primary" id="creator-research-run" onclick="runCreatorResearch()">Run Research</button>
     </div>
   </div>
 </div>
@@ -1816,6 +1933,18 @@ function applyOutreachTemplate(str, record = {}) {
     .replace(/\{\{\s*contact\s*\}\}/gi, contact || fullName);
 }
 
+let creatorResearchResults = [];
+let creatorResearchSummary = '';
+let creatorResearchSources = [];
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function stripCodeFence(text) {
   return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 }
@@ -1856,6 +1985,23 @@ function normalizeImportedCreatorLead(record = {}) {
     notes: notesParts.join(' | '),
   });
 }
+function creatorLeadKey(record = {}) {
+  return `${String(record.name || '').trim().toLowerCase()}|${String(record.platform || '').trim().toLowerCase()}`;
+}
+function addCreatorLeads(rows = []) {
+  const existingKeys = new Set(db.creators.map(creatorLeadKey));
+  let added = 0;
+  rows.map(normalizeImportedCreatorLead).forEach(record => {
+    if (!record.name) return;
+    const key = creatorLeadKey(record);
+    if (existingKeys.has(key)) return;
+    existingKeys.add(key);
+    db.creators.push(record);
+    added += 1;
+  });
+  if (added) save('creators');
+  return added;
+}
 function openCreatorImportModal() {
   document.getElementById('creator-import-json').value = '';
   document.getElementById('modal-creator-import').classList.add('active');
@@ -1878,24 +2024,147 @@ function importCreatorLeads() {
     toast('No creator rows were found in that JSON.', 'err');
     return;
   }
-  const existingKeys = new Set(db.creators.map(c => `${String(c.name || '').trim().toLowerCase()}|${String(c.platform || '').trim().toLowerCase()}`));
-  let added = 0;
-  rows.map(normalizeImportedCreatorLead).forEach(record => {
-    if (!record.name) return;
-    const key = `${String(record.name).trim().toLowerCase()}|${String(record.platform || '').trim().toLowerCase()}`;
-    if (existingKeys.has(key)) return;
-    existingKeys.add(key);
-    db.creators.push(record);
-    added += 1;
-  });
+  const added = addCreatorLeads(rows);
   if (!added) {
     toast('Those creator leads were already in your tracker.', 'err');
     return;
   }
-  save('creators');
   closeModal('modal-creator-import');
   renderTable('creators');
   toast(`${added} creator lead${added === 1 ? '' : 's'} imported.`, 'ok');
+}
+function openCreatorResearchModal() {
+  creatorResearchResults = [];
+  creatorResearchSummary = '';
+  creatorResearchSources = [];
+  document.getElementById('creator-research-notes').value = document.getElementById('creator-research-notes').value
+    || 'Find Christian creators with strong speaking-style videos, good hooks, and clean brand fit for Creed.';
+  renderCreatorResearchResults();
+  document.getElementById('modal-creator-research').classList.add('active');
+}
+function renderCreatorResearchResults() {
+  const wrap = document.getElementById('creator-research-results');
+  if (!wrap) return;
+
+  if (!creatorResearchResults.length) {
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">Search</div>
+        <h3>${creatorResearchSummary ? 'No pending suggestions left.' : 'Run research to review creator suggestions here.'}</h3>
+        <p>${creatorResearchSummary ? escapeHtml(creatorResearchSummary) : 'Gemini will search, summarize, and let you accept or deny each lead before it gets added.'}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const sourcesHtml = creatorResearchSources.length
+    ? `
+      <div class="source-list">
+        ${creatorResearchSources.map((source, idx) => `
+          <div class="source-item">
+            <span>${idx + 1}.</span>
+            <a href="${escapeHtml(source.uri || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title || source.uri || 'Source')}</a>
+          </div>
+        `).join('')}
+      </div>
+    `
+    : '';
+
+  wrap.innerHTML = `
+    ${creatorResearchSummary ? `<div class="import-helper">${escapeHtml(creatorResearchSummary)}</div>` : ''}
+    ${sourcesHtml}
+    ${creatorResearchResults.map((lead, idx) => `
+      <div class="research-card">
+        <div class="research-card-head">
+          <div>
+            <h4>${escapeHtml(lead.name || 'Unnamed Creator')}</h4>
+            <div class="research-meta">
+              <span class="research-chip">${escapeHtml(lead.platform || 'Unknown Platform')}</span>
+              <span class="research-chip">${escapeHtml(lead.followers || 'Followers N/A')}</span>
+              <span class="research-chip">${escapeHtml(lead.sizeBucket || creatorTier(lead.followers) || 'Unbucketed')}</span>
+              <span class="research-chip">${escapeHtml(lead.bestUseCase || 'General fit')}</span>
+            </div>
+          </div>
+          ${lead.profileUrl ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(lead.profileUrl)}" target="_blank" rel="noopener noreferrer">View Profile</a>` : ''}
+        </div>
+        <p><strong>Style:</strong> ${escapeHtml(lead.contentStyle || lead.style || 'Not provided')}</p>
+        <p><strong>Why fit:</strong> ${escapeHtml(lead.whyFit || 'No fit note provided yet.')}</p>
+        <p><strong>Outreach angle:</strong> ${escapeHtml(lead.suggestedFirstOutreachAngle || 'No outreach angle yet.')}</p>
+        <div class="research-card-actions">
+          <button class="btn btn-primary btn-sm" onclick="acceptCreatorResearchLead(${idx})">Accept</button>
+          <button class="btn btn-outline btn-sm" onclick="denyCreatorResearchLead(${idx})">Deny</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+async function runCreatorResearch() {
+  const runBtn = document.getElementById('creator-research-run');
+  const payload = {
+    platforms: document.getElementById('creator-research-platforms').value.split(',').map(v => v.trim()).filter(Boolean),
+    sizeBuckets: document.getElementById('creator-research-buckets').value.split(',').map(v => v.trim()).filter(Boolean),
+    limit: Number.parseInt(document.getElementById('creator-research-count').value, 10) || 8,
+    brief: document.getElementById('creator-research-brief').value.trim(),
+    notes: document.getElementById('creator-research-notes').value.trim(),
+  };
+
+  runBtn.disabled = true;
+  runBtn.textContent = 'Researching…';
+  document.getElementById('creator-research-results').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">…</div>
+      <h3>Gemini is researching creators now.</h3>
+      <p>This can take a few seconds while it searches and formats the leads.</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch('/api/creator-research', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Gemini research failed.');
+
+    creatorResearchResults = Array.isArray(result.creators) ? result.creators : [];
+    creatorResearchSummary = String(result.summary || '').trim();
+    creatorResearchSources = Array.isArray(result.sources) ? result.sources : [];
+    renderCreatorResearchResults();
+    toast(`Gemini found ${creatorResearchResults.length} creator suggestion${creatorResearchResults.length === 1 ? '' : 's'}.`, 'ok');
+  } catch (err) {
+    creatorResearchResults = [];
+    creatorResearchSummary = '';
+    creatorResearchSources = [];
+    renderCreatorResearchResults();
+    toast(err.message || 'Gemini research failed.', 'err');
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = 'Run Research';
+  }
+}
+function acceptCreatorResearchLead(idx) {
+  const [lead] = creatorResearchResults.splice(idx, 1);
+  if (!lead) return;
+  const added = addCreatorLeads([lead]);
+  renderCreatorResearchResults();
+  renderTable('creators');
+  toast(added ? `${lead.name || 'Creator'} added to your tracker.` : 'That creator is already in your tracker.', added ? 'ok' : 'err');
+}
+function denyCreatorResearchLead(idx) {
+  creatorResearchResults.splice(idx, 1);
+  renderCreatorResearchResults();
+}
+function acceptAllCreatorResearchLeads() {
+  if (!creatorResearchResults.length) {
+    toast('There are no pending creator suggestions to add yet.', 'err');
+    return;
+  }
+  const added = addCreatorLeads(creatorResearchResults);
+  creatorResearchResults = [];
+  renderCreatorResearchResults();
+  renderTable('creators');
+  toast(added ? `${added} creator suggestion${added === 1 ? '' : 's'} added.` : 'Those creators were already in your tracker.', added ? 'ok' : 'err');
 }
 
 

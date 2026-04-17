@@ -24,6 +24,52 @@ const PUBLIC_CONFIG = {
   supabaseTable: process.env.SUPABASE_TABLE || 'dashboard_state',
   workspaceId: process.env.SUPABASE_WORKSPACE_ID || 'main',
 };
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+const CREATOR_RESEARCH_SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: { type: 'string' },
+    creators: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          platform: { type: 'string' },
+          followers: { type: 'string' },
+          sizeBucket: { type: 'string' },
+          contentStyle: { type: 'string' },
+          whyFit: { type: 'string' },
+          engagementQuality: { type: 'string' },
+          bestUseCase: { type: 'string' },
+          suggestedFirstOutreachAngle: { type: 'string' },
+          profileUrl: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string' },
+          notes: { type: 'string' },
+        },
+        required: [
+          'name',
+          'platform',
+          'followers',
+          'sizeBucket',
+          'contentStyle',
+          'whyFit',
+          'engagementQuality',
+          'bestUseCase',
+          'suggestedFirstOutreachAngle',
+          'profileUrl',
+          'email',
+          'phone',
+          'notes',
+        ],
+      },
+    },
+  },
+  required: ['summary', 'creators'],
+};
 
 function sanitizeState(state = {}) {
   return {
@@ -102,6 +148,100 @@ function collectBody(req) {
   });
 }
 
+function buildCreatorResearchPrompt(options = {}) {
+  const platforms = Array.isArray(options.platforms) && options.platforms.length ? options.platforms : ['TikTok', 'Instagram'];
+  const sizeBuckets = Array.isArray(options.sizeBuckets) && options.sizeBuckets.length ? options.sizeBuckets : ['Small Creator', 'Medium Creator'];
+  const limit = Math.min(Math.max(Number.parseInt(options.limit || 8, 10) || 8, 1), 20);
+  const brief = String(options.brief || '').trim();
+  const notes = String(options.notes || '').trim();
+
+  return [
+    'You are researching Christian creators for Creed, a Christian app.',
+    'Use Google Search grounding to find real creators and return only creators you can reasonably verify from public web results.',
+    `Target platforms: ${platforms.join(', ')}.`,
+    `Target size buckets: ${sizeBuckets.join(', ')}.`,
+    `Return up to ${limit} creators.`,
+    'Prioritize creators with strong speaking-style or direct-to-camera videos, clear Christian/devotional/inspirational fit, clean brand safety, and strong potential for paid ad creative or outreach partnerships.',
+    'If a field cannot be verified, return an empty string instead of guessing.',
+    'Keep follower counts human-readable like "18,500".',
+    'Suggested first outreach angles should feel short and natural for a first message.',
+    brief ? `Extra guidance: ${brief}` : '',
+    notes ? `Research notes: ${notes}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+function getResponseText(payload) {
+  return payload?.candidates?.[0]?.content?.parts
+    ?.map(part => part?.text || '')
+    .join('')
+    .trim() || '';
+}
+
+function extractGroundingSources(payload) {
+  const chunks = payload?.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  if (!Array.isArray(chunks)) return [];
+
+  const unique = new Map();
+  chunks.forEach(chunk => {
+    const uri = chunk?.web?.uri || '';
+    const title = chunk?.web?.title || '';
+    if (!uri || unique.has(uri)) return;
+    unique.set(uri, { uri, title });
+  });
+  return [...unique.values()];
+}
+
+async function runCreatorResearch(options = {}) {
+  const body = {
+    contents: [
+      {
+        parts: [
+          { text: buildCreatorResearchPrompt(options) },
+        ],
+      },
+    ],
+    tools: [
+      { google_search: {} },
+    ],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseJsonSchema: CREATOR_RESEARCH_SCHEMA,
+    },
+  };
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || 'Gemini research request failed.';
+    throw new Error(message);
+  }
+
+  const rawText = getResponseText(payload);
+  if (!rawText) throw new Error('Gemini returned an empty creator research response.');
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (err) {
+    throw new Error('Gemini returned research, but it was not valid JSON.');
+  }
+
+  return {
+    summary: typeof parsed.summary === 'string' ? parsed.summary : '',
+    creators: Array.isArray(parsed.creators) ? parsed.creators : [],
+    sources: extractGroundingSources(payload),
+    model: GEMINI_MODEL,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`);
 
@@ -127,6 +267,23 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, nextState);
     } catch (err) {
       sendJson(res, 400, { error: err.message || 'Unable to save dashboard state.' });
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/creator-research') {
+    if (!GEMINI_API_KEY) {
+      sendJson(res, 400, { error: 'Gemini is not configured yet. Add GEMINI_API_KEY on the server first.' });
+      return;
+    }
+
+    try {
+      const body = await collectBody(req);
+      const options = JSON.parse(body || '{}');
+      const result = await runCreatorResearch(options);
+      sendJson(res, 200, result);
+    } catch (err) {
+      sendJson(res, 502, { error: err.message || 'Unable to run Gemini creator research.' });
     }
     return;
   }
