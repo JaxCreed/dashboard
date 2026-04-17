@@ -2,7 +2,7 @@ services:
   - type: web
     name: jax-dashboard
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
@@ -10,9 +10,11 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22
-      - key: DATA_DIR
-        value: /opt/render/project/src/render-data
-    disk:
-      name: dashboard-data
-      mountPath: /opt/render/project/src/render-data
-      sizeGB: 1
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_TABLE
+        value: dashboard_state
+      - key: SUPABASE_WORKSPACE_ID
+        value: main

@@ -1098,7 +1098,7 @@ const STORE = {
 };
 const SYNC_STORE = 'creed_sync_config_v1';
 const DEFAULT_SYNC_CONFIG = {
-  supabaseUrl: 'https://gvswzponusiabewsuped.supabase.co',
+  supabaseUrl: '',
   supabaseAnonKey: '',
   supabaseTable: 'dashboard_state',
   workspaceId: 'main',
@@ -1122,7 +1122,8 @@ const REMOTE_STATE_URL = '/api/state';
 let db = {};
 let sharedSyncAvailable = false;
 let syncTimer = null;
-let syncConfig = loadSyncConfig();
+let serverSyncDefaults = {};
+let syncConfig = sanitizeSyncConfig(DEFAULT_SYNC_CONFIG);
 function parseStore(key) {
   try { return JSON.parse(localStorage.getItem(key) || 'null'); }
   catch { return null; }
@@ -1135,8 +1136,12 @@ function sanitizeSyncConfig(config = {}) {
     workspaceId: (config.workspaceId || DEFAULT_SYNC_CONFIG.workspaceId || 'main').trim() || 'main',
   };
 }
-function loadSyncConfig() {
-  return sanitizeSyncConfig(parseStore(SYNC_STORE) || DEFAULT_SYNC_CONFIG);
+function loadSyncConfig(serverDefaults = {}) {
+  return sanitizeSyncConfig({
+    ...DEFAULT_SYNC_CONFIG,
+    ...serverDefaults,
+    ...(parseStore(SYNC_STORE) || {}),
+  });
 }
 function persistSyncConfig() {
   localStorage.setItem(SYNC_STORE, JSON.stringify(syncConfig));
@@ -1146,6 +1151,9 @@ function deepClone(value) {
 }
 function hasSyncApi() {
   return window.location.protocol !== 'file:';
+}
+function canUseLegacyServerSync() {
+  return hasSyncApi() && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 }
 function taskCycleKey(date = new Date()) {
   const cycleDate = new Date(date);
@@ -1269,7 +1277,7 @@ function downloadTextFile(filename, content, mimeType = 'application/json') {
 }
 function activeSyncProvider() {
   if (syncConfig.supabaseUrl && syncConfig.supabaseAnonKey) return 'supabase';
-  if (hasSyncApi()) return 'server';
+  if (canUseLegacyServerSync()) return 'server';
   return 'local';
 }
 function syncStatusMeta() {
@@ -1310,6 +1318,22 @@ function readSyncFields() {
 function openSyncModal() {
   fillSyncFields();
   document.getElementById('modal-sync').classList.add('active');
+}
+async function fetchServerSyncDefaults() {
+  if (!hasSyncApi()) return {};
+  try {
+    const res = await fetch('/api/public-config', { cache: 'no-store' });
+    if (!res.ok) return {};
+    const payload = await res.json();
+    return sanitizeSyncConfig({
+      supabaseUrl: payload.supabaseUrl || '',
+      supabaseAnonKey: payload.supabaseAnonKey || '',
+      supabaseTable: payload.supabaseTable || DEFAULT_SYNC_CONFIG.supabaseTable,
+      workspaceId: payload.workspaceId || DEFAULT_SYNC_CONFIG.workspaceId,
+    });
+  } catch (err) {
+    return {};
+  }
 }
 function applyDbState(state = {}) {
   const normalized = normalizeDbState(state);
@@ -1396,8 +1420,8 @@ async function testSyncSettings() {
   toast('Supabase connection worked.');
 }
 async function clearSyncSettings() {
-  syncConfig = sanitizeSyncConfig({ ...DEFAULT_SYNC_CONFIG, supabaseAnonKey: '' });
-  persistSyncConfig();
+  localStorage.removeItem(SYNC_STORE);
+  syncConfig = loadSyncConfig(serverSyncDefaults);
   fillSyncFields();
   updateSyncStatus();
   toast('Supabase sync cleared. This device is back to local-only mode.');
@@ -1604,7 +1628,8 @@ function save(key) {
   queueSharedSync();
 }
 async function initDashboard() {
-  syncConfig = loadSyncConfig();
+  serverSyncDefaults = await fetchServerSyncDefaults();
+  syncConfig = loadSyncConfig(serverSyncDefaults);
   updateSyncStatus();
   load();
   const localSnapshot = deepClone(snapshotDbState());

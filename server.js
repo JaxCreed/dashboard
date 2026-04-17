@@ -18,6 +18,12 @@ const EMPTY_STATE = {
   orgPartners: [],
   scripts: [],
 };
+const PUBLIC_CONFIG = {
+  supabaseUrl: process.env.SUPABASE_URL || '',
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+  supabaseTable: process.env.SUPABASE_TABLE || 'dashboard_state',
+  workspaceId: process.env.SUPABASE_WORKSPACE_ID || 'main',
+};
 
 function sanitizeState(state = {}) {
   return {
@@ -101,6 +107,11 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && url.pathname === '/health') {
     sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/public-config') {
+    sendJson(res, 200, PUBLIC_CONFIG);
     return;
   }
 
