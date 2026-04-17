@@ -380,6 +380,123 @@ tbody tr:last-child td { border-bottom: none; }
   background: linear-gradient(180deg, #f8fbff, #eef5ff); border: 1px solid #d6e4fb;
   border-radius: 14px; padding: 14px;
 }
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.overview-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.overview-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,249,255,0.96));
+  border: 1px solid #dbe7fb;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  margin-bottom: 14px;
+}
+.panel-head h3 {
+  font-size: 16px; font-weight: 700; color: var(--primary-dark); letter-spacing: -0.2px;
+}
+.panel-head p {
+  font-size: 12px; color: #6680a1; margin-top: 4px; line-height: 1.5;
+}
+.panel-kicker {
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px;
+  color: #7a93b5;
+}
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.command-card {
+  background: linear-gradient(180deg, #ffffff, #f5f9ff);
+  border: 1px solid #d9e5fb;
+  border-radius: 18px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.command-card h4 { font-size: 15px; font-weight: 700; color: #143d75; }
+.command-metrics { display: flex; gap: 10px; flex-wrap: wrap; }
+.command-metric {
+  min-width: 84px; padding: 10px 12px; border-radius: 14px;
+  background: #eef5ff; border: 1px solid #d7e5fb;
+}
+.command-metric strong {
+  display: block; font-size: 18px; color: var(--primary-dark); line-height: 1;
+}
+.command-metric span {
+  display: block; margin-top: 5px; font-size: 11px; color: #6680a1; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.command-next {
+  font-size: 12px; color: #4f6788; line-height: 1.55; min-height: 36px;
+}
+.command-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.command-actions .btn, .mini-action {
+  border-radius: 999px; padding: 7px 11px; min-height: 32px; font-size: 12px;
+}
+.lane-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.focus-lane {
+  background: linear-gradient(180deg, #fff, #f7fbff);
+  border: 1px solid #dce7fb;
+  border-radius: 18px;
+  padding: 14px;
+}
+.focus-lane h4 { font-size: 13px; font-weight: 700; color: #234d86; margin-bottom: 10px; }
+.focus-list { display: flex; flex-direction: column; gap: 9px; }
+.focus-item {
+  padding: 10px 11px; border-radius: 14px; background: #f4f8ff; border: 1px solid #e1ebfb;
+}
+.focus-item strong {
+  display: block; font-size: 12px; color: #173d72;
+}
+.focus-item span {
+  display: block; margin-top: 4px; font-size: 11px; color: #6d83a1; line-height: 1.45;
+}
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.goal-card {
+  padding: 14px; border-radius: 18px; background: linear-gradient(180deg, #ffffff, #f6faff); border: 1px solid #dce6fa;
+}
+.goal-card h4 { font-size: 13px; font-weight: 700; color: #1c467d; }
+.goal-card p { font-size: 11px; color: #6b84a2; margin-top: 4px; line-height: 1.45; }
+.goal-meta {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: #6780a0;
+}
+.mini-progress {
+  height: 8px; border-radius: 999px; background: #e7effd; overflow: hidden; margin-top: 8px;
+}
+.mini-progress > div {
+  height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2e74df, #63a6ff);
+}
+.reference-stack { display: flex; flex-direction: column; gap: 10px; }
+.reference-card {
+  padding: 14px; border-radius: 18px; border: 1px solid #dce7fb; background: linear-gradient(180deg, #ffffff, #f6faff);
+}
+.reference-card h4 { font-size: 13px; font-weight: 700; color: #1c467d; }
+.reference-card p { font-size: 12px; color: #6a84a3; line-height: 1.5; margin-top: 4px; }
+.reference-card a {
+  display: inline-flex; margin-top: 8px; font-size: 12px; font-weight: 700; color: #2668cf; text-decoration: none;
+}
+.reference-card a:hover { text-decoration: underline; }
 
 @media (max-width: 760px) {
   .app-header { padding: 16px 20px; }
@@ -390,6 +507,7 @@ tbody tr:last-child td { border-bottom: none; }
   .task-item { flex-wrap: wrap; }
   .task-meta { min-width: 0; width: 100%; margin-left: 0; align-items: flex-start; }
   .task-actions { justify-content: flex-start; }
+  .overview-grid, .overview-split, .command-grid, .lane-grid, .goal-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -429,6 +547,52 @@ tbody tr:last-child td { border-bottom: none; }
       <p>All onboarding next steps in one place. Check them off as you finish.</p>
     </div>
     <button class="btn btn-primary" onclick="openTaskModal(-1)">+ Add Task</button>
+  </div>
+
+  <div class="overview-grid">
+    <div class="overview-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">Command Center</div>
+          <h3>Core Workstreams</h3>
+          <p>Your four main lanes this month, with the next move for each one.</p>
+        </div>
+      </div>
+      <div class="command-grid" id="commandCenter"></div>
+    </div>
+    <div class="overview-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">Right Now</div>
+          <h3>What Needs Attention</h3>
+          <p>Quick lanes for today, this week, blockers, and review items.</p>
+        </div>
+      </div>
+      <div class="lane-grid" id="focusLanes"></div>
+    </div>
+  </div>
+
+  <div class="overview-split">
+    <div class="overview-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">Month Goals</div>
+          <h3>Progress That Matters</h3>
+          <p>Simple targets tied to the asks you’re responsible for this month.</p>
+        </div>
+      </div>
+      <div class="goal-grid" id="monthGoals"></div>
+    </div>
+    <div class="overview-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">Reference Library</div>
+          <h3>Templates & Inspiration</h3>
+          <p>Keep the key examples and reminders close without burying them in task notes.</p>
+        </div>
+      </div>
+      <div class="reference-stack" id="referenceLinks"></div>
+    </div>
   </div>
 
   <div class="progress-wrap">
@@ -1764,6 +1928,193 @@ function applyOutreachTemplate(str, record = {}) {
     .replace(/\{\{\s*contact\s*\}\}/gi, contact || fullName);
 }
 
+const REFERENCE_LINKS = [
+  {
+    title: 'Instagram Format Reference',
+    text: 'Use this as the visual baseline for CreedBibleApp daily posting style.',
+    url: 'https://www.instagram.com/matthaioslevy/',
+    action: 'Open profile',
+  },
+  {
+    title: 'Paid Ad Example 1',
+    text: 'Strong ad example from Anna to study the hook and first 10–15 seconds.',
+    url: 'https://www.tiktok.com/@anna.creed/video/7596331215129464094?is_from_webapp=1&sender_device=pc&web_id=7573475100080981535',
+    action: 'Watch example',
+  },
+  {
+    title: 'Paid Ad Example 2',
+    text: 'Another high-performing example for scripting and pacing.',
+    url: 'https://www.tiktok.com/@anna.creed/video/7615850657421036830?is_from_webapp=1&sender_device=pc&web_id=7573475100080981535',
+    action: 'Watch example',
+  },
+  {
+    title: 'Paid Ad Example 3',
+    text: 'Use this one when you need more hook angles and demo transitions.',
+    url: 'https://www.tiktok.com/@anna.creed/video/7623997378458029342?is_from_webapp=1&sender_device=pc&web_id=7573475100080981535',
+    action: 'Watch example',
+  },
+  {
+    title: 'Script Reminder',
+    text: 'Every ad script should lead with a catchy hook and introduce Creed within the first 10–15 seconds.',
+    url: '',
+    action: '',
+  },
+];
+
+function focusTaskCategory(category) {
+  switchTab('overview');
+  const chip = Array.from(document.querySelectorAll('#catChips .cat-chip')).find(el => el.dataset.cat === category);
+  if (chip) {
+    document.querySelectorAll('#catChips .cat-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  }
+  taskCatFilter = category;
+  taskSectionFilter = 'All';
+  document.querySelectorAll('#taskSectionChips .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.section === 'All'));
+  renderTasks();
+  document.getElementById('tab-overview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function overviewItem(title, meta) {
+  return `<div class="focus-item"><strong>${title}</strong><span>${meta}</span></div>`;
+}
+
+function renderOverviewDashboard() {
+  const tasks = db.tasks.map(normalizeTaskItem);
+  const openTasks = tasks.filter(t => getTaskStatus(t) !== 'Completed');
+  const creators = db.creators || [];
+  const partners = db.partners || [];
+  const orgPartners = db.orgPartners || [];
+  const scripts = db.scripts || [];
+
+  const workstreams = [
+    {
+      title: 'Instagram',
+      action: `<button class="btn btn-outline mini-action" onclick="focusTaskCategory('Instagram')">View Tasks</button>`,
+      open: openTasks.filter(t => t.category === 'Instagram').length,
+      waiting: openTasks.filter(t => t.category === 'Instagram' && getTaskStatus(t) === 'In Progress').length,
+      next: openTasks.find(t => t.category === 'Instagram')?.title || 'Daily posting engine is fully clear.',
+    },
+    {
+      title: 'Paid Ads',
+      action: `<button class="btn btn-outline mini-action" onclick="focusTaskCategory('Paid Ads')">Open Pipeline</button>`,
+      open: openTasks.filter(t => t.category === 'Paid Ads').length,
+      waiting: scripts.filter(s => normalizeScriptUse(s.use) === 'Ad Script').length,
+      next: openTasks.find(t => t.category === 'Paid Ads')?.title || 'Paid ads lane is caught up.',
+    },
+    {
+      title: 'Creator Recruiting',
+      action: `<button class="btn btn-outline mini-action" onclick="switchTab('creators')">Open Tracker</button>`,
+      open: openTasks.filter(t => t.category === 'Creator Outreach').length,
+      waiting: creators.filter(c => normalizeStatus(c.status) === 'Pending').length,
+      next: creators.length ? `${creators.filter(c => normalizeStatus(c.status) === 'Active').length} creator(s) currently active.` : 'Start logging outreach and move toward 3–5 signups.',
+    },
+    {
+      title: 'Partnerships',
+      action: `<button class="btn btn-outline mini-action" onclick="switchTab('partners')">Open Lanes</button>`,
+      open: openTasks.filter(t => t.category === 'Partnerships').length,
+      waiting: partners.filter(p => normalizeStatus(p.status) === 'Pending').length + orgPartners.filter(p => normalizeStatus(p.status) === 'Pending').length,
+      next: partners.length || orgPartners.length ? `${partners.length + orgPartners.length} total relationship records in play.` : 'Start with artists, merch brands, and church/camp targets.',
+    },
+  ];
+
+  document.getElementById('commandCenter').innerHTML = workstreams.map(stream => `
+    <div class="command-card">
+      <h4>${stream.title}</h4>
+      <div class="command-metrics">
+        <div class="command-metric"><strong>${stream.open}</strong><span>Open</span></div>
+        <div class="command-metric"><strong>${stream.waiting}</strong><span>Waiting</span></div>
+      </div>
+      <div class="command-next">${stream.next}</div>
+      <div class="command-actions">${stream.action}</div>
+    </div>
+  `).join('');
+
+  const todayItems = openTasks
+    .sort((a, b) => {
+      const aStatus = getTaskStatus(a) === 'In Progress' ? -1 : 0;
+      const bStatus = getTaskStatus(b) === 'In Progress' ? -1 : 0;
+      if (aStatus !== bStatus) return aStatus - bStatus;
+      return compareTaskImportance(a, b);
+    })
+    .slice(0, 3)
+    .map(t => overviewItem(t.title, `${t.category}${t.priority ? ` | ${t.priority}` : ''}`));
+
+  const thisWeekItems = openTasks
+    .filter(t => t.cadence !== 'Recurring')
+    .sort(compareTaskImportance)
+    .slice(0, 4)
+    .map(t => overviewItem(t.title, t.due ? `Due ${t.due}` : `${t.category} lane`));
+
+  const waitingOnAdiItems = [
+    ...openTasks
+      .filter(t => /adi/i.test(`${t.title} ${t.notes || ''}`))
+      .slice(0, 3)
+      .map(t => overviewItem(t.title, 'Waiting on Adi / walkthrough / approval')),
+    ...partners
+      .filter(p => String(p.adi || '').toLowerCase() === 'no' && normalizeStatus(p.status) !== 'Declined')
+      .slice(0, 2)
+      .map(p => overviewItem(p.name || 'Partnership draft', 'Needs Adi review before outreach')),
+  ].slice(0, 4);
+
+  const needReviewItems = [
+    ...openTasks
+      .filter(t => /(review|draft|script)/i.test(`${t.title} ${t.notes || ''}`))
+      .slice(0, 3)
+      .map(t => overviewItem(t.title, 'Review or refine before sending')),
+    ...partners
+      .filter(p => String(p.adi || '').toLowerCase() !== 'yes' && normalizeStatus(p.status) === 'Pending')
+      .slice(0, 2)
+      .map(p => overviewItem(p.name || 'Pending partnership', 'Pending review / first-draft signoff')),
+  ].slice(0, 4);
+
+  const lanes = [
+    { title: 'Today', items: todayItems, empty: 'No immediate tasks queued.' },
+    { title: 'This Week', items: thisWeekItems, empty: 'Weekly queue is clear.' },
+    { title: 'Waiting on Adi', items: waitingOnAdiItems, empty: 'No current Adi blockers.' },
+    { title: 'Need Review', items: needReviewItems, empty: 'Nothing needs review right now.' },
+  ];
+
+  document.getElementById('focusLanes').innerHTML = lanes.map(lane => `
+    <div class="focus-lane">
+      <h4>${lane.title}</h4>
+      <div class="focus-list">${lane.items.length ? lane.items.join('') : `<div class="focus-item"><strong>All set</strong><span>${lane.empty}</span></div>`}</div>
+    </div>
+  `).join('');
+
+  const activeCreators = creators.filter(c => normalizeStatus(c.status) === 'Active').length;
+  const outreachStarted = [creators, partners, orgPartners].filter(list => list.length > 0).length;
+  const activePartnerships = partners.filter(p => normalizeStatus(p.status) !== 'Not Sent').length + orgPartners.filter(p => normalizeStatus(p.status) !== 'Not Sent').length;
+  const adScripts = scripts.filter(s => normalizeScriptUse(s.use) === 'Ad Script').length;
+
+  const goals = [
+    { title: 'Paid Creators Signed', current: activeCreators, target: 5, note: 'Target: 3–5 new paid creators active this month.' },
+    { title: 'Trackers Started', current: outreachStarted, target: 3, note: 'Creator, artist/brand, and partnership trackers up and running.' },
+    { title: 'Active Outreach Records', current: activePartnerships, target: 10, note: 'Artists, brands, and church/camp relationships in motion.' },
+    { title: 'Ad Scripts Ready', current: adScripts, target: 6, note: 'Build out a script bank creators can keep using.' },
+  ];
+
+  document.getElementById('monthGoals').innerHTML = goals.map(goal => {
+    const pct = goal.target ? Math.min(100, Math.round(goal.current / goal.target * 100)) : 0;
+    return `
+      <div class="goal-card">
+        <h4>${goal.title}</h4>
+        <p>${goal.note}</p>
+        <div class="goal-meta"><span>${goal.current} complete</span><span>${goal.target} target</span></div>
+        <div class="mini-progress"><div style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('referenceLinks').innerHTML = REFERENCE_LINKS.map(link => `
+    <div class="reference-card">
+      <h4>${link.title}</h4>
+      <p>${link.text}</p>
+      ${link.url ? `<a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.action || 'Open link'}</a>` : ''}
+    </div>
+  `).join('');
+}
+
 
 // ══════════════════════════════════════════
 //  TASK CHECKLIST
@@ -1916,6 +2267,8 @@ function renderTasks() {
   const total = db.tasks.length;
   const done  = db.tasks.filter(t => getTaskStatus(t) === 'Completed').length;
   const pct   = total ? Math.round(done / total * 100) : 0;
+
+  renderOverviewDashboard();
 
   document.getElementById('progBar').style.width   = pct + '%';
   document.getElementById('progLabel').textContent = pct + '%';
