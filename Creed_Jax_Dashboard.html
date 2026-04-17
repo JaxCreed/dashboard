@@ -81,6 +81,21 @@ body {
 .header-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .header-tools .btn { background: rgba(255,255,255,0.9); }
 .header-tools .btn:hover { background: #fff; }
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  color: var(--primary-dark); background: rgba(255,255,255,0.9); border: 1px solid rgba(126,163,224,0.38);
+}
+.sync-pill::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: #94a3b8; box-shadow: 0 0 0 4px rgba(148,163,184,0.14);
+}
+.sync-pill[data-state="live"]::before { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,0.14); }
+.sync-pill[data-state="pending"]::before { background: #f59e0b; box-shadow: 0 0 0 4px rgba(245,158,11,0.14); }
+.sync-note {
+  font-size: 12px; color: #6781a3; line-height: 1.55; background: #f6f9ff;
+  border: 1px solid #dbe7fb; border-radius: 12px; padding: 12px 14px; margin-top: 8px;
+}
 .search-box {
   flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #d2e0fb;
   border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
@@ -377,6 +392,8 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="subtitle">Month 1 Tracker · April 2026</div>
   </div>
   <div class="header-tools">
+    <span class="sync-pill" id="sync-pill" data-state="pending">Local Only</span>
+    <button class="btn btn-outline" onclick="openSyncModal()">Sync Settings</button>
     <button class="btn btn-outline" onclick="exportDashboardBackup()">Export Backup</button>
     <button class="btn btn-outline" onclick="document.getElementById('backup-import').click()">Import Backup</button>
     <input type="file" id="backup-import" accept="application/json" style="display:none" onchange="importDashboardBackup(event)">
@@ -1019,6 +1036,46 @@ tbody tr:last-child td { border-bottom: none; }
 </div>
 
 
+<div class="modal-overlay" id="modal-sync">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Sync Settings</h2>
+      <button class="modal-close" onclick="closeModal('modal-sync')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Supabase Project URL</label>
+          <input type="text" id="sync-url" placeholder="https://your-project.supabase.co">
+        </div>
+        <div class="form-group">
+          <label>Supabase Anon Key</label>
+          <input type="text" id="sync-key" placeholder="Paste the public anon key">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Table Name</label>
+          <input type="text" id="sync-table" placeholder="dashboard_state">
+        </div>
+        <div class="form-group">
+          <label>Workspace ID</label>
+          <input type="text" id="sync-workspace" placeholder="main">
+        </div>
+      </div>
+      <div class="sync-note">
+        Use the SQL file in this project to create the shared table in Supabase first. Once these values are saved, the dashboard will pull from Supabase on load and save changes there for your laptop, iPad, and boss view.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="clearSyncSettings()">Clear</button>
+      <button class="btn btn-outline" onclick="testSyncSettings()">Test</button>
+      <button class="btn btn-primary" onclick="saveSyncSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ══════════════════════════════════════════
 //  DATA
@@ -1039,6 +1096,13 @@ const STORE = {
   orgPartners:  'creed_org_partners_current',
   scripts:      'creed_scripts_current',
 };
+const SYNC_STORE = 'creed_sync_config_v1';
+const DEFAULT_SYNC_CONFIG = {
+  supabaseUrl: 'https://gvswzponusiabewsuped.supabase.co',
+  supabaseAnonKey: '',
+  supabaseTable: 'dashboard_state',
+  workspaceId: 'main',
+};
 
 const DEFAULT_TASKS = [
   { id:1,  title:'Create new Instagram account for Creed Bible App', category:'Instagram',        priority:'High',   done:false, due:'', notes:'Warm up for 3 days on Christian content before any branded posts.' },
@@ -1058,9 +1122,24 @@ const REMOTE_STATE_URL = '/api/state';
 let db = {};
 let sharedSyncAvailable = false;
 let syncTimer = null;
+let syncConfig = loadSyncConfig();
 function parseStore(key) {
   try { return JSON.parse(localStorage.getItem(key) || 'null'); }
   catch { return null; }
+}
+function sanitizeSyncConfig(config = {}) {
+  return {
+    supabaseUrl: (config.supabaseUrl || DEFAULT_SYNC_CONFIG.supabaseUrl || '').trim().replace(/\/+$/, ''),
+    supabaseAnonKey: (config.supabaseAnonKey || '').trim(),
+    supabaseTable: (config.supabaseTable || DEFAULT_SYNC_CONFIG.supabaseTable || 'dashboard_state').trim() || 'dashboard_state',
+    workspaceId: (config.workspaceId || DEFAULT_SYNC_CONFIG.workspaceId || 'main').trim() || 'main',
+  };
+}
+function loadSyncConfig() {
+  return sanitizeSyncConfig(parseStore(SYNC_STORE) || DEFAULT_SYNC_CONFIG);
+}
+function persistSyncConfig() {
+  localStorage.setItem(SYNC_STORE, JSON.stringify(syncConfig));
 }
 function deepClone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -1188,6 +1267,50 @@ function downloadTextFile(filename, content, mimeType = 'application/json') {
   link.remove();
   URL.revokeObjectURL(url);
 }
+function activeSyncProvider() {
+  if (syncConfig.supabaseUrl && syncConfig.supabaseAnonKey) return 'supabase';
+  if (hasSyncApi()) return 'server';
+  return 'local';
+}
+function syncStatusMeta() {
+  const provider = activeSyncProvider();
+  if (provider === 'supabase') {
+    return sharedSyncAvailable
+      ? { label: `Supabase: ${syncConfig.workspaceId}`, state: 'live' }
+      : { label: 'Supabase Pending', state: 'pending' };
+  }
+  if (provider === 'server') {
+    return sharedSyncAvailable
+      ? { label: 'Server Sync Live', state: 'live' }
+      : { label: 'Server Sync Pending', state: 'pending' };
+  }
+  return { label: 'Local Only', state: 'pending' };
+}
+function updateSyncStatus() {
+  const pill = document.getElementById('sync-pill');
+  if (!pill) return;
+  const meta = syncStatusMeta();
+  pill.textContent = meta.label;
+  pill.dataset.state = meta.state;
+}
+function fillSyncFields() {
+  document.getElementById('sync-url').value = syncConfig.supabaseUrl || '';
+  document.getElementById('sync-key').value = syncConfig.supabaseAnonKey || '';
+  document.getElementById('sync-table').value = syncConfig.supabaseTable || DEFAULT_SYNC_CONFIG.supabaseTable;
+  document.getElementById('sync-workspace').value = syncConfig.workspaceId || DEFAULT_SYNC_CONFIG.workspaceId;
+}
+function readSyncFields() {
+  return sanitizeSyncConfig({
+    supabaseUrl: document.getElementById('sync-url').value,
+    supabaseAnonKey: document.getElementById('sync-key').value,
+    supabaseTable: document.getElementById('sync-table').value,
+    workspaceId: document.getElementById('sync-workspace').value,
+  });
+}
+function openSyncModal() {
+  fillSyncFields();
+  document.getElementById('modal-sync').classList.add('active');
+}
 function applyDbState(state = {}) {
   const normalized = normalizeDbState(state);
   db.tasks = normalized.tasks;
@@ -1229,6 +1352,55 @@ async function importDashboardBackup(event) {
   } finally {
     input.value = '';
   }
+}
+async function applySyncConfigAndRefresh(nextConfig) {
+  syncConfig = sanitizeSyncConfig(nextConfig);
+  persistSyncConfig();
+  updateSyncStatus();
+
+  if (activeSyncProvider() === 'supabase') {
+    const remoteState = await fetchSupabaseState(syncConfig);
+    if (remoteState && !isRemoteStateEmpty(remoteState)) {
+      applyDbState(remoteState);
+      persistLocalState();
+      renderAll();
+      toast('Supabase sync connected.');
+    } else {
+      persistLocalState();
+      await pushSupabaseState(syncConfig, true);
+      renderAll();
+      toast('Supabase sync connected and seeded.');
+    }
+    return;
+  }
+
+  renderAll();
+  toast('Sync settings saved.');
+}
+async function saveSyncSettings() {
+  const nextConfig = readSyncFields();
+  await applySyncConfigAndRefresh(nextConfig);
+  closeModal('modal-sync');
+}
+async function testSyncSettings() {
+  const draft = readSyncFields();
+  if (!draft.supabaseUrl || !draft.supabaseAnonKey) {
+    toast('Add the Supabase URL and anon key first.', 'err');
+    return;
+  }
+  const state = await fetchSupabaseState(draft);
+  if (state === null) {
+    toast('Supabase test failed. Double-check the URL, anon key, and table setup.', 'err');
+    return;
+  }
+  toast('Supabase connection worked.');
+}
+async function clearSyncSettings() {
+  syncConfig = sanitizeSyncConfig({ ...DEFAULT_SYNC_CONFIG, supabaseAnonKey: '' });
+  persistSyncConfig();
+  fillSyncFields();
+  updateSyncStatus();
+  toast('Supabase sync cleared. This device is back to local-only mode.');
 }
 function migrateCreators() {
   const creators = parseStore(LEGACY_STORE.creators) || [];
@@ -1324,36 +1496,104 @@ function load() {
   db.scripts = (firstStored([STORE.scripts, 'creed_scripts_v1']) || []).map(normalizeScriptItem);
 }
 async function fetchSharedState() {
-  if (!hasSyncApi()) return null;
+  if (activeSyncProvider() === 'supabase') {
+    return fetchSupabaseState(syncConfig);
+  }
+  if (activeSyncProvider() === 'server') {
+    try {
+      const res = await fetch(REMOTE_STATE_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Shared load failed (${res.status})`);
+      sharedSyncAvailable = true;
+      updateSyncStatus();
+      return normalizeDbState(await res.json());
+    } catch (err) {
+      sharedSyncAvailable = false;
+      updateSyncStatus();
+      return null;
+    }
+  }
+  sharedSyncAvailable = false;
+  updateSyncStatus();
+  return null;
+}
+async function fetchSupabaseState(config) {
   try {
-    const res = await fetch(REMOTE_STATE_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Shared load failed (${res.status})`);
+    const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?workspace_id=eq.${encodeURIComponent(config.workspaceId)}&select=payload,updated_at`;
+    const res = await fetch(url, {
+      headers: {
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`,
+      },
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`Supabase load failed (${res.status})`);
+    const rows = await res.json();
     sharedSyncAvailable = true;
-    return normalizeDbState(await res.json());
+    updateSyncStatus();
+    return rows.length ? normalizeDbState(rows[0].payload || {}) : normalizeDbState({});
   } catch (err) {
     sharedSyncAvailable = false;
+    updateSyncStatus();
     return null;
   }
 }
 async function pushSharedState(showToastOnError = false) {
-  if (!hasSyncApi()) return false;
+  if (activeSyncProvider() === 'supabase') {
+    return pushSupabaseState(syncConfig, showToastOnError);
+  }
+  if (activeSyncProvider() === 'server') {
+    try {
+      const res = await fetch(REMOTE_STATE_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(snapshotDbState()),
+      });
+      if (!res.ok) throw new Error(`Shared save failed (${res.status})`);
+      sharedSyncAvailable = true;
+      updateSyncStatus();
+      return true;
+    } catch (err) {
+      sharedSyncAvailable = false;
+      updateSyncStatus();
+      if (showToastOnError) toast('Shared sync is offline. Your changes are still saved on this device.', 'warn');
+      return false;
+    }
+  }
+  sharedSyncAvailable = false;
+  updateSyncStatus();
+  return false;
+}
+async function pushSupabaseState(config, showToastOnError = false) {
   try {
-    const res = await fetch(REMOTE_STATE_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(snapshotDbState()),
+    const payload = {
+      workspace_id: config.workspaceId,
+      payload: snapshotDbState(),
+      updated_at: new Date().toISOString(),
+    };
+    const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?on_conflict=workspace_id`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`Shared save failed (${res.status})`);
+    if (!res.ok) throw new Error(`Supabase save failed (${res.status})`);
     sharedSyncAvailable = true;
+    updateSyncStatus();
     return true;
   } catch (err) {
     sharedSyncAvailable = false;
-    if (showToastOnError) toast('Shared sync is offline. Your changes are still saved on this device.', 'warn');
+    updateSyncStatus();
+    if (showToastOnError) toast('Supabase sync is offline. Your changes are still saved on this device.', 'warn');
     return false;
   }
 }
 function queueSharedSync() {
-  if (!hasSyncApi()) return;
+  if (activeSyncProvider() === 'local') return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
     pushSharedState();
@@ -1364,6 +1604,8 @@ function save(key) {
   queueSharedSync();
 }
 async function initDashboard() {
+  syncConfig = loadSyncConfig();
+  updateSyncStatus();
   load();
   const localSnapshot = deepClone(snapshotDbState());
   const remoteState = await fetchSharedState();
