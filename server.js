@@ -27,20 +27,27 @@ const PUBLIC_CONFIG = {
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
-const CREATOR_RESEARCH_SCHEMA = {
+const LEAD_RESEARCH_SCHEMA = {
   type: 'object',
   properties: {
     summary: { type: 'string' },
-    creators: {
+    leads: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
           name: { type: 'string' },
+          kind: { type: 'string' },
+          type: { type: 'string' },
           platform: { type: 'string' },
           followers: { type: 'string' },
           sizeBucket: { type: 'string' },
           contentStyle: { type: 'string' },
+          company: { type: 'string' },
+          title: { type: 'string' },
+          location: { type: 'string' },
+          members: { type: 'string' },
+          incentive: { type: 'string' },
           whyFit: { type: 'string' },
           engagementQuality: { type: 'string' },
           bestUseCase: { type: 'string' },
@@ -52,10 +59,17 @@ const CREATOR_RESEARCH_SCHEMA = {
         },
         required: [
           'name',
+          'kind',
+          'type',
           'platform',
           'followers',
           'sizeBucket',
           'contentStyle',
+          'company',
+          'title',
+          'location',
+          'members',
+          'incentive',
           'whyFit',
           'engagementQuality',
           'bestUseCase',
@@ -68,7 +82,7 @@ const CREATOR_RESEARCH_SCHEMA = {
       },
     },
   },
-  required: ['summary', 'creators'],
+  required: ['summary', 'leads'],
 };
 
 function sanitizeState(state = {}) {
@@ -148,18 +162,51 @@ function collectBody(req) {
   });
 }
 
-function buildCreatorResearchPrompt(options = {}) {
-  const platforms = Array.isArray(options.platforms) && options.platforms.length ? options.platforms : ['TikTok', 'Instagram'];
-  const sizeBuckets = Array.isArray(options.sizeBuckets) && options.sizeBuckets.length ? options.sizeBuckets : ['Small Creator', 'Medium Creator'];
+function buildLeadResearchPrompt(options = {}) {
+  const kind = ['creators', 'partners', 'orgPartners'].includes(options.kind) ? options.kind : 'creators';
+  const primary = Array.isArray(options.primary) && options.primary.length ? options.primary : (kind === 'creators' ? ['TikTok', 'Instagram'] : kind === 'partners' ? ['Artist', 'Brand'] : ['Church', 'Church Camp', 'Ministry']);
+  const secondary = Array.isArray(options.secondary) && options.secondary.length ? options.secondary : (kind === 'creators' ? ['Small Creator', 'Medium Creator'] : kind === 'partners' ? ['Christian music', 'premium Bible brands'] : ['churches', 'camps', 'ministries']);
   const limit = Math.min(Math.max(Number.parseInt(options.limit || 8, 10) || 8, 1), 20);
   const brief = String(options.brief || '').trim();
   const notes = String(options.notes || '').trim();
 
+  if (kind === 'partners') {
+    return [
+      'You are researching outreach leads for Creed, a Christian app.',
+      'Use Google Search grounding to find real Christian artists and premium Christian brands that could be strong partnership fits.',
+      `Target partner types: ${primary.join(', ')}.`,
+      `Focus areas: ${secondary.join(', ')}.`,
+      `Return up to ${limit} leads.`,
+      'Populate kind as either "Artist" or "Brand". Leave unrelated fields as empty strings.',
+      'Prioritize outreach-ready leads with clear websites, public profiles, or visible company/label context.',
+      'Suggested first outreach angles should stay short, warm, and suitable for a first message.',
+      'If a field cannot be verified, return an empty string instead of guessing.',
+      brief ? `Extra guidance: ${brief}` : '',
+      notes ? `Research notes: ${notes}` : '',
+    ].filter(Boolean).join('\n');
+  }
+
+  if (kind === 'orgPartners') {
+    return [
+      'You are researching church, camp, and ministry partnership leads for Creed, a Christian app.',
+      'Use Google Search grounding to find real organizations that could be strong church or community partnerships.',
+      `Target organization types: ${primary.join(', ')}.`,
+      `Focus areas: ${secondary.join(', ')}.`,
+      `Return up to ${limit} leads.`,
+      'Populate type as values like "Church", "Church Camp", "Ministry", or "Other". Leave unrelated fields as empty strings.',
+      'Members should be a rough public estimate only if it is reasonably inferable; otherwise return an empty string.',
+      'Suggested first outreach angles should feel suitable for a first outreach email or message.',
+      'If a field cannot be verified, return an empty string instead of guessing.',
+      brief ? `Extra guidance: ${brief}` : '',
+      notes ? `Research notes: ${notes}` : '',
+    ].filter(Boolean).join('\n');
+  }
+
   return [
     'You are researching Christian creators for Creed, a Christian app.',
     'Use Google Search grounding to find real creators and return only creators you can reasonably verify from public web results.',
-    `Target platforms: ${platforms.join(', ')}.`,
-    `Target size buckets: ${sizeBuckets.join(', ')}.`,
+    `Target platforms: ${primary.join(', ')}.`,
+    `Target size buckets: ${secondary.join(', ')}.`,
     `Return up to ${limit} creators.`,
     'Prioritize creators with strong speaking-style or direct-to-camera videos, clear Christian/devotional/inspirational fit, clean brand safety, and strong potential for paid ad creative or outreach partnerships.',
     'If a field cannot be verified, return an empty string instead of guessing.',
@@ -191,12 +238,12 @@ function extractGroundingSources(payload) {
   return [...unique.values()];
 }
 
-async function runCreatorResearch(options = {}) {
+async function runLeadResearch(options = {}) {
   const body = {
     contents: [
       {
         parts: [
-          { text: buildCreatorResearchPrompt(options) },
+          { text: buildLeadResearchPrompt(options) },
         ],
       },
     ],
@@ -205,7 +252,7 @@ async function runCreatorResearch(options = {}) {
     ],
     generationConfig: {
       responseMimeType: 'application/json',
-      responseJsonSchema: CREATOR_RESEARCH_SCHEMA,
+      responseJsonSchema: LEAD_RESEARCH_SCHEMA,
     },
   };
 
@@ -225,7 +272,7 @@ async function runCreatorResearch(options = {}) {
   }
 
   const rawText = getResponseText(payload);
-  if (!rawText) throw new Error('Gemini returned an empty creator research response.');
+  if (!rawText) throw new Error('Gemini returned an empty lead research response.');
 
   let parsed;
   try {
@@ -236,7 +283,7 @@ async function runCreatorResearch(options = {}) {
 
   return {
     summary: typeof parsed.summary === 'string' ? parsed.summary : '',
-    creators: Array.isArray(parsed.creators) ? parsed.creators : [],
+    leads: Array.isArray(parsed.leads) ? parsed.leads : [],
     sources: extractGroundingSources(payload),
     model: GEMINI_MODEL,
   };
@@ -271,7 +318,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && url.pathname === '/api/creator-research') {
+  if (req.method === 'POST' && (url.pathname === '/api/lead-research' || url.pathname === '/api/creator-research')) {
     if (!GEMINI_API_KEY) {
       sendJson(res, 400, { error: 'Gemini is not configured yet. Add GEMINI_API_KEY on the server first.' });
       return;
@@ -280,10 +327,10 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await collectBody(req);
       const options = JSON.parse(body || '{}');
-      const result = await runCreatorResearch(options);
+      const result = await runLeadResearch(options);
       sendJson(res, 200, result);
     } catch (err) {
-      sendJson(res, 502, { error: err.message || 'Unable to run Gemini creator research.' });
+      sendJson(res, 502, { error: err.message || 'Unable to run Gemini lead research.' });
     }
     return;
   }

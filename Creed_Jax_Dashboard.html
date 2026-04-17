@@ -549,7 +549,7 @@ tbody tr:last-child td { border-bottom: none; }
       <p>Track creator outreach and app creator partnerships in one place. Creator size is labeled automatically from follower count.</p>
     </div>
     <div class="import-actions">
-      <button class="btn btn-outline" onclick="openCreatorResearchModal()">Research with Gemini</button>
+      <button class="btn btn-outline" onclick="openLeadResearchModal('creators')">Research with Gemini</button>
       <button class="btn btn-outline" onclick="openCreatorImportModal()">Import AI Leads</button>
       <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
     </div>
@@ -582,7 +582,10 @@ tbody tr:last-child td { border-bottom: none; }
       <h2>🎵 Artists &amp; Brands</h2>
       <p>Combine artist and brand outreach in one tracker. Each record is labeled as an artist or brand when you add it.</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal('partners',-1)">+ Add Partner</button>
+    <div class="import-actions">
+      <button class="btn btn-outline" onclick="openLeadResearchModal('partners')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openModal('partners',-1)">+ Add Partner</button>
+    </div>
   </div>
   <div class="stats-row" id="stats-partners"></div>
   <div class="toolbar">
@@ -679,7 +682,10 @@ tbody tr:last-child td { border-bottom: none; }
       <h2>⛪ Partnerships</h2>
       <p>Track churches and church camps like Pine Cove or Sky Ranch for broader Creed partnerships and outreach.</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal('orgPartners',-1)">+ Add Partnership</button>
+    <div class="import-actions">
+      <button class="btn btn-outline" onclick="openLeadResearchModal('orgPartners')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openModal('orgPartners',-1)">+ Add Partnership</button>
+    </div>
   </div>
   <div class="stats-row" id="stats-orgPartners"></div>
   <div class="toolbar">
@@ -933,46 +939,46 @@ tbody tr:last-child td { border-bottom: none; }
 <div class="modal-overlay" id="modal-creator-research">
   <div class="modal">
     <div class="modal-header">
-      <h2>Research Creators with Gemini</h2>
+      <h2 id="lead-research-title">Research Creators with Gemini</h2>
       <button class="modal-close" onclick="closeModal('modal-creator-research')">&times;</button>
     </div>
     <div class="modal-body">
       <div class="form-row">
         <div class="form-group">
-          <label>Platforms</label>
+          <label id="lead-research-primary-label">Platforms</label>
           <input type="text" id="creator-research-platforms" value="TikTok, Instagram" placeholder="TikTok, Instagram">
         </div>
         <div class="form-group">
-          <label>Size Buckets</label>
+          <label id="lead-research-secondary-label">Size Buckets</label>
           <input type="text" id="creator-research-buckets" value="Small Creator, Medium Creator" placeholder="Small Creator, Medium Creator">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>How Many Leads</label>
+          <label id="lead-research-count-label">How Many Leads</label>
           <input type="number" id="creator-research-count" min="1" max="20" value="8">
         </div>
         <div class="form-group">
-          <label>Extra Guidance</label>
+          <label id="lead-research-brief-label">Extra Guidance</label>
           <input type="text" id="creator-research-brief" placeholder="Speaking-style, Christian inspirational, strong hooks…">
         </div>
       </div>
       <div class="form-group">
-        <label>What Gemini Should Look For</label>
+        <label id="lead-research-notes-label">What Gemini Should Look For</label>
         <textarea id="creator-research-notes" rows="4" placeholder="Find Christian creators who feel strong for paid ads, devotional videos, or outreach partnerships. Prefer clean brand fit, direct-to-camera presence, and good hooks."></textarea>
       </div>
       <div class="research-results" id="creator-research-results">
         <div class="empty-state">
           <div class="icon">Search</div>
-          <h3>Run research to review creator suggestions here.</h3>
-          <p>Gemini will search, summarize, and let you accept or deny each lead before it gets added.</p>
+          <h3 id="lead-research-empty-title">Run research to review creator suggestions here.</h3>
+          <p id="lead-research-empty-copy">Gemini will search, summarize, and let you accept or deny each lead before it gets added.</p>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="acceptAllCreatorResearchLeads()">Accept All</button>
+      <button class="btn btn-outline" onclick="acceptAllLeadResearchResults()">Accept All</button>
       <button class="btn btn-outline" onclick="closeModal('modal-creator-research')">Close</button>
-      <button class="btn btn-primary" id="creator-research-run" onclick="runCreatorResearch()">Run Research</button>
+      <button class="btn btn-primary" id="creator-research-run" onclick="runLeadResearch()">Run Research</button>
     </div>
   </div>
 </div>
@@ -1933,9 +1939,10 @@ function applyOutreachTemplate(str, record = {}) {
     .replace(/\{\{\s*contact\s*\}\}/gi, contact || fullName);
 }
 
-let creatorResearchResults = [];
-let creatorResearchSummary = '';
-let creatorResearchSources = [];
+let leadResearchContext = 'creators';
+let leadResearchResults = [];
+let leadResearchSummary = '';
+let leadResearchSources = [];
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -1985,6 +1992,47 @@ function normalizeImportedCreatorLead(record = {}) {
     notes: notesParts.join(' | '),
   });
 }
+function normalizeImportedPartnerLead(record = {}) {
+  const notesParts = [
+    record.whyFit ? `Why fit: ${record.whyFit}` : '',
+    record.engagementQuality ? `Engagement: ${record.engagementQuality}` : '',
+    record.bestUseCase ? `Use case: ${record.bestUseCase}` : '',
+    record.suggestedFirstOutreachAngle ? `Outreach angle: ${record.suggestedFirstOutreachAngle}` : '',
+    record.notes || '',
+  ].filter(Boolean);
+  return normalizePartnerItem({
+    kind: ['Artist', 'Brand'].includes(record.kind) ? record.kind : 'Brand',
+    name: record.name || '',
+    email: record.email || '',
+    company: record.company || '',
+    phone: record.phone || '',
+    title: record.title || '',
+    platform: record.platform || record.profileUrl || '',
+    status: normalizeStatus(record.status || 'Not Sent'),
+    date: record.lastContact || '',
+    adi: record.adi || 'No',
+    notes: notesParts.join(' | '),
+  });
+}
+function normalizeImportedOrgPartnerLead(record = {}) {
+  const notesParts = [
+    record.whyFit ? `Why fit: ${record.whyFit}` : '',
+    record.suggestedFirstOutreachAngle ? `Outreach angle: ${record.suggestedFirstOutreachAngle}` : '',
+    record.notes || '',
+  ].filter(Boolean);
+  return normalizeOrgPartnerItem({
+    name: record.name || record.organization || '',
+    type: record.type || 'Church',
+    location: record.location || '',
+    status: normalizeStatus(record.status || 'Not Sent'),
+    members: record.members || '',
+    date: record.lastContact || '',
+    incentive: record.incentive || '',
+    email: record.email || '',
+    phone: record.phone || '',
+    notes: notesParts.join(' | '),
+  });
+}
 function creatorLeadKey(record = {}) {
   return `${String(record.name || '').trim().toLowerCase()}|${String(record.platform || '').trim().toLowerCase()}`;
 }
@@ -2002,6 +2050,96 @@ function addCreatorLeads(rows = []) {
   if (added) save('creators');
   return added;
 }
+function partnerLeadKey(record = {}) {
+  return `${String(record.kind || '').trim().toLowerCase()}|${String(record.name || '').trim().toLowerCase()}|${String(record.company || '').trim().toLowerCase()}`;
+}
+function addPartnerLeads(rows = []) {
+  const existingKeys = new Set(db.partners.map(partnerLeadKey));
+  let added = 0;
+  rows.map(normalizeImportedPartnerLead).forEach(record => {
+    if (!record.name) return;
+    const key = partnerLeadKey(record);
+    if (existingKeys.has(key)) return;
+    existingKeys.add(key);
+    db.partners.push(record);
+    added += 1;
+  });
+  if (added) save('partners');
+  return added;
+}
+function orgPartnerLeadKey(record = {}) {
+  return `${String(record.type || '').trim().toLowerCase()}|${String(record.name || '').trim().toLowerCase()}|${String(record.location || '').trim().toLowerCase()}`;
+}
+function addOrgPartnerLeads(rows = []) {
+  const existingKeys = new Set(db.orgPartners.map(orgPartnerLeadKey));
+  let added = 0;
+  rows.map(normalizeImportedOrgPartnerLead).forEach(record => {
+    if (!record.name) return;
+    const key = orgPartnerLeadKey(record);
+    if (existingKeys.has(key)) return;
+    existingKeys.add(key);
+    db.orgPartners.push(record);
+    added += 1;
+  });
+  if (added) save('orgPartners');
+  return added;
+}
+const LEAD_RESEARCH_CONFIG = {
+  creators: {
+    title: 'Research Creators with Gemini',
+    primaryLabel: 'Platforms',
+    primaryDefault: 'TikTok, Instagram',
+    secondaryLabel: 'Size Buckets',
+    secondaryDefault: 'Small Creator, Medium Creator',
+    countDefault: 8,
+    briefPlaceholder: 'Speaking-style, Christian inspirational, strong hooks…',
+    notesLabel: 'What Gemini Should Look For',
+    notesDefault: 'Find Christian creators who feel strong for paid ads, devotional videos, or outreach partnerships. Prefer clean brand fit, direct-to-camera presence, and good hooks.',
+    emptyTitle: 'Run research to review creator suggestions here.',
+    emptyCopy: 'Gemini will search, summarize, and let you accept or deny each lead before it gets added.',
+    loadingTitle: 'Gemini is researching creators now.',
+    loadingCopy: 'This can take a few seconds while it searches and formats the leads.',
+    noun: 'creator',
+    addLeads: addCreatorLeads,
+    rerender: () => renderTable('creators'),
+  },
+  partners: {
+    title: 'Research Artists & Brands with Gemini',
+    primaryLabel: 'Partner Types',
+    primaryDefault: 'Artist, Brand',
+    secondaryLabel: 'Focus Areas',
+    secondaryDefault: 'Christian music, premium Bible brands, journals, apparel',
+    countDefault: 8,
+    briefPlaceholder: 'Worship artists, premium Christian brands, manager contacts…',
+    notesLabel: 'What Gemini Should Look For',
+    notesDefault: 'Find Christian artists and premium brands with strong partnership fit for Creed. Prioritize quality, clean brand alignment, and reachable contact or website information.',
+    emptyTitle: 'Run research to review artist and brand suggestions here.',
+    emptyCopy: 'Gemini will find artist and brand leads, then let you accept or deny each one before it lands in your dashboard.',
+    loadingTitle: 'Gemini is researching artists and brands now.',
+    loadingCopy: 'This can take a few seconds while it searches for outreach-ready leads.',
+    noun: 'lead',
+    addLeads: addPartnerLeads,
+    rerender: () => renderTable('partners'),
+  },
+  orgPartners: {
+    title: 'Research Churches & Camps with Gemini',
+    primaryLabel: 'Organization Types',
+    primaryDefault: 'Church, Church Camp, Ministry',
+    secondaryLabel: 'Focus Areas',
+    secondaryDefault: 'churches, camps, student ministries, young adult ministries',
+    countDefault: 8,
+    briefPlaceholder: 'Texas churches, Christian camps, ministry partnerships…',
+    notesLabel: 'What Gemini Should Look For',
+    notesDefault: 'Find churches, church camps, and ministries that could be a strong fit for Creed partnerships. Prefer groups with clear public websites, visible reach, and a plausible church or community activation angle.',
+    emptyTitle: 'Run research to review church and camp suggestions here.',
+    emptyCopy: 'Gemini will find partnership leads, then let you accept or deny each one before it gets saved.',
+    loadingTitle: 'Gemini is researching churches and camps now.',
+    loadingCopy: 'This can take a few seconds while it searches for partnership-ready organizations.',
+    noun: 'partnership',
+    addLeads: addOrgPartnerLeads,
+    rerender: () => renderTable('orgPartners'),
+  },
+};
 function openCreatorImportModal() {
   document.getElementById('creator-import-json').value = '';
   document.getElementById('modal-creator-import').classList.add('active');
@@ -2033,34 +2171,127 @@ function importCreatorLeads() {
   renderTable('creators');
   toast(`${added} creator lead${added === 1 ? '' : 's'} imported.`, 'ok');
 }
+function leadResearchConfig(kind = leadResearchContext) {
+  return LEAD_RESEARCH_CONFIG[kind] || LEAD_RESEARCH_CONFIG.creators;
+}
 function openCreatorResearchModal() {
-  creatorResearchResults = [];
-  creatorResearchSummary = '';
-  creatorResearchSources = [];
-  document.getElementById('creator-research-notes').value = document.getElementById('creator-research-notes').value
-    || 'Find Christian creators with strong speaking-style videos, good hooks, and clean brand fit for Creed.';
-  renderCreatorResearchResults();
+  openLeadResearchModal('creators');
+}
+function openLeadResearchModal(kind) {
+  const config = leadResearchConfig(kind);
+  leadResearchContext = kind;
+  leadResearchResults = [];
+  leadResearchSummary = '';
+  leadResearchSources = [];
+  document.getElementById('lead-research-title').textContent = config.title;
+  document.getElementById('lead-research-primary-label').textContent = config.primaryLabel;
+  document.getElementById('lead-research-secondary-label').textContent = config.secondaryLabel;
+  document.getElementById('lead-research-brief-label').textContent = 'Extra Guidance';
+  document.getElementById('lead-research-notes-label').textContent = config.notesLabel;
+  document.getElementById('lead-research-empty-title').textContent = config.emptyTitle;
+  document.getElementById('lead-research-empty-copy').textContent = config.emptyCopy;
+  document.getElementById('creator-research-platforms').value = config.primaryDefault;
+  document.getElementById('creator-research-platforms').placeholder = config.primaryDefault;
+  document.getElementById('creator-research-buckets').value = config.secondaryDefault;
+  document.getElementById('creator-research-buckets').placeholder = config.secondaryDefault;
+  document.getElementById('creator-research-count').value = String(config.countDefault);
+  document.getElementById('creator-research-brief').value = '';
+  document.getElementById('creator-research-brief').placeholder = config.briefPlaceholder;
+  document.getElementById('creator-research-notes').value = config.notesDefault;
+  document.getElementById('creator-research-notes').placeholder = config.notesDefault;
+  renderLeadResearchResults();
   document.getElementById('modal-creator-research').classList.add('active');
 }
-function renderCreatorResearchResults() {
+function renderLeadResearchCard(lead, idx) {
+  const link = lead.profileUrl || lead.website || lead.platformUrl || '';
+  if (leadResearchContext === 'partners') {
+    const chips = [lead.kind || 'Partner', lead.company || '', lead.title || '', lead.bestUseCase || 'Outreach'].filter(Boolean);
+    return `
+      <div class="research-card">
+        <div class="research-card-head">
+          <div>
+            <h4>${escapeHtml(lead.name || 'Unnamed Lead')}</h4>
+            <div class="research-meta">
+              ${chips.map(chip => `<span class="research-chip">${escapeHtml(chip)}</span>`).join('')}
+            </div>
+          </div>
+          ${link ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open Link</a>` : ''}
+        </div>
+        <p><strong>Company / Label:</strong> ${escapeHtml(lead.company || 'Not provided')}</p>
+        <p><strong>Why fit:</strong> ${escapeHtml(lead.whyFit || 'No fit note provided yet.')}</p>
+        <p><strong>Outreach angle:</strong> ${escapeHtml(lead.suggestedFirstOutreachAngle || 'No outreach angle yet.')}</p>
+        <div class="research-card-actions">
+          <button class="btn btn-primary btn-sm" onclick="acceptLeadResearchResult(${idx})">Accept</button>
+          <button class="btn btn-outline btn-sm" onclick="denyLeadResearchResult(${idx})">Deny</button>
+        </div>
+      </div>
+    `;
+  }
+  if (leadResearchContext === 'orgPartners') {
+    const chips = [lead.type || 'Organization', lead.location || '', lead.members ? `${lead.members} reach` : '', lead.bestUseCase || 'Partnership'].filter(Boolean);
+    return `
+      <div class="research-card">
+        <div class="research-card-head">
+          <div>
+            <h4>${escapeHtml(lead.name || 'Unnamed Organization')}</h4>
+            <div class="research-meta">
+              ${chips.map(chip => `<span class="research-chip">${escapeHtml(chip)}</span>`).join('')}
+            </div>
+          </div>
+          ${link ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open Link</a>` : ''}
+        </div>
+        <p><strong>Location:</strong> ${escapeHtml(lead.location || 'Not provided')}</p>
+        <p><strong>Why fit:</strong> ${escapeHtml(lead.whyFit || 'No fit note provided yet.')}</p>
+        <p><strong>Outreach angle:</strong> ${escapeHtml(lead.suggestedFirstOutreachAngle || 'No outreach angle yet.')}</p>
+        <div class="research-card-actions">
+          <button class="btn btn-primary btn-sm" onclick="acceptLeadResearchResult(${idx})">Accept</button>
+          <button class="btn btn-outline btn-sm" onclick="denyLeadResearchResult(${idx})">Deny</button>
+        </div>
+      </div>
+    `;
+  }
+  const creatorChips = [lead.platform || 'Unknown Platform', lead.followers || 'Followers N/A', lead.sizeBucket || creatorTier(lead.followers) || 'Unbucketed', lead.bestUseCase || 'General fit'].filter(Boolean);
+  return `
+    <div class="research-card">
+      <div class="research-card-head">
+        <div>
+          <h4>${escapeHtml(lead.name || 'Unnamed Creator')}</h4>
+          <div class="research-meta">
+            ${creatorChips.map(chip => `<span class="research-chip">${escapeHtml(chip)}</span>`).join('')}
+          </div>
+        </div>
+        ${link ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">View Profile</a>` : ''}
+      </div>
+      <p><strong>Style:</strong> ${escapeHtml(lead.contentStyle || lead.style || 'Not provided')}</p>
+      <p><strong>Why fit:</strong> ${escapeHtml(lead.whyFit || 'No fit note provided yet.')}</p>
+      <p><strong>Outreach angle:</strong> ${escapeHtml(lead.suggestedFirstOutreachAngle || 'No outreach angle yet.')}</p>
+      <div class="research-card-actions">
+        <button class="btn btn-primary btn-sm" onclick="acceptLeadResearchResult(${idx})">Accept</button>
+        <button class="btn btn-outline btn-sm" onclick="denyLeadResearchResult(${idx})">Deny</button>
+      </div>
+    </div>
+  `;
+}
+function renderLeadResearchResults() {
   const wrap = document.getElementById('creator-research-results');
+  const config = leadResearchConfig();
   if (!wrap) return;
 
-  if (!creatorResearchResults.length) {
+  if (!leadResearchResults.length) {
     wrap.innerHTML = `
       <div class="empty-state">
         <div class="icon">Search</div>
-        <h3>${creatorResearchSummary ? 'No pending suggestions left.' : 'Run research to review creator suggestions here.'}</h3>
-        <p>${creatorResearchSummary ? escapeHtml(creatorResearchSummary) : 'Gemini will search, summarize, and let you accept or deny each lead before it gets added.'}</p>
+        <h3>${leadResearchSummary ? 'No pending suggestions left.' : escapeHtml(config.emptyTitle)}</h3>
+        <p>${leadResearchSummary ? escapeHtml(leadResearchSummary) : escapeHtml(config.emptyCopy)}</p>
       </div>
     `;
     return;
   }
 
-  const sourcesHtml = creatorResearchSources.length
+  const sourcesHtml = leadResearchSources.length
     ? `
       <div class="source-list">
-        ${creatorResearchSources.map((source, idx) => `
+        ${leadResearchSources.map((source, idx) => `
           <div class="source-item">
             <span>${idx + 1}.</span>
             <a href="${escapeHtml(source.uri || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title || source.uri || 'Source')}</a>
@@ -2071,38 +2302,18 @@ function renderCreatorResearchResults() {
     : '';
 
   wrap.innerHTML = `
-    ${creatorResearchSummary ? `<div class="import-helper">${escapeHtml(creatorResearchSummary)}</div>` : ''}
+    ${leadResearchSummary ? `<div class="import-helper">${escapeHtml(leadResearchSummary)}</div>` : ''}
     ${sourcesHtml}
-    ${creatorResearchResults.map((lead, idx) => `
-      <div class="research-card">
-        <div class="research-card-head">
-          <div>
-            <h4>${escapeHtml(lead.name || 'Unnamed Creator')}</h4>
-            <div class="research-meta">
-              <span class="research-chip">${escapeHtml(lead.platform || 'Unknown Platform')}</span>
-              <span class="research-chip">${escapeHtml(lead.followers || 'Followers N/A')}</span>
-              <span class="research-chip">${escapeHtml(lead.sizeBucket || creatorTier(lead.followers) || 'Unbucketed')}</span>
-              <span class="research-chip">${escapeHtml(lead.bestUseCase || 'General fit')}</span>
-            </div>
-          </div>
-          ${lead.profileUrl ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(lead.profileUrl)}" target="_blank" rel="noopener noreferrer">View Profile</a>` : ''}
-        </div>
-        <p><strong>Style:</strong> ${escapeHtml(lead.contentStyle || lead.style || 'Not provided')}</p>
-        <p><strong>Why fit:</strong> ${escapeHtml(lead.whyFit || 'No fit note provided yet.')}</p>
-        <p><strong>Outreach angle:</strong> ${escapeHtml(lead.suggestedFirstOutreachAngle || 'No outreach angle yet.')}</p>
-        <div class="research-card-actions">
-          <button class="btn btn-primary btn-sm" onclick="acceptCreatorResearchLead(${idx})">Accept</button>
-          <button class="btn btn-outline btn-sm" onclick="denyCreatorResearchLead(${idx})">Deny</button>
-        </div>
-      </div>
-    `).join('')}
+    ${leadResearchResults.map((lead, idx) => renderLeadResearchCard(lead, idx)).join('')}
   `;
 }
-async function runCreatorResearch() {
+async function runLeadResearch() {
+  const config = leadResearchConfig();
   const runBtn = document.getElementById('creator-research-run');
   const payload = {
-    platforms: document.getElementById('creator-research-platforms').value.split(',').map(v => v.trim()).filter(Boolean),
-    sizeBuckets: document.getElementById('creator-research-buckets').value.split(',').map(v => v.trim()).filter(Boolean),
+    kind: leadResearchContext,
+    primary: document.getElementById('creator-research-platforms').value.split(',').map(v => v.trim()).filter(Boolean),
+    secondary: document.getElementById('creator-research-buckets').value.split(',').map(v => v.trim()).filter(Boolean),
     limit: Number.parseInt(document.getElementById('creator-research-count').value, 10) || 8,
     brief: document.getElementById('creator-research-brief').value.trim(),
     notes: document.getElementById('creator-research-notes').value.trim(),
@@ -2113,13 +2324,13 @@ async function runCreatorResearch() {
   document.getElementById('creator-research-results').innerHTML = `
     <div class="empty-state">
       <div class="icon">…</div>
-      <h3>Gemini is researching creators now.</h3>
-      <p>This can take a few seconds while it searches and formats the leads.</p>
+      <h3>${escapeHtml(config.loadingTitle)}</h3>
+      <p>${escapeHtml(config.loadingCopy)}</p>
     </div>
   `;
 
   try {
-    const response = await fetch('/api/creator-research', {
+    const response = await fetch('/api/lead-research', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -2127,44 +2338,46 @@ async function runCreatorResearch() {
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || 'Gemini research failed.');
 
-    creatorResearchResults = Array.isArray(result.creators) ? result.creators : [];
-    creatorResearchSummary = String(result.summary || '').trim();
-    creatorResearchSources = Array.isArray(result.sources) ? result.sources : [];
-    renderCreatorResearchResults();
-    toast(`Gemini found ${creatorResearchResults.length} creator suggestion${creatorResearchResults.length === 1 ? '' : 's'}.`, 'ok');
+    leadResearchResults = Array.isArray(result.leads) ? result.leads : [];
+    leadResearchSummary = String(result.summary || '').trim();
+    leadResearchSources = Array.isArray(result.sources) ? result.sources : [];
+    renderLeadResearchResults();
+    toast(`Gemini found ${leadResearchResults.length} ${config.noun} suggestion${leadResearchResults.length === 1 ? '' : 's'}.`, 'ok');
   } catch (err) {
-    creatorResearchResults = [];
-    creatorResearchSummary = '';
-    creatorResearchSources = [];
-    renderCreatorResearchResults();
+    leadResearchResults = [];
+    leadResearchSummary = '';
+    leadResearchSources = [];
+    renderLeadResearchResults();
     toast(err.message || 'Gemini research failed.', 'err');
   } finally {
     runBtn.disabled = false;
     runBtn.textContent = 'Run Research';
   }
 }
-function acceptCreatorResearchLead(idx) {
-  const [lead] = creatorResearchResults.splice(idx, 1);
+function acceptLeadResearchResult(idx) {
+  const config = leadResearchConfig();
+  const [lead] = leadResearchResults.splice(idx, 1);
   if (!lead) return;
-  const added = addCreatorLeads([lead]);
-  renderCreatorResearchResults();
-  renderTable('creators');
-  toast(added ? `${lead.name || 'Creator'} added to your tracker.` : 'That creator is already in your tracker.', added ? 'ok' : 'err');
+  const added = config.addLeads([lead]);
+  renderLeadResearchResults();
+  config.rerender();
+  toast(added ? `${lead.name || config.noun} added to your tracker.` : 'That lead is already in your tracker.', added ? 'ok' : 'err');
 }
-function denyCreatorResearchLead(idx) {
-  creatorResearchResults.splice(idx, 1);
-  renderCreatorResearchResults();
+function denyLeadResearchResult(idx) {
+  leadResearchResults.splice(idx, 1);
+  renderLeadResearchResults();
 }
-function acceptAllCreatorResearchLeads() {
-  if (!creatorResearchResults.length) {
-    toast('There are no pending creator suggestions to add yet.', 'err');
+function acceptAllLeadResearchResults() {
+  const config = leadResearchConfig();
+  if (!leadResearchResults.length) {
+    toast('There are no pending suggestions to add yet.', 'err');
     return;
   }
-  const added = addCreatorLeads(creatorResearchResults);
-  creatorResearchResults = [];
-  renderCreatorResearchResults();
-  renderTable('creators');
-  toast(added ? `${added} creator suggestion${added === 1 ? '' : 's'} added.` : 'Those creators were already in your tracker.', added ? 'ok' : 'err');
+  const added = config.addLeads(leadResearchResults);
+  leadResearchResults = [];
+  renderLeadResearchResults();
+  config.rerender();
+  toast(added ? `${added} ${config.noun} suggestion${added === 1 ? '' : 's'} added.` : 'Those leads were already in your tracker.', added ? 'ok' : 'err');
 }
 
 
