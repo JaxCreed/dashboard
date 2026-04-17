@@ -78,12 +78,22 @@ body {
 
 /* ── Toolbar ── */
 .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-.header-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.header-tools .btn { background: rgba(255,255,255,0.9); }
+.header-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.header-tools .btn {
+  background: rgba(255,255,255,0.9);
+  padding: 8px 12px;
+  min-height: 34px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 10px 24px rgba(20, 54, 103, 0.08);
+}
 .header-tools .btn:hover { background: #fff; }
 .sync-pill {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  min-height: 34px;
   color: var(--primary-dark); background: rgba(255,255,255,0.9); border: 1px solid rgba(126,163,224,0.38);
 }
 .sync-pill::before {
