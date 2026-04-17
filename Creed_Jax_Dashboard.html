@@ -106,6 +106,17 @@ body {
   font-size: 12px; color: #6781a3; line-height: 1.55; background: #f6f9ff;
   border: 1px solid #dbe7fb; border-radius: 12px; padding: 12px 14px; margin-top: 8px;
 }
+.import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.import-helper {
+  margin-top: 10px; padding: 12px 14px; border-radius: 14px;
+  background: linear-gradient(180deg, #f8fbff, #eef5ff); border: 1px solid #d8e5fb;
+  font-size: 12px; color: #5f7697; line-height: 1.55;
+}
+.import-helper pre {
+  margin-top: 10px; padding: 12px; border-radius: 12px;
+  background: #0f1b2f; color: #dbe9ff; font-size: 11px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
 .search-box {
   flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #d2e0fb;
   border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
@@ -468,7 +479,10 @@ tbody tr:last-child td { border-bottom: none; }
       <h2>📱 Creator Outreach</h2>
       <p>Track creator outreach and app creator partnerships in one place. Creator size is labeled automatically from follower count.</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
+    <div class="import-actions">
+      <button class="btn btn-outline" onclick="openCreatorImportModal()">Import AI Leads</button>
+      <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
+    </div>
   </div>
   <div class="stats-row" id="stats-creators"></div>
   <div class="toolbar">
@@ -804,6 +818,44 @@ tbody tr:last-child td { border-bottom: none; }
       <button class="btn btn-danger btn-sm" id="creator-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('creator')">Delete</button>
       <button class="btn btn-outline" onclick="closeModal('modal-creator')">Cancel</button>
       <button class="btn btn-primary" onclick="saveRec('creator')">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-creator-import">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Import AI Creator Leads</h2>
+      <button class="modal-close" onclick="closeModal('modal-creator-import')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Paste AI JSON</label>
+        <textarea id="creator-import-json" rows="12" placeholder='Paste a JSON array of creators here'></textarea>
+      </div>
+      <div class="import-helper">
+        Ask ChatGPT or Claude to return a JSON array using these fields:
+        <pre>[
+  {
+    "name": "@creatorhandle",
+    "platform": "TikTok",
+    "followers": "18,500",
+    "sizeBucket": "Small Creator",
+    "contentStyle": "Christian inspirational speaking videos",
+    "whyFit": "Strong direct-to-camera presence and clean Christian brand fit",
+    "engagementQuality": "High",
+    "bestUseCase": "paid ad creator",
+    "suggestedFirstOutreachAngle": "Loved your speaking-style content and think you'd be strong for paid UGC",
+    "profileUrl": "https://www.tiktok.com/@creatorhandle",
+    "email": "",
+    "phone": ""
+  }
+]</pre>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('creator-import-json').value=''">Clear</button>
+      <button class="btn btn-primary" onclick="importCreatorLeads()">Import Leads</button>
     </div>
   </div>
 </div>
@@ -1762,6 +1814,88 @@ function applyOutreachTemplate(str, record = {}) {
     .replace(/\{\{\s*firstName\s*\}\}/gi, firstName)
     .replace(/\{\{\s*company\s*\}\}/gi, company)
     .replace(/\{\{\s*contact\s*\}\}/gi, contact || fullName);
+}
+
+function stripCodeFence(text) {
+  return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+}
+function guessPlatformFromUrl(url = '') {
+  const value = String(url || '').toLowerCase();
+  if (value.includes('tiktok.com')) return 'TikTok';
+  if (value.includes('instagram.com')) return 'Instagram';
+  if (value.includes('youtube.com') || value.includes('youtu.be')) return 'YouTube';
+  return '';
+}
+function normalizeImportedCreatorLead(record = {}) {
+  const url = record.profileUrl || record.url || record.link || '';
+  const platform = record.platform || guessPlatformFromUrl(url) || 'TikTok';
+  const followers = String(record.followers || record.followerCount || record.estimatedFollowerCount || '').trim();
+  const style = String(record.contentStyle || record.style || record.content_type || '').trim();
+  const notesParts = [
+    record.sizeBucket ? `Size: ${record.sizeBucket}` : '',
+    record.whyFit ? `Why fit: ${record.whyFit}` : '',
+    record.engagementQuality ? `Engagement: ${record.engagementQuality}` : '',
+    record.bestUseCase ? `Use case: ${record.bestUseCase}` : '',
+    record.suggestedFirstOutreachAngle ? `Outreach angle: ${record.suggestedFirstOutreachAngle}` : '',
+    record.notes || '',
+  ].filter(Boolean);
+  return normalizeCreatorItem({
+    name: record.name || record.handle || record.creator || '',
+    platform,
+    followers,
+    style,
+    email: record.email || '',
+    phone: record.phone || '',
+    status: normalizeStatus(record.status || 'Not Sent'),
+    offer: record.offer || '',
+    payout: record.payout || '',
+    code: record.code || '',
+    vids: record.targetVideos || record.videosPerWeek || '',
+    date: record.lastContact || '',
+    url,
+    notes: notesParts.join(' | '),
+  });
+}
+function openCreatorImportModal() {
+  document.getElementById('creator-import-json').value = '';
+  document.getElementById('modal-creator-import').classList.add('active');
+}
+function importCreatorLeads() {
+  const raw = stripCodeFence(document.getElementById('creator-import-json').value);
+  if (!raw) {
+    toast('Paste the AI creator JSON first.', 'err');
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    toast('That import is not valid JSON yet.', 'err');
+    return;
+  }
+  const rows = Array.isArray(parsed) ? parsed : Array.isArray(parsed.creators) ? parsed.creators : [];
+  if (!rows.length) {
+    toast('No creator rows were found in that JSON.', 'err');
+    return;
+  }
+  const existingKeys = new Set(db.creators.map(c => `${String(c.name || '').trim().toLowerCase()}|${String(c.platform || '').trim().toLowerCase()}`));
+  let added = 0;
+  rows.map(normalizeImportedCreatorLead).forEach(record => {
+    if (!record.name) return;
+    const key = `${String(record.name).trim().toLowerCase()}|${String(record.platform || '').trim().toLowerCase()}`;
+    if (existingKeys.has(key)) return;
+    existingKeys.add(key);
+    db.creators.push(record);
+    added += 1;
+  });
+  if (!added) {
+    toast('Those creator leads were already in your tracker.', 'err');
+    return;
+  }
+  save('creators');
+  closeModal('modal-creator-import');
+  renderTable('creators');
+  toast(`${added} creator lead${added === 1 ? '' : 's'} imported.`, 'ok');
 }
 
 
