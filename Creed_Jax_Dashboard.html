@@ -550,7 +550,6 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
     <div class="import-actions">
       <button class="btn btn-outline" onclick="openLeadResearchModal('creators')">Research with Gemini</button>
-      <button class="btn btn-outline" onclick="openCreatorImportModal()">Import AI Leads</button>
       <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
     </div>
   </div>
@@ -977,6 +976,7 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="acceptAllLeadResearchResults()">Accept All</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-creator-research'); openCreatorImportModal()">Paste AI Results</button>
       <button class="btn btn-outline" onclick="closeModal('modal-creator-research')">Close</button>
       <button class="btn btn-primary" id="creator-research-run" onclick="runLeadResearch()">Run Research</button>
     </div>
