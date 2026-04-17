@@ -217,11 +217,40 @@ function buildLeadResearchPrompt(options = {}) {
   ].filter(Boolean).join('\n');
 }
 
+function buildJsonFormatHint() {
+  return [
+    'Return valid JSON only.',
+    'Do not use markdown fences.',
+    'Use exactly this top-level shape:',
+    '{"summary":"string","leads":[{"name":"","kind":"","type":"","platform":"","followers":"","sizeBucket":"","contentStyle":"","company":"","title":"","location":"","members":"","incentive":"","whyFit":"","engagementQuality":"","bestUseCase":"","suggestedFirstOutreachAngle":"","profileUrl":"","email":"","phone":"","notes":""}]}',
+  ].join('\n');
+}
+
 function getResponseText(payload) {
   return payload?.candidates?.[0]?.content?.parts
     ?.map(part => part?.text || '')
     .join('')
     .trim() || '';
+}
+
+function extractJsonObject(text) {
+  const raw = String(text || '').trim();
+  if (!raw) throw new Error('Gemini returned an empty lead research response.');
+
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (fenceMatch) return fenceMatch[1].trim();
+
+  const firstBrace = raw.indexOf('{');
+  const lastBrace = raw.lastIndexOf('}');
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return raw.slice(firstBrace, lastBrace + 1).trim();
+  }
+
+  return raw;
+}
+
+function supportsStructuredToolJson(modelName = '') {
+  return /^gemini-3/i.test(String(modelName || '').trim());
 }
 
 function extractGroundingSources(payload) {
@@ -239,22 +268,26 @@ function extractGroundingSources(payload) {
 }
 
 async function runLeadResearch(options = {}) {
+  const useStructuredToolJson = supportsStructuredToolJson(GEMINI_MODEL);
   const body = {
     contents: [
       {
         parts: [
-          { text: buildLeadResearchPrompt(options) },
+          { text: [buildLeadResearchPrompt(options), !useStructuredToolJson ? buildJsonFormatHint() : ''].filter(Boolean).join('\n\n') },
         ],
       },
     ],
     tools: [
       { google_search: {} },
     ],
-    generationConfig: {
+  };
+
+  if (useStructuredToolJson) {
+    body.generationConfig = {
       responseMimeType: 'application/json',
       responseJsonSchema: LEAD_RESEARCH_SCHEMA,
-    },
-  };
+    };
+  }
 
   const response = await fetch(GEMINI_API_URL, {
     method: 'POST',
@@ -276,7 +309,7 @@ async function runLeadResearch(options = {}) {
 
   let parsed;
   try {
-    parsed = JSON.parse(rawText);
+    parsed = JSON.parse(useStructuredToolJson ? rawText : extractJsonObject(rawText));
   } catch (err) {
     throw new Error('Gemini returned research, but it was not valid JSON.');
   }
