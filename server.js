@@ -25,7 +25,7 @@ const PUBLIC_CONFIG = {
   workspaceId: process.env.SUPABASE_WORKSPACE_ID || 'main',
 };
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
 const LEAD_RESEARCH_SCHEMA = {
   type: 'object',
