@@ -487,7 +487,6 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
   <div class="header-tools">
     <span class="sync-pill" id="sync-pill" data-state="pending">Local Only</span>
-    <button class="btn btn-outline" onclick="openSyncModal()">Sync Settings</button>
     <button class="btn btn-outline" onclick="exportDashboardBackup()">Export Backup</button>
     <button class="btn btn-outline" onclick="document.getElementById('backup-import').click()">Import Backup</button>
     <input type="file" id="backup-import" accept="application/json" style="display:none" onchange="importDashboardBackup(event)">
