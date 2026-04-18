@@ -266,6 +266,12 @@ tbody tr:last-child td { border-bottom: none; }
   display: inline-block; width: 12px; height: 12px; border-radius: 999px;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 3px rgba(26,26,46,0.08);
 }
+.status-text {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5373a6;
+}
 .status-initial  { background: #3B82F6; }
 .status-pending  { background: #F59E0B; }
 .status-active   { background: #22C55E; }
@@ -1928,6 +1934,9 @@ function scriptUseBadge(val) {
 }
 function statusDot(val) {
   const status = normalizeStatus(val);
+  if (status === 'Not Sent') {
+    return `<span class="status-text" title="${status}" aria-label="${status}">${status}</span>`;
+  }
   const clsMap = {
     'Not Sent': 'status-initial',
     Pending: 'status-pending',
