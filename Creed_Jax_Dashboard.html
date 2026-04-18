@@ -241,9 +241,9 @@ tbody tr:last-child td { border-bottom: none; }
 .badge-high   { background: #F4CCCC; color: #9C0006; }
 .badge-medium { background: #FFD9B3; color: #B85C00; }
 .badge-low    { background: #FFF1A8; color: #8A6A00; }
-.badge-notsent { background: #E8F1FF; color: #1E4E8C; }
+.badge-initial { background: #E8F1FF; color: #1E4E8C; }
 .badge-pending { background: #FFF4CC; color: #9C6500; }
-.badge-active  { background: #E3F6EC; color: #1F7A4D; }
+.badge-accepted  { background: #E3F6EC; color: #1F7A4D; }
 .badge-declined { background: #FDE2E4; color: #B42318; }
 .badge-small  { background: #E8F1FF; color: #1E4E8C; }
 .badge-mediumcreator { background: #FFF4CC; color: #9C6500; }
@@ -274,7 +274,7 @@ tbody tr:last-child td { border-bottom: none; }
 }
 .status-initial  { background: #3B82F6; }
 .status-pending  { background: #F59E0B; }
-.status-active   { background: #22C55E; }
+.status-accepted { background: #22C55E; }
 .status-declined { background: #EF4444; }
 
 /* ── Modals ── */
@@ -567,7 +567,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-creators" placeholder="Search name, style, notes…" oninput="renderTable('creators')">
     <select class="btn btn-outline" id="flt-creators-status" onchange="renderTable('creators')">
       <option value="">Status: All</option>
-      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+      <option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option>
     </select>
   </div>
   <div class="table-container">
@@ -600,7 +600,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-partners" placeholder="Search name, phone, email, notes…" oninput="renderTable('partners')">
     <select class="btn btn-outline" id="flt-partners-status" onchange="renderTable('partners')">
       <option value="">Status: All</option>
-      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+      <option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option>
     </select>
   </div>
   <div class="table-container">
@@ -630,7 +630,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-merch" placeholder="Search brand, contact, notes…" oninput="renderTable('merch')">
     <select class="btn btn-outline" id="flt-merch-status" onchange="renderTable('merch')">
       <option value="">Status: All</option>
-      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+      <option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option>
     </select>
     <select class="btn btn-outline" id="flt-merch-type" onchange="renderTable('merch')">
       <option value="">Type: All</option>
@@ -665,7 +665,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-appCreators" placeholder="Search creator, platform, notes…" oninput="renderTable('appCreators')">
     <select class="btn btn-outline" id="flt-appCreators-status" onchange="renderTable('appCreators')">
       <option value="">Status: All</option>
-      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+      <option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option>
     </select>
   </div>
   <div class="table-container">
@@ -698,7 +698,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-orgPartners" placeholder="Search partner, email, phone, location, notes…" oninput="renderTable('orgPartners')">
     <select class="btn btn-outline" id="flt-orgPartners-status" onchange="renderTable('orgPartners')">
       <option value="">Status: All</option>
-      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
+      <option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option>
     </select>
   </div>
   <div class="table-container">
@@ -877,7 +877,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="form-row">
         <div class="form-group"><label>Status</label>
-          <select id="cr-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+          <select id="cr-status"><option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option></select>
         </div>
         <div class="form-group"><label>Offer ($/video)</label><input type="number" id="cr-offer" placeholder="15" min="0"></div>
       </div>
@@ -1023,7 +1023,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="form-row">
         <div class="form-group"><label>Status</label>
-          <select id="pa-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+          <select id="pa-status"><option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option></select>
         </div>
         <div class="form-group"><label>Last Contact</label><input type="date" id="pa-date"></div>
       </div>
@@ -1064,7 +1064,7 @@ tbody tr:last-child td { border-bottom: none; }
           <select id="me-type"><option>Bible Study</option><option>Journal</option><option>Clothing</option><option>Rosary / Jewelry</option><option>Books</option><option>Other</option></select>
         </div>
         <div class="form-group"><label>Status</label>
-          <select id="me-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+          <select id="me-status"><option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option></select>
         </div>
       </div>
       <div class="form-row">
@@ -1105,7 +1105,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="form-row">
         <div class="form-group"><label>Status</label>
-          <select id="ac-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+          <select id="ac-status"><option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option></select>
         </div>
         <div class="form-group"><label>Creator Code</label><input type="text" id="ac-code" placeholder="Assigned referral code"></div>
       </div>
@@ -1141,7 +1141,7 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="form-row">
         <div class="form-group"><label>Location</label><input type="text" id="op-location" placeholder="e.g. Dallas, TX"></div>
         <div class="form-group"><label>Status</label>
-          <select id="op-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
+          <select id="op-status"><option>Initial Reach</option><option>Pending</option><option>Accepted</option><option>Declined</option></select>
         </div>
       </div>
       <div class="form-row">
@@ -1399,12 +1399,12 @@ function normalizeTaskCategory(val) {
   return val || 'Other';
 }
 function normalizeStatus(val) {
-  if (!val) return 'Not Sent';
-  if (['Active', 'Agreed'].includes(val)) return 'Active';
+  if (!val) return 'Initial Reach';
+  if (['Accepted', 'Active', 'Agreed'].includes(val)) return 'Accepted';
   if (['Declined', 'Inactive'].includes(val)) return 'Declined';
   if (['Interested', 'In Talks', 'Contract Sent', 'Replied', 'Invited', 'Pending', 'DM Sent', 'Reached Out', 'Initial Reach'].includes(val)) return 'Pending';
-  if (['Not Sent', 'Not Contacted', 'Prospect'].includes(val)) return 'Not Sent';
-  return 'Not Sent';
+  if (['Not Sent', 'Not Contacted', 'Prospect'].includes(val)) return 'Initial Reach';
+  return 'Initial Reach';
 }
 function normalizeScriptLabel(val) {
   return ['Creator', 'Brands', 'Partnerships'].includes(val) ? val : 'Creator';
@@ -1869,15 +1869,15 @@ function switchTab(tab) {
 //  BADGES
 // ══════════════════════════════════════════
 const STATUS_CLS = {
-  'Not Sent':'badge-notsent',
+  'Initial Reach':'badge-initial',
   'Pending':'badge-pending',
-  'Active':'badge-active',
+  'Accepted':'badge-accepted',
   'Declined':'badge-declined',
 };
 function badge(val) {
   if (!val) return '—';
   const status = normalizeStatus(val);
-  return `<span class="badge ${STATUS_CLS[status]||'badge-notsent'}">${status}</span>`;
+  return `<span class="badge ${STATUS_CLS[status]||'badge-initial'}">${status}</span>`;
 }
 function priBadge(p) {
   const c = p==='High'?'badge-high':p==='Medium'?'badge-medium':'badge-low';
@@ -1934,13 +1934,10 @@ function scriptUseBadge(val) {
 }
 function statusDot(val) {
   const status = normalizeStatus(val);
-  if (status === 'Not Sent') {
-    return `<span class="status-text" title="${status}" aria-label="${status}">${status}</span>`;
-  }
   const clsMap = {
-    'Not Sent': 'status-initial',
+    'Initial Reach': 'status-initial',
     Pending: 'status-pending',
-    Active: 'status-active',
+    Accepted: 'status-accepted',
     Declined: 'status-declined',
   };
   return `<span class="status-dot ${clsMap[status] || 'status-initial'}" title="${status}" aria-label="${status}"></span>`;
@@ -2008,7 +2005,7 @@ function normalizeImportedCreatorLead(record = {}) {
     style,
     email: record.email || '',
     phone: record.phone || '',
-    status: normalizeStatus(record.status || 'Not Sent'),
+    status: normalizeStatus(record.status || 'Initial Reach'),
     offer: record.offer || '',
     payout: record.payout || '',
     code: record.code || '',
@@ -2035,7 +2032,7 @@ function normalizeImportedPartnerLead(record = {}) {
     title: record.title || '',
     platform: record.platform || record.profileUrl || '',
     followers: record.followers || record.socialFollowers || '',
-    status: normalizeStatus(record.status || 'Not Sent'),
+    status: normalizeStatus(record.status || 'Initial Reach'),
     date: record.lastContact || '',
     adi: record.adi || 'No',
     notes: notesParts.join(' | '),
@@ -2052,7 +2049,7 @@ function normalizeImportedOrgPartnerLead(record = {}) {
     type: record.type || 'Church',
     location: record.location || '',
     followers: record.followers || record.socialFollowers || '',
-    status: normalizeStatus(record.status || 'Not Sent'),
+    status: normalizeStatus(record.status || 'Initial Reach'),
     members: record.members || '',
     date: record.lastContact || '',
     incentive: record.incentive || '',
@@ -2809,9 +2806,9 @@ const TABLES = {
     statsEl: 'stats-creators', countEl: 'cnt-creators',
     stats: d => [
       { n: d.length,                                                              l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,           l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Initial Reach').length,      l: 'Initial Reach' },
       { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,            l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,             l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,           l: 'Accepted'    },
       { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,           l: 'Declined'    },
     ],
     renderRow: (r,i) => `
@@ -2834,9 +2831,9 @@ const TABLES = {
     statsEl: 'stats-artists', countEl: 'cnt-artists',
     stats: d => [
       { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,     l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Initial Reach').length, l: 'Initial Reach' },
       { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,       l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,     l: 'Accepted'    },
       { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
     ],
     renderRow: (r,i) => `
@@ -2862,9 +2859,9 @@ const TABLES = {
     statsEl: 'stats-merch', countEl: 'cnt-merch',
     stats: d => [
       { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,     l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Initial Reach').length, l: 'Initial Reach' },
       { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,       l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,     l: 'Accepted'    },
       { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
     ],
     renderRow: (r,i) => `
@@ -2887,9 +2884,9 @@ const TABLES = {
     statsEl: 'stats-appCreators', countEl: 'cnt-appCreators',
     stats: d => [
       { n: d.length,                                                    l: 'Total'           },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length, l: 'Not Sent'        },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Initial Reach').length, l: 'Initial Reach' },
       { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,  l: 'Pending'         },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,   l: 'Active'          },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length, l: 'Accepted'        },
       { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length, l: 'Declined'        },
     ],
     renderRow: (r,i) => `
@@ -2911,7 +2908,7 @@ const TABLES = {
     statsEl: 'stats-ambassadors', countEl: 'cnt-ambassadors',
     stats: d => [
       { n: d.length,                                                  l: 'Total'           },
-      { n: d.filter(r=>r.status==='Active').length,                  l: 'Active'          },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length, l: 'Accepted'      },
       { n: d.reduce((s,r)=>s+(parseInt(r.members)||0),0),           l: 'Members Reached' },
       { n: d.filter(r=>r.status==='Prospect').length,                l: 'Prospects'       },
     ],
@@ -2992,7 +2989,7 @@ TABLES.creators = {
   statsEl: 'stats-creators', countEl: 'cnt-creators',
   stats: d => [
     { n: d.length, l: 'Total' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Accepted').length, l: 'Accepted' },
     { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
     { n: d.filter(r => creatorTier(r.followers) === 'Large').length, l: 'Large Creators' },
   ],
@@ -3017,7 +3014,7 @@ TABLES.partners = {
     { n: d.length, l: 'Total' },
     { n: d.filter(r => r.kind === 'Artist').length, l: 'Artists' },
     { n: d.filter(r => r.kind === 'Brand').length, l: 'Brands' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Accepted').length, l: 'Accepted' },
   ],
   renderRow: (r,i) => `
     <tr onclick="openModal('partners',${i})">
@@ -3040,7 +3037,7 @@ TABLES.orgPartners = {
   statsEl: 'stats-orgPartners', countEl: 'cnt-orgPartners',
   stats: d => [
     { n: d.length, l: 'Total' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
+    { n: d.filter(r => normalizeStatus(r.status) === 'Accepted').length, l: 'Accepted' },
     { n: d.reduce((sum, r) => sum + (parseInt(r.members, 10) || 0), 0), l: 'People Reached' },
     { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
   ],
