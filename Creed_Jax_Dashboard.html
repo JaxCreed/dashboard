@@ -241,6 +241,10 @@ tbody tr:last-child td { border-bottom: none; }
 .badge-high   { background: #F4CCCC; color: #9C0006; }
 .badge-medium { background: #FFD9B3; color: #B85C00; }
 .badge-low    { background: #FFF1A8; color: #8A6A00; }
+.badge-notsent { background: #E8F1FF; color: #1E4E8C; }
+.badge-pending { background: #FFF4CC; color: #9C6500; }
+.badge-active  { background: #E3F6EC; color: #1F7A4D; }
+.badge-declined { background: #FDE2E4; color: #B42318; }
 .badge-small  { background: #E8F1FF; color: #1E4E8C; }
 .badge-mediumcreator { background: #FFF4CC; color: #9C6500; }
 .badge-large  { background: #FDE2E4; color: #B42318; }
@@ -621,8 +625,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-merch" placeholder="Search brand, contact, notes…" oninput="renderTable('merch')">
     <select class="btn btn-outline" id="flt-merch-status" onchange="renderTable('merch')">
       <option value="">Status: All</option>
-      <option>Not Contacted</option><option>Reached Out</option><option>Replied</option>
-      <option>In Talks</option><option>Agreed</option><option>Declined</option>
+      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
     </select>
     <select class="btn btn-outline" id="flt-merch-type" onchange="renderTable('merch')">
       <option value="">Type: All</option>
@@ -657,8 +660,7 @@ tbody tr:last-child td { border-bottom: none; }
     <input type="text" class="search-box" id="srch-appCreators" placeholder="Search creator, platform, notes…" oninput="renderTable('appCreators')">
     <select class="btn btn-outline" id="flt-appCreators-status" onchange="renderTable('appCreators')">
       <option value="">Status: All</option>
-      <option>Not Contacted</option><option>DM Sent</option><option>Replied</option>
-      <option>In Talks</option><option>Agreed</option><option>Declined</option>
+      <option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option>
     </select>
   </div>
   <div class="table-container">
@@ -1057,7 +1059,7 @@ tbody tr:last-child td { border-bottom: none; }
           <select id="me-type"><option>Bible Study</option><option>Journal</option><option>Clothing</option><option>Rosary / Jewelry</option><option>Books</option><option>Other</option></select>
         </div>
         <div class="form-group"><label>Status</label>
-          <select id="me-status"><option>Not Contacted</option><option>Reached Out</option><option>Replied</option><option>In Talks</option><option>Agreed</option><option>Declined</option></select>
+          <select id="me-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
         </div>
       </div>
       <div class="form-row">
@@ -1098,7 +1100,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="form-row">
         <div class="form-group"><label>Status</label>
-          <select id="ac-status"><option>Not Contacted</option><option>DM Sent</option><option>Replied</option><option>In Talks</option><option>Agreed</option><option>Declined</option></select>
+          <select id="ac-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
         </div>
         <div class="form-group"><label>Creator Code</label><input type="text" id="ac-code" placeholder="Assigned referral code"></div>
       </div>
@@ -1862,14 +1864,15 @@ function switchTab(tab) {
 //  BADGES
 // ══════════════════════════════════════════
 const STATUS_CLS = {
-  'Not Contacted':'badge-notcontacted','DM Sent':'badge-dmsent','Interested':'badge-interested',
-  'In Talks':'badge-intalk','Reached Out':'badge-dmsent','Replied':'badge-interested',
-  'Contract Sent':'badge-contractsent','Active':'badge-active','Agreed':'badge-agreed',
-  'Declined':'badge-declined','Prospect':'badge-prospect','Invited':'badge-invited','Inactive':'badge-inactive',
+  'Not Sent':'badge-notsent',
+  'Pending':'badge-pending',
+  'Active':'badge-active',
+  'Declined':'badge-declined',
 };
 function badge(val) {
   if (!val) return '—';
-  return `<span class="badge ${STATUS_CLS[val]||'badge-notcontacted'}">${val}</span>`;
+  const status = normalizeStatus(val);
+  return `<span class="badge ${STATUS_CLS[status]||'badge-notsent'}">${status}</span>`;
 }
 function priBadge(p) {
   const c = p==='High'?'badge-high':p==='Medium'?'badge-medium':'badge-low';
@@ -2798,9 +2801,10 @@ const TABLES = {
     statsEl: 'stats-creators', countEl: 'cnt-creators',
     stats: d => [
       { n: d.length,                                                              l: 'Total'       },
-      { n: d.filter(r=>r.status==='Active').length,                              l: 'Active'      },
-      { n: d.filter(r=>['DM Sent','Interested','In Talks','Contract Sent'].includes(r.status)).length, l: 'In Pipeline' },
-      { n: d.filter(r=>r.status==='Declined').length,                            l: 'Declined'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,           l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,            l: 'Pending'     },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,             l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,           l: 'Declined'    },
     ],
     renderRow: (r,i) => `
       <tr onclick="openModal('creator',${i})">
@@ -2822,9 +2826,10 @@ const TABLES = {
     statsEl: 'stats-artists', countEl: 'cnt-artists',
     stats: d => [
       { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>r.status==='Agreed').length,                        l: 'Agreed'      },
-      { n: d.filter(r=>['Reached Out','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
-      { n: d.filter(r=>r.status==='Declined').length,                      l: 'Declined'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,     l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,       l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
     ],
     renderRow: (r,i) => `
       <tr onclick="openModal('artists',${i})">
@@ -2849,9 +2854,10 @@ const TABLES = {
     statsEl: 'stats-merch', countEl: 'cnt-merch',
     stats: d => [
       { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>r.status==='Agreed').length,                        l: 'Agreed'      },
-      { n: d.filter(r=>['Reached Out','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
-      { n: d.filter(r=>r.status==='Declined').length,                      l: 'Declined'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length,     l: 'Not Sent'    },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,       l: 'Active'      },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
     ],
     renderRow: (r,i) => `
       <tr onclick="openModal('merch',${i})">
@@ -2873,9 +2879,10 @@ const TABLES = {
     statsEl: 'stats-appCreators', countEl: 'cnt-appCreators',
     stats: d => [
       { n: d.length,                                                    l: 'Total'           },
-      { n: d.filter(r=>r.status==='Agreed').length,                    l: 'Agreed'          },
-      { n: d.filter(r=>['DM Sent','Replied','In Talks'].includes(r.status)).length, l: 'In Pipeline' },
-      { n: d.filter(r=>r.code).length,                                 l: 'Codes Assigned'  },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Not Sent').length, l: 'Not Sent'        },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,  l: 'Pending'         },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Active').length,   l: 'Active'          },
+      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length, l: 'Declined'        },
     ],
     renderRow: (r,i) => `
       <tr onclick="openModal('appCreators',${i})">
