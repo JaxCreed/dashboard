@@ -164,6 +164,7 @@ function collectBody(req) {
 
 function buildLeadResearchPrompt(options = {}) {
   const kind = ['creators', 'partners', 'orgPartners'].includes(options.kind) ? options.kind : 'creators';
+  const focus = String(options.focus || '').trim().toLowerCase();
   const primary = Array.isArray(options.primary) && options.primary.length ? options.primary : (kind === 'creators' ? ['TikTok', 'Instagram'] : kind === 'partners' ? ['Artist', 'Brand'] : ['Church', 'Church Camp', 'Ministry']);
   const secondary = Array.isArray(options.secondary) && options.secondary.length ? options.secondary : (kind === 'creators' ? ['Small Creator', 'Medium Creator'] : kind === 'partners' ? ['Christian music', 'premium Bible brands'] : ['churches', 'camps', 'ministries']);
   const limit = Math.min(Math.max(Number.parseInt(options.limit || 8, 10) || 8, 1), 20);
@@ -186,6 +187,10 @@ function buildLeadResearchPrompt(options = {}) {
       'bestUseCase should be specific, such as "artist partnership", "brand partnership", "merch partnership", or "cross-promotion".',
       'Suggested first outreach angles should stay short, warm, and intentionally a little vague on details for the first reach-out.',
       'Do not suggest artists or brands that feel controversial, off-brand, low quality, or only loosely connected to Christian audiences.',
+      focus === 'artists' ? 'Only return Artist leads in this run.' : '',
+      focus === 'brands' ? 'Only return Brand leads in this run.' : '',
+      'followers should reflect the most relevant social following you can reasonably verify from a public profile; otherwise leave it blank.',
+      'sizeBucket should be "Small", "Medium", or "Large" when followers can be inferred from the public profile.',
       'If a field cannot be verified, return an empty string instead of guessing.',
       brief ? `Extra guidance: ${brief}` : '',
       notes ? `Research notes: ${notes}` : '',
@@ -208,6 +213,8 @@ function buildLeadResearchPrompt(options = {}) {
       'incentive should suggest a plausible partnership package direction, like free Creed access, ambassador rollout, merch support, event activation, or church access.',
       'Suggested first outreach angles should feel suitable for a first outreach email or message and should emphasize alignment, usefulness to their people, and curiosity rather than hard selling.',
       'Avoid organizations that look inactive, outdated, or not clearly Christian.',
+      'followers should reflect the most relevant public social following you can verify for the organization if available; otherwise leave it blank.',
+      'sizeBucket should be "Small", "Medium", or "Large" when followers can be inferred from the public profile.',
       'If a field cannot be verified, return an empty string instead of guessing.',
       brief ? `Extra guidance: ${brief}` : '',
       notes ? `Research notes: ${notes}` : '',
@@ -220,6 +227,8 @@ function buildLeadResearchPrompt(options = {}) {
     `Target platforms: ${primary.join(', ')}.`,
     `Target size buckets: ${secondary.join(', ')}.`,
     `Return up to ${limit} creators.`,
+    focus === 'ugc' ? 'This run is specifically for UGC creators. Prioritize roughly 5k-50k followers, authenticity, relatability, and creators who feel natural for testimonial-style or creator-made app content.' : '',
+    focus === 'paid_ads' ? 'This run is specifically for paid ad creators. Prioritize roughly 20k-200k followers, stronger hooks, sharper on-camera delivery, and creators who feel especially capable of producing performance-oriented paid creative.' : '',
     'Creed is specifically looking for creators who could make strong UGC-style or paid ad content for a Christian app, not just generic influencers.',
     'Prioritize creators with direct-to-camera, speaking-style, testimonial, devotional, motivational, evangelical, or Christian inspirational short-form content.',
     'Strong fits should look natural introducing an app early, hooking attention quickly, explaining something clearly, and speaking with warmth and conviction on camera.',
@@ -229,6 +238,7 @@ function buildLeadResearchPrompt(options = {}) {
     'Avoid creators who feel risky for brand safety, polarizing in a way that would hurt Creed, or weak on camera.',
     'If a field cannot be verified, return an empty string instead of guessing.',
     'Keep follower counts human-readable like "18,500".',
+    'sizeBucket should be "Small", "Medium", or "Large" based on the creator’s social following when it can be inferred.',
     'whyFit should explain exactly why they feel like a Creed fit for UGC or paid ads, not just that they are Christian.',
     'engagementQuality should reflect whether the audience seems genuinely responsive, not just large.',
     'bestUseCase should be specific, such as "paid ad creator", "ugc creator", "creator recruiting", or "devotional/content partner".',

@@ -598,7 +598,7 @@ tbody tr:last-child td { border-bottom: none; }
     <table>
       <thead><tr>
         <th>Partner</th><th>Type</th><th>Company / Label</th><th>Email / Phone</th>
-        <th>Channel / Website</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
+        <th>Channel / Website</th><th>Followers</th><th>Tag</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbl-partners"></tbody>
     </table>
@@ -697,7 +697,7 @@ tbody tr:last-child td { border-bottom: none; }
   <div class="table-container">
     <table>
       <thead><tr>
-        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Status</th>
+        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Followers</th><th>Tag</th><th>Status</th>
         <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Notes</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbl-orgPartners"></tbody>
@@ -943,6 +943,10 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
     <div class="modal-body">
       <div class="form-row">
+        <div class="form-group" id="lead-research-focus-group">
+          <label id="lead-research-focus-label">Research Focus</label>
+          <select id="lead-research-focus" onchange="handleLeadResearchFocusChange()"></select>
+        </div>
         <div class="form-group">
           <label id="lead-research-primary-label">Platforms</label>
           <input type="text" id="creator-research-platforms" value="TikTok, Instagram" placeholder="TikTok, Instagram">
@@ -1008,12 +1012,15 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="form-row">
         <div class="form-group"><label>Platform / Website</label><input type="text" id="pa-platform" placeholder="e.g. Spotify, TikTok, brand website"></div>
+        <div class="form-group"><label>Social Followers</label><input type="text" id="pa-followers" placeholder="e.g. 28,000"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><label>Status</label>
           <select id="pa-status"><option>Not Sent</option><option>Pending</option><option>Active</option><option>Declined</option></select>
         </div>
+        <div class="form-group"><label>Last Contact</label><input type="date" id="pa-date"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Last Contact</label><input type="date" id="pa-date"></div>
         <div class="form-group"><label>Adi Reviewed?</label>
           <select id="pa-adi"><option value="No">No</option><option value="Yes">Yes</option><option value="N/A">N/A</option></select>
         </div>
@@ -1131,10 +1138,13 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label>Social Followers</label><input type="text" id="op-followers" placeholder="e.g. 42,000"></div>
         <div class="form-group"><label>People Reached (est.)</label><input type="number" id="op-members" placeholder="0" min="0"></div>
-        <div class="form-group"><label>Last Contact</label><input type="date" id="op-date"></div>
       </div>
-      <div class="form-group"><label>Partnership Package</label><input type="text" id="op-incentive" placeholder="e.g. free Creed access, merch package, camp activation"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Last Contact</label><input type="date" id="op-date"></div>
+        <div class="form-group"><label>Partnership Package</label><input type="text" id="op-incentive" placeholder="e.g. free Creed access, merch package, camp activation"></div>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>Email</label><input type="email" id="op-email" placeholder="contact@organization.org"></div>
         <div class="form-group"><label>Phone Number</label><input type="text" id="op-phone" placeholder="(555) 555-5555"></div>
@@ -1418,6 +1428,7 @@ function normalizePartnerItem(record = {}) {
   return {
     ...record,
     phone: record.phone || record.contact || '',
+    followers: record.followers || '',
   };
 }
 function normalizeOrgPartnerItem(record = {}) {
@@ -1425,6 +1436,7 @@ function normalizeOrgPartnerItem(record = {}) {
     ...record,
     email: record.email || '',
     phone: record.phone || '',
+    followers: record.followers || '',
   };
 }
 function normalizeDbState(state = {}) {
@@ -1868,17 +1880,20 @@ function parseFollowerCount(val) {
   const num = parseInt(String(val || '').replace(/[^0-9]/g, ''), 10);
   return Number.isFinite(num) ? num : NaN;
 }
-function creatorTier(val) {
+function socialTier(val) {
   const followers = parseFollowerCount(val);
   if (!Number.isFinite(followers) || followers < 5000) return '';
-  if (followers < 20000) return 'Small Creator';
-  if (followers < 50000) return 'Medium Creator';
-  return 'Large Creator';
+  if (followers < 20000) return 'Small';
+  if (followers < 50000) return 'Medium';
+  return 'Large';
+}
+function creatorTier(val) {
+  return socialTier(val);
 }
 function creatorTierBadge(val) {
   const tier = creatorTier(val);
   if (!tier) return '-';
-  const cls = tier === 'Small Creator' ? 'badge-small' : tier === 'Medium Creator' ? 'badge-mediumcreator' : 'badge-large';
+  const cls = tier === 'Small' ? 'badge-small' : tier === 'Medium' ? 'badge-mediumcreator' : 'badge-large';
   return `<span class="badge ${cls}">${tier}</span>`;
 }
 function typeBadge(val) {
@@ -2008,6 +2023,7 @@ function normalizeImportedPartnerLead(record = {}) {
     phone: record.phone || '',
     title: record.title || '',
     platform: record.platform || record.profileUrl || '',
+    followers: record.followers || record.socialFollowers || '',
     status: normalizeStatus(record.status || 'Not Sent'),
     date: record.lastContact || '',
     adi: record.adi || 'No',
@@ -2024,6 +2040,7 @@ function normalizeImportedOrgPartnerLead(record = {}) {
     name: record.name || record.organization || '',
     type: record.type || 'Church',
     location: record.location || '',
+    followers: record.followers || record.socialFollowers || '',
     status: normalizeStatus(record.status || 'Not Sent'),
     members: record.members || '',
     date: record.lastContact || '',
@@ -2087,9 +2104,29 @@ function addOrgPartnerLeads(rows = []) {
 const LEAD_RESEARCH_CONFIG = {
   creators: {
     title: 'Research Creators with Gemini',
+    focusLabel: 'Creator Focus',
+    focusOptions: [
+      { value: 'ugc', label: 'UGC' },
+      { value: 'paid_ads', label: 'Paid Ads' },
+    ],
+    defaultFocus: 'ugc',
+    focusPresets: {
+      ugc: {
+        primaryDefault: 'TikTok, Instagram',
+        secondaryDefault: '5k-50k followers',
+        briefPlaceholder: 'Direct-to-camera Christian creators, authentic, relatable, good for UGC…',
+        notesDefault: 'Find Christian creators who feel like strong Creed fits for UGC. Prioritize 5k-50k followers, direct-to-camera speaking style, relatable presence, strong hooks, devotional or inspirational Christian content, clean brand fit, and creators who seem likely to make authentic paid content well.',
+      },
+      paid_ads: {
+        primaryDefault: 'TikTok, Instagram',
+        secondaryDefault: '20k-200k followers',
+        briefPlaceholder: 'Stronger hooks, sharper delivery, ad-ready Christian creators…',
+        notesDefault: 'Find Christian creators who feel like strong Creed fits for paid ads. Prioritize roughly 20k-200k followers, direct-to-camera speaking style, sharp hooks, clear app-intro potential, strong ad-readiness, clean brand fit, and creators who look capable of making high-performing paid creative.',
+      },
+    },
     primaryLabel: 'Platforms',
     primaryDefault: 'TikTok, Instagram',
-    secondaryLabel: 'Size Buckets',
+    secondaryLabel: 'Follower Range',
     secondaryDefault: 'Small Creator, Medium Creator',
     countDefault: 8,
     briefPlaceholder: 'Speaking-style Christian creators, strong on camera, good for UGC or paid ads…',
@@ -2105,6 +2142,33 @@ const LEAD_RESEARCH_CONFIG = {
   },
   partners: {
     title: 'Research Artists & Brands with Gemini',
+    focusLabel: 'Partner Focus',
+    focusOptions: [
+      { value: 'both', label: 'Both' },
+      { value: 'artists', label: 'Artists' },
+      { value: 'brands', label: 'Brands' },
+    ],
+    defaultFocus: 'both',
+    focusPresets: {
+      both: {
+        primaryDefault: 'Artist, Brand',
+        secondaryDefault: 'Christian music, premium Bible brands, journals, apparel',
+        briefPlaceholder: 'Worship artists, premium Christian brands, partnership-ready teams…',
+        notesDefault: 'Find Christian artists and premium Christian brands that align well with Creed. Prioritize worship or faith-adjacent artists, premium Bible/journal/apparel brands, strong audience overlap, clean brand alignment, and leads with clear sites or contact paths.',
+      },
+      artists: {
+        primaryDefault: 'Artist',
+        secondaryDefault: 'worship artists, Christian musicians, faith-adjacent artists',
+        briefPlaceholder: 'Worship artists, Christian musicians, artist teams with audience overlap…',
+        notesDefault: 'Find Christian or worship artists who align well with Creed. Prioritize artists or teams with strong Christian audience overlap, clean reputation, clear public presence, and partnership potential around audience trust and faith alignment.',
+      },
+      brands: {
+        primaryDefault: 'Brand',
+        secondaryDefault: 'premium Bible brands, journals, devotionals, apparel, rosaries',
+        briefPlaceholder: 'Premium Christian brands, strong quality and audience alignment…',
+        notesDefault: 'Find premium Christian brands that align well with Creed. Prioritize Bible studies, journals, devotionals, apparel, books, rosaries, and other high-trust faith products with a premium feel and strong audience overlap.',
+      },
+    },
     primaryLabel: 'Partner Types',
     primaryDefault: 'Artist, Brand',
     secondaryLabel: 'Focus Areas',
@@ -2123,6 +2187,10 @@ const LEAD_RESEARCH_CONFIG = {
   },
   orgPartners: {
     title: 'Research Churches & Camps with Gemini',
+    focusLabel: '',
+    focusOptions: [],
+    defaultFocus: '',
+    focusPresets: {},
     primaryLabel: 'Organization Types',
     primaryDefault: 'Church, Church Camp, Ministry',
     secondaryLabel: 'Focus Areas',
@@ -2140,6 +2208,25 @@ const LEAD_RESEARCH_CONFIG = {
     rerender: () => renderTable('orgPartners'),
   },
 };
+function currentLeadResearchFocus() {
+  return document.getElementById('lead-research-focus')?.value || '';
+}
+function applyLeadResearchFocusPreset() {
+  const config = leadResearchConfig();
+  const focus = currentLeadResearchFocus();
+  const preset = config.focusPresets?.[focus];
+  if (!preset) return;
+  document.getElementById('creator-research-platforms').value = preset.primaryDefault || config.primaryDefault;
+  document.getElementById('creator-research-platforms').placeholder = preset.primaryDefault || config.primaryDefault;
+  document.getElementById('creator-research-buckets').value = preset.secondaryDefault || config.secondaryDefault;
+  document.getElementById('creator-research-buckets').placeholder = preset.secondaryDefault || config.secondaryDefault;
+  document.getElementById('creator-research-brief').placeholder = preset.briefPlaceholder || config.briefPlaceholder;
+  document.getElementById('creator-research-notes').value = preset.notesDefault || config.notesDefault;
+  document.getElementById('creator-research-notes').placeholder = preset.notesDefault || config.notesDefault;
+}
+function handleLeadResearchFocusChange() {
+  applyLeadResearchFocusPreset();
+}
 function openCreatorImportModal() {
   document.getElementById('creator-import-json').value = '';
   document.getElementById('modal-creator-import').classList.add('active');
@@ -2190,6 +2277,18 @@ function openLeadResearchModal(kind) {
   document.getElementById('lead-research-notes-label').textContent = config.notesLabel;
   document.getElementById('lead-research-empty-title').textContent = config.emptyTitle;
   document.getElementById('lead-research-empty-copy').textContent = config.emptyCopy;
+  const focusGroup = document.getElementById('lead-research-focus-group');
+  const focusLabel = document.getElementById('lead-research-focus-label');
+  const focusSelect = document.getElementById('lead-research-focus');
+  if (config.focusOptions?.length) {
+    focusGroup.style.display = '';
+    focusLabel.textContent = config.focusLabel || 'Research Focus';
+    focusSelect.innerHTML = config.focusOptions.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+    focusSelect.value = config.defaultFocus || config.focusOptions[0].value;
+  } else {
+    focusGroup.style.display = 'none';
+    focusSelect.innerHTML = '';
+  }
   document.getElementById('creator-research-platforms').value = config.primaryDefault;
   document.getElementById('creator-research-platforms').placeholder = config.primaryDefault;
   document.getElementById('creator-research-buckets').value = config.secondaryDefault;
@@ -2199,13 +2298,14 @@ function openLeadResearchModal(kind) {
   document.getElementById('creator-research-brief').placeholder = config.briefPlaceholder;
   document.getElementById('creator-research-notes').value = config.notesDefault;
   document.getElementById('creator-research-notes').placeholder = config.notesDefault;
+  applyLeadResearchFocusPreset();
   renderLeadResearchResults();
   document.getElementById('modal-creator-research').classList.add('active');
 }
 function renderLeadResearchCard(lead, idx) {
   const link = lead.profileUrl || lead.website || lead.platformUrl || '';
   if (leadResearchContext === 'partners') {
-    const chips = [lead.kind || 'Partner', lead.company || '', lead.title || '', lead.bestUseCase || 'Outreach'].filter(Boolean);
+    const chips = [lead.kind || 'Partner', lead.followers || '', lead.sizeBucket || socialTier(lead.followers) || '', lead.company || '', lead.bestUseCase || 'Outreach'].filter(Boolean);
     return `
       <div class="research-card">
         <div class="research-card-head">
@@ -2228,7 +2328,7 @@ function renderLeadResearchCard(lead, idx) {
     `;
   }
   if (leadResearchContext === 'orgPartners') {
-    const chips = [lead.type || 'Organization', lead.location || '', lead.members ? `${lead.members} reach` : '', lead.bestUseCase || 'Partnership'].filter(Boolean);
+    const chips = [lead.type || 'Organization', lead.followers || '', lead.sizeBucket || socialTier(lead.followers) || '', lead.location || '', lead.bestUseCase || 'Partnership'].filter(Boolean);
     return `
       <div class="research-card">
         <div class="research-card-head">
@@ -2312,6 +2412,7 @@ async function runLeadResearch() {
   const runBtn = document.getElementById('creator-research-run');
   const payload = {
     kind: leadResearchContext,
+    focus: currentLeadResearchFocus(),
     primary: document.getElementById('creator-research-platforms').value.split(',').map(v => v.trim()).filter(Boolean),
     secondary: document.getElementById('creator-research-buckets').value.split(',').map(v => v.trim()).filter(Boolean),
     limit: Number.parseInt(document.getElementById('creator-research-count').value, 10) || 8,
@@ -2878,7 +2979,7 @@ TABLES.creators = {
     { n: d.length, l: 'Total' },
     { n: d.filter(r => normalizeStatus(r.status) === 'Active').length, l: 'Active' },
     { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
-    { n: d.filter(r => creatorTier(r.followers) === 'Large Creator').length, l: 'Large Creators' },
+    { n: d.filter(r => creatorTier(r.followers) === 'Large').length, l: 'Large Creators' },
   ],
   renderRow: (r,i) => `
     <tr onclick="openModal('creator',${i})">
@@ -2895,7 +2996,7 @@ TABLES.creators = {
   empty: 'No creators yet. Add creator outreach or app creator partnerships here.',
 };
 TABLES.partners = {
-  search: ['kind','name','email','company','phone','title','platform','notes'],
+  search: ['kind','name','email','company','phone','title','platform','notes','followers'],
   statsEl: 'stats-partners', countEl: 'cnt-partners',
   stats: d => [
     { n: d.length, l: 'Total' },
@@ -2910,6 +3011,8 @@ TABLES.partners = {
       <td>${r.company||'-'}</td>
       <td>${[r.email ? `<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>` : '', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td>${r.platform||'-'}</td>
+      <td>${r.followers||'-'}</td>
+      <td>${creatorTierBadge(r.followers)}</td>
       <td class="status-cell">${statusDot(r.status)}</td>
       <td>${r.date||'-'}</td>
       <td>${r.adi=='Yes'?'Yes':r.adi=='No'?'No':'-'}</td>
@@ -2918,7 +3021,7 @@ TABLES.partners = {
   empty: 'No artist or brand partnerships tracked yet.',
 };
 TABLES.orgPartners = {
-  search: ['name','type','location','notes','email','phone','incentive'],
+  search: ['name','type','location','notes','email','phone','incentive','followers'],
   statsEl: 'stats-orgPartners', countEl: 'cnt-orgPartners',
   stats: d => [
     { n: d.length, l: 'Total' },
@@ -2932,6 +3035,8 @@ TABLES.orgPartners = {
       <td>${typeBadge(r.type)}</td>
       <td>${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td>${r.location||'-'}</td>
+      <td>${r.followers||'-'}</td>
+      <td>${creatorTierBadge(r.followers)}</td>
       <td class="status-cell">${statusDot(r.status)}</td>
       <td>${r.members||'-'}</td>
       <td>${r.date||'-'}</td>
@@ -3029,13 +3134,13 @@ FIELDS.creator = {
   nameKey:'name'
 };
 FIELDS.partners = {
-  ids:['pa-kind','pa-name','pa-email','pa-company','pa-phone','pa-title','pa-platform','pa-status','pa-date','pa-adi','pa-notes'],
-  keys:['kind','name','email','company','phone','title','platform','status','date','adi','notes'],
+  ids:['pa-kind','pa-name','pa-email','pa-company','pa-phone','pa-title','pa-platform','pa-followers','pa-status','pa-date','pa-adi','pa-notes'],
+  keys:['kind','name','email','company','phone','title','platform','followers','status','date','adi','notes'],
   nameKey:'name'
 };
 FIELDS.orgPartners = {
-  ids:['op-name','op-type','op-location','op-status','op-members','op-date','op-incentive','op-email','op-phone','op-notes'],
-  keys:['name','type','location','status','members','date','incentive','email','phone','notes'],
+  ids:['op-name','op-type','op-location','op-status','op-followers','op-members','op-date','op-incentive','op-email','op-phone','op-notes'],
+  keys:['name','type','location','status','followers','members','date','incentive','email','phone','notes'],
   nameKey:'name'
 };
 FIELDS.scripts = {
