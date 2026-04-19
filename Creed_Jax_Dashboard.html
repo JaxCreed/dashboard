@@ -775,6 +775,14 @@ body[data-theme="dark"] .toast {
     overflow: visible;
     text-overflow: clip;
   }
+  #tab-messages table.messages-table {
+    table-layout: fixed;
+  }
+  #tab-messages table.messages-table thead th {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
   #tab-creators table.mobile-cards th:nth-child(1),
   #tab-creators table.mobile-cards td:nth-child(1) { width: 20%; }
   #tab-creators table.mobile-cards th:nth-child(2),
@@ -835,6 +843,20 @@ body[data-theme="dark"] .toast {
   #tab-orgPartners table.mobile-cards td:nth-child(9) { width: 8%; }
   #tab-orgPartners table.mobile-cards th:nth-child(10),
   #tab-orgPartners table.mobile-cards td:nth-child(10) { width: 6%; }
+  #tab-messages table.messages-table th:nth-child(1),
+  #tab-messages table.messages-table td:nth-child(1) { width: 18%; }
+  #tab-messages table.messages-table th:nth-child(2),
+  #tab-messages table.messages-table td:nth-child(2) { width: 12%; }
+  #tab-messages table.messages-table th:nth-child(3),
+  #tab-messages table.messages-table td:nth-child(3) { width: 12%; }
+  #tab-messages table.messages-table th:nth-child(4),
+  #tab-messages table.messages-table td:nth-child(4) { width: 12%; }
+  #tab-messages table.messages-table th:nth-child(5),
+  #tab-messages table.messages-table td:nth-child(5) { width: 28%; }
+  #tab-messages table.messages-table th:nth-child(6),
+  #tab-messages table.messages-table td:nth-child(6) { width: 8%; }
+  #tab-messages table.messages-table th:nth-child(7),
+  #tab-messages table.messages-table td:nth-child(7) { width: 10%; }
   #tab-scripts table.mobile-cards th:nth-child(1),
   #tab-scripts table.mobile-cards td:nth-child(1) { width: 24%; }
   #tab-scripts table.mobile-cards th:nth-child(2),
@@ -1268,7 +1290,16 @@ body[data-theme="dark"] .toast {
     </select>
   </div>
   <div class="table-container">
-    <table class="mobile-cards">
+    <table class="mobile-cards messages-table">
+      <colgroup>
+        <col style="width:18%">
+        <col style="width:12%">
+        <col style="width:12%">
+        <col style="width:12%">
+        <col style="width:28%">
+        <col style="width:8%">
+        <col style="width:10%">
+      </colgroup>
       <thead><tr>
         <th>Recipient</th><th>Group</th><th>Channel</th><th>Status</th><th>Preview</th><th>Updated</th><th>Actions</th>
       </tr></thead>
