@@ -207,11 +207,12 @@ body {
 .btn-danger { background: var(--danger); color: white; }
 .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
 .row-actions {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
   white-space: normal;
+  width: 100%;
 }
 .notes-cell {
   font-size: 12px;
@@ -743,9 +744,9 @@ body[data-theme="dark"] .toast {
   #tab-creators table.mobile-cards th:nth-child(9),
   #tab-creators table.mobile-cards td:nth-child(9) { width: 12%; }
   #tab-partners table.mobile-cards th:nth-child(1),
-  #tab-partners table.mobile-cards td:nth-child(1) { width: 14%; }
+  #tab-partners table.mobile-cards td:nth-child(1) { width: 13%; }
   #tab-partners table.mobile-cards th:nth-child(2),
-  #tab-partners table.mobile-cards td:nth-child(2) { width: 8%; }
+  #tab-partners table.mobile-cards td:nth-child(2) { width: 7%; }
   #tab-partners table.mobile-cards th:nth-child(3),
   #tab-partners table.mobile-cards td:nth-child(3) { width: 11%; }
   #tab-partners table.mobile-cards th:nth-child(4),
@@ -753,41 +754,37 @@ body[data-theme="dark"] .toast {
   #tab-partners table.mobile-cards th:nth-child(5),
   #tab-partners table.mobile-cards td:nth-child(5) { width: 10%; }
   #tab-partners table.mobile-cards th:nth-child(6),
-  #tab-partners table.mobile-cards td:nth-child(6) { width: 8%; }
+  #tab-partners table.mobile-cards td:nth-child(6) { width: 7%; }
   #tab-partners table.mobile-cards th:nth-child(7),
-  #tab-partners table.mobile-cards td:nth-child(7) { width: 8%; }
+  #tab-partners table.mobile-cards td:nth-child(7) { width: 7%; }
   #tab-partners table.mobile-cards th:nth-child(8),
   #tab-partners table.mobile-cards td:nth-child(8) { width: 8%; }
   #tab-partners table.mobile-cards th:nth-child(9),
-  #tab-partners table.mobile-cards td:nth-child(9) { width: 7%; }
+  #tab-partners table.mobile-cards td:nth-child(9) { width: 6%; }
   #tab-partners table.mobile-cards th:nth-child(10),
   #tab-partners table.mobile-cards td:nth-child(10) { width: 4%; }
   #tab-partners table.mobile-cards th:nth-child(11),
-  #tab-partners table.mobile-cards td:nth-child(11) { width: 10%; }
+  #tab-partners table.mobile-cards td:nth-child(11) { width: 12%; }
   #tab-orgPartners table.mobile-cards th:nth-child(1),
-  #tab-orgPartners table.mobile-cards td:nth-child(1) { width: 13%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(1) { width: 15%; }
   #tab-orgPartners table.mobile-cards th:nth-child(2),
-  #tab-orgPartners table.mobile-cards td:nth-child(2) { width: 7%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(2) { width: 8%; }
   #tab-orgPartners table.mobile-cards th:nth-child(3),
-  #tab-orgPartners table.mobile-cards td:nth-child(3) { width: 14%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(3) { width: 16%; }
   #tab-orgPartners table.mobile-cards th:nth-child(4),
-  #tab-orgPartners table.mobile-cards td:nth-child(4) { width: 8%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(4) { width: 10%; }
   #tab-orgPartners table.mobile-cards th:nth-child(5),
-  #tab-orgPartners table.mobile-cards td:nth-child(5) { width: 7%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(5) { width: 8%; }
   #tab-orgPartners table.mobile-cards th:nth-child(6),
-  #tab-orgPartners table.mobile-cards td:nth-child(6) { width: 7%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(6) { width: 9%; }
   #tab-orgPartners table.mobile-cards th:nth-child(7),
   #tab-orgPartners table.mobile-cards td:nth-child(7) { width: 8%; }
   #tab-orgPartners table.mobile-cards th:nth-child(8),
-  #tab-orgPartners table.mobile-cards td:nth-child(8) { width: 8%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(8) { width: 12%; }
   #tab-orgPartners table.mobile-cards th:nth-child(9),
-  #tab-orgPartners table.mobile-cards td:nth-child(9) { width: 7%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(9) { width: 8%; }
   #tab-orgPartners table.mobile-cards th:nth-child(10),
-  #tab-orgPartners table.mobile-cards td:nth-child(10) { width: 7%; }
-  #tab-orgPartners table.mobile-cards th:nth-child(11),
-  #tab-orgPartners table.mobile-cards td:nth-child(11) { width: 8%; }
-  #tab-orgPartners table.mobile-cards th:nth-child(12),
-  #tab-orgPartners table.mobile-cards td:nth-child(12) { width: 8%; }
+  #tab-orgPartners table.mobile-cards td:nth-child(10) { width: 6%; }
   #tab-scripts table.mobile-cards th:nth-child(1),
   #tab-scripts table.mobile-cards td:nth-child(1) { width: 24%; }
   #tab-scripts table.mobile-cards th:nth-child(2),
@@ -1194,7 +1191,7 @@ body[data-theme="dark"] .toast {
   <div class="table-container">
       <table class="mobile-cards">
       <thead><tr>
-        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Followers</th><th>Tag</th><th>Status</th>
+        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Status</th>
         <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Notes</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbl-orgPartners"></tbody>
@@ -1941,6 +1938,7 @@ function normalizeScriptItem(script = {}) {
 function normalizeCreatorItem(record = {}) {
   return {
     ...record,
+    url: normalizeExternalUrl(record.url || record.profileUrl || record.link || ''),
     email: record.email || '',
     phone: record.phone || '',
     status: normalizeStatus(record.status),
@@ -2516,8 +2514,15 @@ function guessPlatformFromUrl(url = '') {
   if (value.includes('youtube.com') || value.includes('youtu.be')) return 'YouTube';
   return '';
 }
+function normalizeExternalUrl(url = '') {
+  const value = String(url || '').trim();
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(?:\/|$)/i.test(value)) return `https://${value}`;
+  return value;
+}
 function normalizeImportedCreatorLead(record = {}) {
-  const url = record.profileUrl || record.url || record.link || '';
+  const url = normalizeExternalUrl(record.profileUrl || record.url || record.link || '');
   const platform = record.platform || guessPlatformFromUrl(url) || 'TikTok';
   const followers = String(record.followers || record.followerCount || record.estimatedFollowerCount || '').trim();
   const style = String(record.contentStyle || record.style || record.content_type || '').trim();
@@ -3526,7 +3531,7 @@ TABLES.creators = {
   ],
   renderRow: (r,i) => `
     <tr onclick="openModal('creator',${i})">
-      <td data-label="Creator"><strong>${r.name||'-'}</strong>${r.url?`<br><a href="${r.url}" target="_blank" class="ext-link" onclick="event.stopPropagation()">View Profile</a>`:''}${r.style?`<br><span style="font-size:12px;color:var(--muted);">${r.style}</span>`:''}</td>
+      <td data-label="Creator"><strong>${r.name||'-'}</strong>${normalizeExternalUrl(r.url || r.profileUrl || r.link) ? `<br><a href="${normalizeExternalUrl(r.url || r.profileUrl || r.link)}" target="_blank" rel="noopener noreferrer" class="ext-link" onclick="event.stopPropagation()">View Profile</a>`:''}${r.style?`<br><span style="font-size:12px;color:var(--muted);">${r.style}</span>`:''}</td>
       <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td data-label="Platform">${r.platform||'-'}</td>
       <td data-label="Followers">${r.followers||'-'}</td>
@@ -3578,13 +3583,11 @@ TABLES.orgPartners = {
       <td data-label="Type">${typeBadge(r.type)}</td>
       <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td data-label="Location">${r.location||'-'}</td>
-      <td data-label="Followers">${r.followers||'-'}</td>
-      <td data-label="Tag">${creatorTierBadge(r.followers)}</td>
       <td data-label="Status" class="status-cell">${statusDot(r.status)}</td>
       <td data-label="People Reached">${r.members||'-'}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Package">${r.incentive||'-'}</td>
-      <td data-label="Notes" style="max-width:170px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes||'-'}</td>
+      <td data-label="Notes" class="notes-cell">${r.notes||'-'}</td>
       <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></div></td>
     </tr>`,
   empty: 'No church or camp partnerships tracked yet.',
