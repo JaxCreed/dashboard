@@ -288,6 +288,17 @@ tbody tr:last-child td { border-bottom: none; }
   font-weight: 600;
   color: #5373a6;
 }
+.status-toggle {
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+}
+.status-toggle.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .status-initial  { background: #3B82F6; }
 .status-pending  { background: #F59E0B; }
 .status-accepted { background: #22C55E; }
@@ -689,6 +700,9 @@ body[data-theme="dark"] .task-item.completed,
 body[data-theme="dark"] .task-item.in-progress,
 body[data-theme="dark"] .task-item.recurring-task {
   background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+}
+body[data-theme="dark"] .status-toggle {
+  color: inherit;
 }
 body[data-theme="dark"] .empty-state {
   background: linear-gradient(180deg, rgba(16, 27, 45, 0.94), rgba(11, 20, 35, 0.94));
@@ -2389,6 +2403,7 @@ const STATUS_CLS = {
   'Accepted':'badge-accepted',
   'Declined':'badge-declined',
 };
+const STATUS_ORDER = ['Not Reached Yet', 'Pending', 'Accepted', 'Declined'];
 function badge(val) {
   if (!val) return '—';
   const status = normalizeStatus(val);
@@ -2461,15 +2476,34 @@ function scriptUseBadge(val) {
   };
   return `<span class="badge ${clsMap[normalizeScriptUse(val)] || 'badge-script-email'}">${normalizeScriptUse(val)}</span>`;
 }
+function statusLabel(val) {
+  const status = normalizeStatus(val);
+  return status === 'Not Reached Yet' ? 'Not Yet' : status;
+}
 function statusDot(val) {
   const status = normalizeStatus(val);
-  if (status === 'Not Reached Yet') return `<span class="status-text">Not Yet</span>`;
+  if (status === 'Not Reached Yet') return `<span class="status-text">${statusLabel(status)}</span>`;
   const clsMap = {
     Pending: 'status-pending',
     Accepted: 'status-accepted',
     Declined: 'status-declined',
   };
   return `<span class="status-dot ${clsMap[status] || 'status-pending'}" title="${status}" aria-label="${status}"></span>`;
+}
+function statusControl(key, idx, val) {
+  const status = normalizeStatus(val);
+  return `<button class="status-toggle badge ${STATUS_CLS[status] || 'badge-initial'}" title="Click to change status" onclick="event.stopPropagation();cycleRecordStatus('${key}', ${idx})">${statusLabel(status)}</button>`;
+}
+function cycleRecordStatus(key, idx) {
+  const record = (db[key] || [])[idx];
+  if (!record) return;
+  const current = normalizeStatus(record.status);
+  const currentIndex = STATUS_ORDER.indexOf(current);
+  const nextStatus = STATUS_ORDER[(currentIndex + 1 + STATUS_ORDER.length) % STATUS_ORDER.length];
+  record.status = nextStatus;
+  save(key);
+  renderTable(key);
+  toast(`${record.name || record.brand || 'Record'}: ${statusLabel(nextStatus)}`, 'ok');
 }
 function creatorTerms(r) {
   const parts = [];
@@ -3536,7 +3570,7 @@ TABLES.creators = {
       <td data-label="Platform">${r.platform||'-'}</td>
       <td data-label="Followers">${r.followers||'-'}</td>
       <td data-label="Tag">${creatorTierBadge(r.followers)}</td>
-      <td data-label="Status" class="status-cell">${statusDot(r.status)}</td>
+      <td data-label="Status" class="status-cell">${statusControl('creators', i, r.status)}</td>
       <td data-label="Terms">${creatorTerms(r)}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('creators',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('creator',${i})">Edit</button></div></td>
@@ -3561,7 +3595,7 @@ TABLES.partners = {
       <td data-label="Channel">${r.platform||'-'}</td>
       <td data-label="Followers">${r.followers||'-'}</td>
       <td data-label="Tag">${creatorTierBadge(r.followers)}</td>
-      <td data-label="Status" class="status-cell">${statusDot(r.status)}</td>
+      <td data-label="Status" class="status-cell">${statusControl('partners', i, r.status)}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Adi Reviewed">${r.adi=='Yes'?'Yes':r.adi=='No'?'No':'-'}</td>
       <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('partners',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('partners',${i})">Edit</button></div></td>
@@ -3583,7 +3617,7 @@ TABLES.orgPartners = {
       <td data-label="Type">${typeBadge(r.type)}</td>
       <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td data-label="Location">${r.location||'-'}</td>
-      <td data-label="Status" class="status-cell">${statusDot(r.status)}</td>
+      <td data-label="Status" class="status-cell">${statusControl('orgPartners', i, r.status)}</td>
       <td data-label="People Reached">${r.members||'-'}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Package">${r.incentive||'-'}</td>
