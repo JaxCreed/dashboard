@@ -480,6 +480,34 @@ tbody tr:last-child td { border-bottom: none; }
   max-width: 280px; font-size: 12px; color: #5d7290;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.asset-preview {
+  min-height: 64px;
+  border: 1px dashed #cddcf7;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f8fbff, #eef5ff);
+  color: #6a7f9f;
+  font-size: 12px;
+}
+.asset-preview img {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.script-asset-thumb {
+  margin-top: 8px;
+}
+.script-asset-thumb img {
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #d5e3fb;
+}
 .script-sections { display: flex; flex-direction: column; gap: 18px; }
 .script-section {
   background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,250,255,0.96));
@@ -583,6 +611,14 @@ body[data-theme="dark"] .source-item,
 body[data-theme="dark"] .outreach-preview {
   background: linear-gradient(180deg, #101b2d, #0d1728);
   color: #b8c8e2;
+}
+body[data-theme="dark"] .asset-preview {
+  background: linear-gradient(180deg, #101b2d, #0d1728);
+  border-color: #304768;
+  color: #b8c8e2;
+}
+body[data-theme="dark"] .script-asset-thumb img {
+  border-color: #304768;
 }
 body[data-theme="dark"] .research-card,
 body[data-theme="dark"] .script-section,
@@ -1006,6 +1042,7 @@ body[data-theme="dark"] .toast {
   <button class="tab-btn" onclick="switchTab('creators')">📱 Creator Outreach <span class="tab-count" id="cnt-creators">0</span></button>
   <button class="tab-btn" onclick="switchTab('partners')">🎵 Artists &amp; Brands <span class="tab-count" id="cnt-partners">0</span></button>
   <button class="tab-btn" onclick="switchTab('orgPartners')">⛪ Partnerships <span class="tab-count" id="cnt-orgPartners">0</span></button>
+  <button class="tab-btn" onclick="switchTab('messages')">💬 Messages <span class="tab-count" id="cnt-messages">0</span></button>
   <button class="tab-btn" onclick="switchTab('scripts')">📝 Scripts <span class="tab-count" id="cnt-scripts">0</span></button>
 </div>
 
@@ -1213,22 +1250,51 @@ body[data-theme="dark"] .toast {
   </div>
 </div>
 
+<div class="tab-content" id="tab-messages">
+  <div class="section-header">
+    <div>
+      <h2>💬 Messages</h2>
+      <p>Keep your generated outreach drafts and sent-message history in one place. Use this like a lightweight CRM for creator, brand, and partnership follow-up.</p>
+    </div>
+  </div>
+  <div class="stats-row" id="stats-messages"></div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="srch-messages" placeholder="Search recipient, group, channel, or message…" oninput="renderTable('messages')">
+    <select class="btn btn-outline" id="flt-messages-status" onchange="renderTable('messages')">
+      <option value="">Status: All</option>
+      <option>Draft</option>
+      <option>Ready</option>
+      <option>Sent</option>
+    </select>
+  </div>
+  <div class="table-container">
+    <table class="mobile-cards">
+      <thead><tr>
+        <th>Recipient</th><th>Group</th><th>Channel</th><th>Status</th><th>Preview</th><th>Updated</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbl-messages"></tbody>
+    </table>
+  </div>
+</div>
+
 <div class="tab-content" id="tab-scripts">
   <div class="section-header">
     <div>
       <h2>📝 Scripts</h2>
-      <p>Save ad scripts, creator emails, and outreach drafts in one place. Each script is labeled for Creator, Brands, or Partnerships.</p>
+      <p>Store campaign scripts, creator briefs, trend examples, story ideas, and talking points for creators, brands, and partnerships. You can also save visual examples here.</p>
     </div>
     <button class="btn btn-primary" onclick="openModal('scripts',-1)">+ Add Script</button>
   </div>
   <div class="stats-row" id="stats-scripts"></div>
   <div class="toolbar">
-    <input type="text" class="search-box" id="srch-scripts" placeholder="Search title, hook, CTA, body, notes…" oninput="renderScripts()">
+    <input type="text" class="search-box" id="srch-scripts" placeholder="Search title, format, hook, script, notes…" oninput="renderScripts()">
     <select class="btn btn-outline" id="flt-scripts-kind" onchange="renderTable('scripts')">
-      <option value="">Use: All</option>
-      <option>Ad Script</option>
-      <option>Email</option>
-      <option>Outreach</option>
+      <option value="">Format: All</option>
+      <option>Paid Ad</option>
+      <option>Creator Brief</option>
+      <option>Trend Example</option>
+      <option>Story Concept</option>
+      <option>Email Angle</option>
     </select>
   </div>
   <div class="script-sections">
@@ -1236,7 +1302,7 @@ body[data-theme="dark"] .toast {
       <div class="script-section-head">
         <div>
           <h3>Creator Scripts</h3>
-          <p>Ad scripts, emails, and creator outreach drafts.</p>
+          <p>Creator campaign scripts, talking points, UGC briefs, and trend references.</p>
         </div>
         <span class="tab-count" id="cnt-scripts-creator">0</span>
       </div>
@@ -1253,12 +1319,12 @@ body[data-theme="dark"] .toast {
       <div class="script-section-head">
         <div>
           <h3>Brand Scripts</h3>
-          <p>Brand emails, ad concepts, and outreach templates.</p>
+          <p>Artist and brand campaign angles, promo ideas, and message references.</p>
         </div>
         <span class="tab-count" id="cnt-scripts-brand">0</span>
       </div>
       <div class="table-container" style="border:none;border-radius:0;box-shadow:none;">
-        <table>
+        <table class="mobile-cards">
           <thead><tr>
             <th>Title</th><th>Use</th><th>Hook / Subject</th><th>Preview</th><th>Last Updated</th><th>Actions</th>
           </tr></thead>
@@ -1270,12 +1336,12 @@ body[data-theme="dark"] .toast {
       <div class="script-section-head">
         <div>
           <h3>Partnership Scripts</h3>
-          <p>Church, camp, and ministry outreach drafts.</p>
+          <p>Church, camp, and ministry rollout ideas, event concepts, and promo examples.</p>
         </div>
         <span class="tab-count" id="cnt-scripts-partnership">0</span>
       </div>
       <div class="table-container" style="border:none;border-radius:0;box-shadow:none;">
-        <table>
+        <table class="mobile-cards">
           <thead><tr>
             <th>Title</th><th>Use</th><th>Hook / Subject</th><th>Preview</th><th>Last Updated</th><th>Actions</th>
           </tr></thead>
@@ -1676,21 +1742,30 @@ body[data-theme="dark"] .toast {
     <div class="modal-body">
       <input type="hidden" id="scripts-idx" value="-1">
       <div class="form-row">
-        <div class="form-group"><label>Script Title *</label><input type="text" id="sc-title" placeholder="e.g. Creator intro email v1"></div>
+        <div class="form-group"><label>Script Title *</label><input type="text" id="sc-title" placeholder="e.g. Creator UGC brief - prayer app angle"></div>
         <div class="form-group"><label>Label</label>
           <select id="sc-label"><option>Creator</option><option>Brands</option><option>Partnerships</option></select>
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Use</label>
-          <select id="sc-use"><option>Ad Script</option><option>Email</option><option>Outreach</option></select>
+        <div class="form-group"><label>Format</label>
+          <select id="sc-use"><option>Paid Ad</option><option>Creator Brief</option><option>Trend Example</option><option>Story Concept</option><option>Email Angle</option></select>
         </div>
-        <div class="form-group"><label>Hook / Subject</label><input type="text" id="sc-hook" placeholder="First line, subject line, or lead-in"></div>
+        <div class="form-group"><label>Hook / Direction</label><input type="text" id="sc-hook" placeholder="First line, angle, or creative direction"></div>
       </div>
-      <div class="form-group"><label>Script Body</label><textarea id="sc-body" rows="7" placeholder="Write the full ad script, email, or outreach draft here…"></textarea></div>
+      <div class="form-group"><label>Script / Brief</label><textarea id="sc-body" rows="7" placeholder="Write the script, creator brief, story concept, trend example, or promo direction here…"></textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>CTA</label><input type="text" id="sc-cta" placeholder="e.g. Would you be open to a quick call next week?"></div>
-        <div class="form-group"><label>Notes</label><input type="text" id="sc-notes" placeholder="Audience angle, personalization ideas, follow-up notes"></div>
+        <div class="form-group"><label>CTA / Talking Point</label><input type="text" id="sc-cta" placeholder="e.g. Try Creed free, mention creator code, or push installs"></div>
+        <div class="form-group"><label>Notes</label><input type="text" id="sc-notes" placeholder="Audience angle, creator direction, production notes"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Example Image</label><input type="file" id="sc-asset-file" accept="image/*" onchange="handleScriptAssetChange(event)"></div>
+        <div class="form-group"><label>Image Caption</label><input type="text" id="sc-asset-caption" placeholder="What this image/example is showing"></div>
+      </div>
+      <input type="hidden" id="sc-asset-data">
+      <div class="form-group">
+        <label>Image Preview</label>
+        <div id="sc-asset-preview" class="asset-preview empty">No image attached yet.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1704,7 +1779,7 @@ body[data-theme="dark"] .toast {
 <div class="modal-overlay" id="modal-outreach">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="outreach-mtitle">Message Contact</h2>
+      <h2 id="outreach-mtitle">Draft Message</h2>
       <button class="modal-close" onclick="closeModal('modal-outreach')">&times;</button>
     </div>
     <div class="modal-body">
@@ -1714,26 +1789,51 @@ body[data-theme="dark"] .toast {
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Script Label</label>
+          <label>Group</label>
           <input type="text" id="outreach-label" readonly>
         </div>
         <div class="form-group">
-          <label>Select Script</label>
-          <select id="outreach-script" onchange="updateOutreachPreview()"></select>
+          <label>Message Type</label>
+          <select id="outreach-type" onchange="handleOutreachTypeChange()">
+            <option>Instagram DM</option>
+            <option>TikTok DM</option>
+            <option>Email</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Reference Script</label>
+          <select id="outreach-script"></select>
+        </div>
+        <div class="form-group">
+          <label>Draft Status</label>
+          <select id="outreach-message-status">
+            <option>Draft</option>
+            <option>Ready</option>
+            <option>Sent</option>
+          </select>
         </div>
       </div>
       <div class="form-group">
         <label>Subject / Hook</label>
-        <input type="text" id="outreach-subject" readonly>
+        <input type="text" id="outreach-subject" placeholder="Email subject or optional internal note">
       </div>
       <div class="form-group">
-        <label>Preview</label>
-        <div class="outreach-preview" id="outreach-preview">Select a script to preview it here.</div>
+        <label>Message</label>
+        <textarea id="outreach-body" rows="8" placeholder="Gemini will draft the message here…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Gemini Notes</label>
+        <div class="outreach-preview" id="outreach-preview">Choose a message type and click Generate with Gemini.</div>
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-outline" onclick="copyOutreachMessage()">Copy Message</button>
+      <button class="btn btn-outline" onclick="saveOutreachDraft()">Save to Messages</button>
       <button class="btn btn-outline" onclick="closeModal('modal-outreach')">Cancel</button>
-      <button class="btn btn-primary" onclick="launchOutreachEmail()">Open in Outlook</button>
+      <button class="btn btn-outline" id="outreach-open-email" onclick="launchOutreachEmail()">Open Email</button>
+      <button class="btn btn-primary" id="outreach-generate" onclick="generateOutreachDraft()">Generate with Gemini</button>
     </div>
   </div>
 </div>
@@ -1797,6 +1897,7 @@ const STORE = {
   creators:     'creed_creators_current',
   partners:     'creed_partners_current',
   orgPartners:  'creed_org_partners_current',
+  messages:     'creed_messages_current',
   scripts:      'creed_scripts_current',
 };
 const SYNC_STORE = 'creed_sync_config_v1';
@@ -1935,10 +2036,14 @@ function normalizeScriptLabel(val) {
   return ['Creator', 'Brands', 'Partnerships'].includes(val) ? val : 'Creator';
 }
 function normalizeScriptUse(val) {
-  return ['Ad Script', 'Email', 'Outreach'].includes(val) ? val : 'Email';
+  if (val === 'Ad Script') return 'Paid Ad';
+  if (val === 'Email') return 'Email Angle';
+  if (val === 'Outreach') return 'Creator Brief';
+  return ['Paid Ad', 'Creator Brief', 'Trend Example', 'Story Concept', 'Email Angle'].includes(val) ? val : 'Paid Ad';
 }
 function normalizeScriptItem(script = {}) {
   return {
+    id: script.id || `script-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
     title: script.title || '',
     label: normalizeScriptLabel(script.label),
     use: normalizeScriptUse(script.use),
@@ -1946,7 +2051,27 @@ function normalizeScriptItem(script = {}) {
     body: script.body || '',
     cta: script.cta || '',
     notes: script.notes || '',
+    assetData: script.assetData || '',
+    assetCaption: script.assetCaption || '',
     updatedAt: script.updatedAt || todayStamp(),
+  };
+}
+function normalizeMessageStatus(val) {
+  return ['Draft', 'Ready', 'Sent'].includes(val) ? val : 'Draft';
+}
+function normalizeMessageItem(message = {}) {
+  return {
+    id: message.id || `msg-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    recipient: message.recipient || '',
+    group: normalizeScriptLabel(message.group || message.label),
+    channel: ['Instagram DM', 'TikTok DM', 'Email'].includes(message.channel) ? message.channel : 'Instagram DM',
+    status: normalizeMessageStatus(message.status),
+    subject: message.subject || '',
+    body: message.body || '',
+    email: message.email || '',
+    sourceKey: message.sourceKey || '',
+    sourceName: message.sourceName || '',
+    updatedAt: message.updatedAt || todayStamp(),
   };
 }
 function normalizeCreatorItem(record = {}) {
@@ -1983,6 +2108,7 @@ function normalizeDbState(state = {}) {
     creators: (Array.isArray(state.creators) ? state.creators : []).map(normalizeCreatorItem),
     partners: (Array.isArray(state.partners) ? state.partners : []).map(normalizePartnerItem),
     orgPartners: (Array.isArray(state.orgPartners) ? state.orgPartners : []).map(normalizeOrgPartnerItem),
+    messages: (Array.isArray(state.messages) ? state.messages : []).map(normalizeMessageItem),
     scripts: (Array.isArray(state.scripts) ? state.scripts : []).map(normalizeScriptItem),
   };
 }
@@ -1994,6 +2120,7 @@ function snapshotDbState() {
     creators: db.creators.map(normalizeCreatorItem),
     partners: db.partners.map(normalizePartnerItem),
     orgPartners: db.orgPartners.map(normalizeOrgPartnerItem),
+    messages: db.messages.map(normalizeMessageItem),
     scripts: db.scripts.map(normalizeScriptItem),
   };
 }
@@ -2074,6 +2201,7 @@ function applyDbState(state = {}) {
   db.creators = normalized.creators;
   db.partners = normalized.partners;
   db.orgPartners = normalized.orgPartners;
+  db.messages = normalized.messages;
   db.scripts = normalized.scripts;
 }
 function persistLocalState() {
@@ -2081,10 +2209,11 @@ function persistLocalState() {
   localStorage.setItem(STORE.creators, JSON.stringify(db.creators));
   localStorage.setItem(STORE.partners, JSON.stringify(db.partners));
   localStorage.setItem(STORE.orgPartners, JSON.stringify(db.orgPartners));
+  localStorage.setItem(STORE.messages, JSON.stringify(db.messages));
   localStorage.setItem(STORE.scripts, JSON.stringify(db.scripts));
 }
 function isRemoteStateEmpty(state = {}) {
-  return ['tasks', 'creators', 'partners', 'orgPartners', 'scripts'].every(key => !Array.isArray(state[key]) || state[key].length === 0);
+  return ['tasks', 'creators', 'partners', 'orgPartners', 'messages', 'scripts'].every(key => !Array.isArray(state[key]) || state[key].length === 0);
 }
 function exportDashboardBackup() {
   const stamp = new Date().toISOString().slice(0, 10);
@@ -2250,6 +2379,7 @@ function load() {
   db.creators = (firstStored([STORE.creators, 'creed_creators_v2']) || migrateCreators()).map(normalizeCreatorItem);
   db.partners = (firstStored([STORE.partners, 'creed_partners_v2']) || migratePartners()).map(normalizePartnerItem);
   db.orgPartners = (firstStored([STORE.orgPartners, 'creed_org_partners_v2']) || migrateOrgPartners()).map(normalizeOrgPartnerItem);
+  db.messages = (firstStored([STORE.messages, 'creed_messages_v1']) || []).map(normalizeMessageItem);
   db.scripts = (firstStored([STORE.scripts, 'creed_scripts_v1']) || []).map(normalizeScriptItem);
 }
 async function fetchSharedState() {
@@ -2470,11 +2600,22 @@ function scriptLabelBadge(val) {
 }
 function scriptUseBadge(val) {
   const clsMap = {
-    'Ad Script': 'badge-script-ad',
-    Email: 'badge-script-email',
-    Outreach: 'badge-script-outreach',
+    'Paid Ad': 'badge-script-ad',
+    'Creator Brief': 'badge-script-outreach',
+    'Trend Example': 'badge-mediumcreator',
+    'Story Concept': 'badge-script-brand',
+    'Email Angle': 'badge-script-email',
   };
   return `<span class="badge ${clsMap[normalizeScriptUse(val)] || 'badge-script-email'}">${normalizeScriptUse(val)}</span>`;
+}
+function messageStatusBadge(val) {
+  const status = normalizeMessageStatus(val);
+  const clsMap = {
+    Draft: 'badge-initial',
+    Ready: 'badge-pending',
+    Sent: 'badge-accepted',
+  };
+  return `<span class="badge ${clsMap[status] || 'badge-initial'}">${status}</span>`;
 }
 function statusLabel(val) {
   const status = normalizeStatus(val);
@@ -3621,12 +3762,33 @@ TABLES.orgPartners = {
       <td data-label="People Reached">${r.members||'-'}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Package">${r.incentive||'-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></div></td>
+      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('orgPartners',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></div></td>
     </tr>`,
   empty: 'No church or camp partnerships tracked yet.',
 };
+TABLES.messages = {
+  search: ['recipient','group','channel','status','body','subject','sourceName'],
+  statsEl: 'stats-messages', countEl: 'cnt-messages',
+  stats: d => [
+    { n: d.length, l: 'Total' },
+    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Draft').length, l: 'Drafts' },
+    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Ready').length, l: 'Ready' },
+    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Sent').length, l: 'Sent' },
+  ],
+  renderRow: (r, i) => `
+    <tr onclick="openSavedMessage(${i})">
+      <td data-label="Recipient"><strong>${r.recipient || '-'}</strong>${r.sourceName ? `<br><span style="font-size:12px;color:var(--muted);">${r.sourceName}</span>` : ''}</td>
+      <td data-label="Group">${scriptLabelBadge(r.group)}</td>
+      <td data-label="Channel">${r.channel || '-'}</td>
+      <td data-label="Status">${messageStatusBadge(r.status)}</td>
+      <td data-label="Preview"><div class="script-preview">${r.body || '-'}</div></td>
+      <td data-label="Updated">${r.updatedAt || '-'}</td>
+      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openSavedMessage(${i})">Open</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteMessage(${i})">Delete</button></div></td>
+    </tr>`,
+  empty: 'No messages saved yet. Generate one from any Message button and it will appear here.',
+};
 TABLES.scripts = {
-  search: ['title','label','use','hook','body','cta','notes'],
+  search: ['title','label','use','hook','body','cta','notes','assetCaption'],
   extraFilter: (r) => {
     const use = document.getElementById('flt-scripts-kind').value;
     return !use || normalizeScriptUse(r.use) === use;
@@ -3638,7 +3800,7 @@ TABLES.scripts = {
     { n: d.filter(r => normalizeScriptLabel(r.label) === 'Brands').length, l: 'Brands' },
     { n: d.filter(r => normalizeScriptLabel(r.label) === 'Partnerships').length, l: 'Partnerships' },
   ],
-  empty: 'No scripts saved yet. Add creator ads, brand emails, or partnership outreach drafts here.',
+  empty: 'No scripts saved yet. Add campaign scripts, trend references, and creator or partnership examples here.',
 };
 delete TABLES.artists;
 delete TABLES.merch;
@@ -3672,7 +3834,7 @@ function renderScriptRow(r, i) {
       <td data-label="Title"><strong>${r.title||'-'}</strong>${r.cta?`<br><span style="font-size:12px;color:var(--muted);">CTA: ${r.cta}</span>`:''}</td>
       <td data-label="Use">${scriptUseBadge(r.use)}</td>
       <td data-label="Hook">${r.hook||'-'}</td>
-      <td data-label="Body"><div class="script-preview">${r.body||'-'}</div></td>
+      <td data-label="Body"><div class="script-preview">${r.body||'-'}</div>${r.assetData ? `<div class="script-asset-thumb"><img src="${r.assetData}" alt="${escapeHtml(r.assetCaption || r.title || 'Example image')}"></div>` : ''}</td>
       <td data-label="Updated">${r.updatedAt||'-'}</td>
       <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('scripts',${i})">Edit</button></div></td>
     </tr>`;
@@ -3723,8 +3885,8 @@ FIELDS.orgPartners = {
   nameKey:'name'
 };
 FIELDS.scripts = {
-  ids:['sc-title','sc-label','sc-use','sc-hook','sc-body','sc-cta','sc-notes'],
-  keys:['title','label','use','hook','body','cta','notes'],
+  ids:['sc-title','sc-label','sc-use','sc-hook','sc-body','sc-cta','sc-notes','sc-asset-caption'],
+  keys:['title','label','use','hook','body','cta','notes','assetCaption'],
   nameKey:'title'
 };
 delete FIELDS.artists;
@@ -3766,9 +3928,19 @@ function openModal(type, idx) {
       if (el.tagName === 'SELECT') el.selectedIndex = 0;
       else el.value = '';
     });
+    if (type === 'scripts') {
+      document.getElementById('sc-asset-data').value = '';
+      document.getElementById('sc-asset-file').value = '';
+      renderScriptAssetPreview('');
+    }
   } else {
     const r = db[key][idx];
     cfg.ids.forEach((id,i) => { const el=document.getElementById(id); if(el) el.value=r[cfg.keys[i]]||''; });
+    if (type === 'scripts') {
+      document.getElementById('sc-asset-data').value = r.assetData || '';
+      document.getElementById('sc-asset-file').value = '';
+      renderScriptAssetPreview(r.assetData || '', r.assetCaption || '');
+    }
   }
   document.getElementById(`modal-${type}`).classList.add('active');
 }
@@ -3784,8 +3956,11 @@ function saveRec(type) {
   });
   if ('status' in obj) obj.status = normalizeStatus(obj.status);
   if (key === 'scripts') {
+    const existingScript = idx === -1 ? {} : (db[key][idx] || {});
     obj.label = normalizeScriptLabel(obj.label);
     obj.use = normalizeScriptUse(obj.use);
+    obj.id = existingScript.id || obj.id;
+    obj.assetData = document.getElementById('sc-asset-data').value || existingScript.assetData || '';
     obj.updatedAt = todayStamp();
   }
   const primaryField = cfg.nameKey || 'name';
@@ -3804,92 +3979,258 @@ function saveRec(type) {
 
 let outreachContext = null;
 
+function renderScriptAssetPreview(assetData = '', caption = '') {
+  const preview = document.getElementById('sc-asset-preview');
+  if (!preview) return;
+  preview.classList.toggle('empty', !assetData);
+  preview.innerHTML = assetData
+    ? `<img src="${assetData}" alt="${escapeHtml(caption || 'Example image')}">`
+    : 'No image attached yet.';
+}
+
+function handleScriptAssetChange(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) {
+    document.getElementById('sc-asset-data').value = '';
+    renderScriptAssetPreview('');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = String(reader.result || '');
+    document.getElementById('sc-asset-data').value = result;
+    renderScriptAssetPreview(result, document.getElementById('sc-asset-caption').value);
+  };
+  reader.readAsDataURL(file);
+}
+
 function getOutreachLabelForKey(key) {
   if (key === 'creators') return 'Creator';
   if (key === 'partners') return 'Brands';
   if (key === 'orgPartners') return 'Partnerships';
-  return '';
+  return 'Creator';
 }
 
-function getOutreachEmail(record = {}, key = '') {
-  if (key === 'creators') return String(record.email || '').trim();
-  if (key === 'partners') return String(record.email || '').trim();
-  if (key === 'orgPartners') return String(record.email || '').trim();
-  return '';
+function getRecordForOutreachContext() {
+  if (!outreachContext) return null;
+  if (outreachContext.recordSnapshot) return outreachContext.recordSnapshot;
+  return (db[outreachContext.key] || [])[outreachContext.idx] || null;
+}
+
+function detectDefaultOutreachType(record = {}, key = '') {
+  const platform = String(record.platform || '').toLowerCase();
+  if (key === 'orgPartners') return 'Email';
+  if (platform.includes('instagram')) return 'Instagram DM';
+  if (platform.includes('tiktok')) return 'TikTok DM';
+  if (record.email) return 'Email';
+  return 'Instagram DM';
+}
+
+function populateOutreachScriptOptions(label, preferredTitle = '') {
+  const select = document.getElementById('outreach-script');
+  const scripts = db.scripts.filter(s => normalizeScriptLabel(s.label) === label);
+  const options = [`<option value="">No reference script</option>`].concat(
+    scripts.map(script => `<option value="${script.id}">${escapeHtml(script.title || 'Untitled script')}</option>`)
+  );
+  select.innerHTML = options.join('');
+  if (preferredTitle) {
+    const match = scripts.find(script => script.title === preferredTitle);
+    if (match) select.value = match.id;
+  }
+}
+
+function getSelectedOutreachScript() {
+  const selectedId = document.getElementById('outreach-script').value;
+  if (!selectedId) return null;
+  return db.scripts.find(script => script.id === selectedId) || null;
+}
+
+function handleOutreachTypeChange() {
+  const type = document.getElementById('outreach-type').value;
+  const openEmailBtn = document.getElementById('outreach-open-email');
+  openEmailBtn.style.display = type === 'Email' ? 'inline-flex' : 'none';
+  document.getElementById('outreach-preview').textContent = type === 'Email'
+    ? 'Gemini will draft a friendly, more professional email that still feels personal.'
+    : 'Gemini will draft a short, natural DM that feels real and not sales-y.';
 }
 
 function openOutreachModal(key, idx) {
   const record = (db[key] || [])[idx];
   if (!record) return;
-
-  const email = getOutreachEmail(record, key);
-  if (!email) {
-    toast('Add an email first before sending a message.', 'err');
-    return;
-  }
-
   const label = getOutreachLabelForKey(key);
-  const scripts = db.scripts.filter(s => normalizeScriptLabel(s.label) === label);
-  if (!scripts.length) {
-    toast(`Add a ${label.toLowerCase()} script first in the Scripts tab.`, 'err');
-    return;
-  }
+  const email = String(record.email || '').trim();
+  const recipientMeta = [email ? `<${email}>` : '', record.platform || record.type || ''].filter(Boolean).join(' · ');
 
-  outreachContext = { key, idx, label, email };
-  document.getElementById('outreach-mtitle').textContent = `Message ${record.name || 'Contact'}`;
-  document.getElementById('outreach-recipient').value = `${record.name || 'Contact'} <${email}>`;
+  outreachContext = {
+    key,
+    idx,
+    label,
+    email,
+    messageId: '',
+    sourceName: record.name || record.brand || 'Contact',
+  };
+
+  document.getElementById('outreach-mtitle').textContent = `Message ${record.name || record.brand || 'Contact'}`;
+  document.getElementById('outreach-recipient').value = [record.name || record.brand || 'Contact', recipientMeta].filter(Boolean).join(' ');
   document.getElementById('outreach-label').value = label;
-
-  const select = document.getElementById('outreach-script');
-  select.innerHTML = scripts.map((script, scriptIdx) =>
-    `<option value="${scriptIdx}">${script.title || `Script ${scriptIdx + 1}`}</option>`
-  ).join('');
-
-  updateOutreachPreview();
+  document.getElementById('outreach-type').value = detectDefaultOutreachType(record, key);
+  document.getElementById('outreach-message-status').value = 'Draft';
+  document.getElementById('outreach-subject').value = '';
+  document.getElementById('outreach-body').value = '';
+  populateOutreachScriptOptions(label);
+  handleOutreachTypeChange();
   document.getElementById('modal-outreach').classList.add('active');
 }
 
-function getSelectedOutreachScript() {
-  if (!outreachContext) return null;
-  const scripts = db.scripts.filter(s => normalizeScriptLabel(s.label) === outreachContext.label);
-  const select = document.getElementById('outreach-script');
-  const idx = parseInt(select.value, 10);
-  return scripts[Number.isFinite(idx) ? idx : 0] || null;
+function openSavedMessage(idx) {
+  const message = db.messages[idx];
+  if (!message) return;
+  outreachContext = {
+    key: message.sourceKey || '',
+    idx: -1,
+    label: normalizeScriptLabel(message.group),
+    email: message.email || '',
+    messageId: message.id,
+    sourceName: message.sourceName || message.recipient,
+    recordSnapshot: {
+      name: message.recipient,
+      email: message.email || '',
+      platform: message.channel,
+      notes: message.body,
+    },
+  };
+  document.getElementById('outreach-mtitle').textContent = `Message ${message.recipient || 'Contact'}`;
+  document.getElementById('outreach-recipient').value = [message.recipient || 'Contact', message.email ? `<${message.email}>` : ''].filter(Boolean).join(' ');
+  document.getElementById('outreach-label').value = normalizeScriptLabel(message.group);
+  document.getElementById('outreach-type').value = message.channel || 'Instagram DM';
+  document.getElementById('outreach-message-status').value = normalizeMessageStatus(message.status);
+  document.getElementById('outreach-subject').value = message.subject || '';
+  document.getElementById('outreach-body').value = message.body || '';
+  populateOutreachScriptOptions(normalizeScriptLabel(message.group));
+  handleOutreachTypeChange();
+  document.getElementById('outreach-preview').textContent = 'Saved message loaded. You can update it, copy it, or mark it sent.';
+  document.getElementById('modal-outreach').classList.add('active');
 }
 
-function updateOutreachPreview() {
+async function generateOutreachDraft() {
   if (!outreachContext) return;
-  const script = getSelectedOutreachScript();
-  const record = db[outreachContext.key][outreachContext.idx];
-  if (!script || !record) return;
+  const record = getRecordForOutreachContext();
+  if (!record) {
+    toast('No contact selected.', 'err');
+    return;
+  }
 
-  const subject = applyOutreachTemplate(script.hook || script.title || '', record);
-  const bodyParts = [
-    applyOutreachTemplate(script.body || '', record),
-    applyOutreachTemplate(script.cta || '', record),
-  ].filter(Boolean);
-  document.getElementById('outreach-subject').value = subject;
-  document.getElementById('outreach-preview').textContent = bodyParts.join('\n\n') || 'This script has no body yet.';
+  const reference = getSelectedOutreachScript();
+  const payload = {
+    channel: document.getElementById('outreach-type').value,
+    recipient: record.name || record.brand || outreachContext.sourceName || 'Contact',
+    group: outreachContext.label,
+    platform: record.platform || record.type || '',
+    company: record.company || '',
+    title: record.title || '',
+    notes: [record.notes || '', record.contentStyle || record.style || ''].filter(Boolean).join(' | '),
+    style: record.style || record.contentStyle || '',
+    whyFit: record.whyFit || '',
+    angle: record.suggestedFirstOutreachAngle || '',
+    referenceTitle: reference?.title || '',
+    referenceBody: [reference?.hook || '', reference?.body || '', reference?.cta || '', reference?.notes || ''].filter(Boolean).join('\n'),
+  };
+
+  const generateBtn = document.getElementById('outreach-generate');
+  const preview = document.getElementById('outreach-preview');
+  generateBtn.disabled = true;
+  preview.textContent = 'Gemini is drafting a message that should feel personal, real, and specific to them…';
+
+  try {
+    const response = await fetch('/api/message-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Gemini could not draft the message.');
+    document.getElementById('outreach-subject').value = result.subject || '';
+    document.getElementById('outreach-body').value = result.message || '';
+    preview.textContent = result.toneNotes || 'Draft ready. Save it to Messages if you want it tracked.';
+    toast('Gemini drafted a message.', 'ok');
+  } catch (err) {
+    preview.textContent = err.message || 'Gemini draft failed.';
+    toast(err.message || 'Gemini draft failed.', 'err');
+  } finally {
+    generateBtn.disabled = false;
+  }
+}
+
+function saveOutreachDraft() {
+  if (!outreachContext) return;
+  const body = document.getElementById('outreach-body').value.trim();
+  if (!body) {
+    toast('Generate or write a message first.', 'err');
+    return;
+  }
+  const existingIdx = db.messages.findIndex(message => message.id === outreachContext.messageId);
+  const draft = normalizeMessageItem({
+    id: outreachContext.messageId || '',
+    recipient: outreachContext.sourceName || getRecordForOutreachContext()?.name || 'Contact',
+    group: outreachContext.label,
+    channel: document.getElementById('outreach-type').value,
+    status: document.getElementById('outreach-message-status').value,
+    subject: document.getElementById('outreach-subject').value.trim(),
+    body,
+    email: outreachContext.email || '',
+    sourceKey: outreachContext.key || '',
+    sourceName: outreachContext.sourceName || '',
+    updatedAt: todayStamp(),
+  });
+  if (existingIdx >= 0) db.messages[existingIdx] = draft;
+  else db.messages.unshift(draft);
+  outreachContext.messageId = draft.id;
+  save('messages');
+  renderTable('messages');
+  toast(existingIdx >= 0 ? 'Message updated in Messages.' : 'Message saved to Messages.', 'ok');
+}
+
+async function copyOutreachMessage() {
+  const body = document.getElementById('outreach-body').value.trim();
+  if (!body) {
+    toast('Nothing to copy yet.', 'err');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(body);
+    toast('Message copied.', 'ok');
+  } catch (err) {
+    toast('Copy failed. Try selecting the text manually.', 'err');
+  }
 }
 
 function launchOutreachEmail() {
   if (!outreachContext) return;
-  const script = getSelectedOutreachScript();
-  const record = db[outreachContext.key][outreachContext.idx];
-  if (!script || !record) {
-    toast('Select a script first.', 'err');
+  if (document.getElementById('outreach-type').value !== 'Email') {
+    toast('Switch the message type to Email first.', 'err');
     return;
   }
-
-  const subject = applyOutreachTemplate(script.hook || script.title || '', record);
-  const body = [
-    applyOutreachTemplate(script.body || '', record),
-    applyOutreachTemplate(script.cta || '', record),
-  ].filter(Boolean).join('\n\n');
-
+  if (!outreachContext.email) {
+    toast('Add an email on the contact first.', 'err');
+    return;
+  }
+  const subject = document.getElementById('outreach-subject').value.trim();
+  const body = document.getElementById('outreach-body').value.trim();
+  if (!body) {
+    toast('Generate or write the email first.', 'err');
+    return;
+  }
   const mailto = `mailto:${outreachContext.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailto;
-  closeModal('modal-outreach');
+}
+
+function deleteMessage(idx) {
+  if (idx < 0 || idx >= db.messages.length) return;
+  if (!confirm('Delete this saved message?')) return;
+  db.messages.splice(idx, 1);
+  save('messages');
+  renderTable('messages');
+  toast('Message deleted.');
 }
 
 function deleteRec(type) {

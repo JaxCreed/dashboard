@@ -16,6 +16,7 @@ const EMPTY_STATE = {
   creators: [],
   partners: [],
   orgPartners: [],
+  messages: [],
   scripts: [],
 };
 const PUBLIC_CONFIG = {
@@ -84,6 +85,16 @@ const LEAD_RESEARCH_SCHEMA = {
   },
   required: ['summary', 'leads'],
 };
+const MESSAGE_DRAFT_SCHEMA = {
+  type: 'object',
+  properties: {
+    subject: { type: 'string' },
+    message: { type: 'string' },
+    channel: { type: 'string' },
+    toneNotes: { type: 'string' },
+  },
+  required: ['subject', 'message', 'channel', 'toneNotes'],
+};
 
 function sanitizeState(state = {}) {
   return {
@@ -93,6 +104,7 @@ function sanitizeState(state = {}) {
     creators: Array.isArray(state.creators) ? state.creators : [],
     partners: Array.isArray(state.partners) ? state.partners : [],
     orgPartners: Array.isArray(state.orgPartners) ? state.orgPartners : [],
+    messages: Array.isArray(state.messages) ? state.messages : [],
     scripts: Array.isArray(state.scripts) ? state.scripts : [],
   };
 }
@@ -258,6 +270,50 @@ function buildJsonFormatHint() {
   ].join('\n');
 }
 
+function buildMessageDraftPrompt(options = {}) {
+  const channel = ['Instagram DM', 'TikTok DM', 'Email'].includes(options.channel) ? options.channel : 'Instagram DM';
+  const recipient = String(options.recipient || '').trim() || 'this person';
+  const group = String(options.group || '').trim() || 'Creator';
+  const platform = String(options.platform || '').trim();
+  const company = String(options.company || '').trim();
+  const title = String(options.title || '').trim();
+  const notes = String(options.notes || '').trim();
+  const style = String(options.style || '').trim();
+  const whyFit = String(options.whyFit || '').trim();
+  const angle = String(options.angle || '').trim();
+  const referenceTitle = String(options.referenceTitle || '').trim();
+  const referenceBody = String(options.referenceBody || '').trim();
+
+  return [
+    'You are drafting a first outreach message for Jax from Creed, a Christian app.',
+    `Recipient: ${recipient}.`,
+    `Group: ${group}.`,
+    platform ? `Platform: ${platform}.` : '',
+    company ? `Company / organization: ${company}.` : '',
+    title ? `Role / title: ${title}.` : '',
+    notes ? `Notes about them: ${notes}.` : '',
+    style ? `Known content or communication style: ${style}.` : '',
+    whyFit ? `Why they seem like a fit: ${whyFit}.` : '',
+    angle ? `Suggested outreach angle: ${angle}.` : '',
+    referenceTitle ? `Reference script title: ${referenceTitle}.` : '',
+    referenceBody ? `Reference script/example for inspiration only: ${referenceBody}.` : '',
+    `Channel: ${channel}.`,
+    'Important tone guidance:',
+    'This must sound real, relatable, personable, and personal.',
+    'It should sound like someone who may not know them yet but genuinely wants to connect, not like a sales pitch.',
+    'Emphasize realness, warmth, and one specific detail that feels unique to them.',
+    'Do not sound robotic, corporate, spammy, overly polished, or overly excited.',
+    'Avoid generic flattery.',
+    'Make it feel like a human reaching out one-to-one.',
+    channel === 'Email'
+      ? 'For email: write a short friendly-professional email with a concise subject line and a body that still feels warm and personal.'
+      : 'For Instagram DM or TikTok DM: keep it short and sweet, very natural, easy to read on mobile, and not too long.',
+    'Return JSON only.',
+    'Use this exact shape:',
+    '{"subject":"string","message":"string","channel":"string","toneNotes":"string"}',
+  ].filter(Boolean).join('\n');
+}
+
 function getResponseText(payload) {
   return payload?.candidates?.[0]?.content?.parts
     ?.map(part => part?.text || '')
@@ -354,6 +410,57 @@ async function runLeadResearch(options = {}) {
   };
 }
 
+async function runMessageDraft(options = {}) {
+  const useStructuredToolJson = supportsStructuredToolJson(GEMINI_MODEL);
+  const body = {
+    contents: [
+      {
+        parts: [
+          { text: buildMessageDraftPrompt(options) },
+        ],
+      },
+    ],
+  };
+
+  if (useStructuredToolJson) {
+    body.generationConfig = {
+      responseMimeType: 'application/json',
+      responseJsonSchema: MESSAGE_DRAFT_SCHEMA,
+    };
+  }
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || 'Gemini message draft request failed.';
+    throw new Error(message);
+  }
+
+  const rawText = getResponseText(payload);
+  if (!rawText) throw new Error('Gemini returned an empty message draft.');
+
+  try {
+    const parsed = JSON.parse(useStructuredToolJson ? rawText : extractJsonObject(rawText));
+    return {
+      subject: typeof parsed.subject === 'string' ? parsed.subject : '',
+      message: typeof parsed.message === 'string' ? parsed.message : '',
+      channel: typeof parsed.channel === 'string' ? parsed.channel : (options.channel || ''),
+      toneNotes: typeof parsed.toneNotes === 'string' ? parsed.toneNotes : '',
+      model: GEMINI_MODEL,
+    };
+  } catch (err) {
+    throw new Error('Gemini returned a message draft, but it was not valid JSON.');
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`);
 
@@ -396,6 +503,23 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, result);
     } catch (err) {
       sendJson(res, 502, { error: err.message || 'Unable to run Gemini lead research.' });
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/message-draft') {
+    if (!GEMINI_API_KEY) {
+      sendJson(res, 400, { error: 'Gemini is not configured yet. Add GEMINI_API_KEY on the server first.' });
+      return;
+    }
+
+    try {
+      const body = await collectBody(req);
+      const options = JSON.parse(body || '{}');
+      const result = await runMessageDraft(options);
+      sendJson(res, 200, result);
+    } catch (err) {
+      sendJson(res, 502, { error: err.message || 'Unable to generate a Gemini message draft.' });
     }
     return;
   }
