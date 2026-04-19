@@ -1206,7 +1206,7 @@ body[data-theme="dark"] .toast {
       <table class="mobile-cards">
       <thead><tr>
         <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Status</th>
-        <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Notes</th><th>Actions</th>
+        <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbl-orgPartners"></tbody>
     </table>
@@ -3621,7 +3621,6 @@ TABLES.orgPartners = {
       <td data-label="People Reached">${r.members||'-'}</td>
       <td data-label="Last Contact">${r.date||'-'}</td>
       <td data-label="Package">${r.incentive||'-'}</td>
-      <td data-label="Notes" class="notes-cell">${r.notes||'-'}</td>
       <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></div></td>
     </tr>`,
   empty: 'No church or camp partnerships tracked yet.',
