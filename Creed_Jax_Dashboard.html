@@ -298,6 +298,17 @@ tbody tr:last-child td { border-bottom: none; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+}
+.status-toggle .status-dot {
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.88), 0 0 0 3px rgba(26,26,46,0.08);
+}
+.status-toggle .status-text {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
 }
 .status-initial  { background: #3B82F6; }
 .status-pending  { background: #F59E0B; }
@@ -2664,7 +2675,15 @@ function statusDot(val) {
 }
 function statusControl(key, idx, val) {
   const status = normalizeStatus(val);
-  return `<button class="status-toggle badge ${STATUS_CLS[status] || 'badge-initial'}" title="Click to change status" onclick="event.stopPropagation();cycleRecordStatus('${key}', ${idx})">${statusLabel(status)}</button>`;
+  const clsMap = {
+    Pending: 'status-pending',
+    Accepted: 'status-accepted',
+    Declined: 'status-declined',
+  };
+  const dot = status === 'Not Reached Yet'
+    ? ''
+    : `<span class="status-dot ${clsMap[status] || 'status-pending'}" aria-hidden="true"></span>`;
+  return `<button class="status-toggle badge ${STATUS_CLS[status] || 'badge-initial'}" title="Click to change status" onclick="event.stopPropagation();cycleRecordStatus('${key}', ${idx})">${dot}<span class="status-text">${statusLabel(status)}</span></button>`;
 }
 function cycleRecordStatus(key, idx) {
   const record = (db[key] || [])[idx];
