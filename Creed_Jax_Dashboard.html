@@ -347,6 +347,87 @@ tbody tr:last-child td { border-bottom: none; }
   padding: 14px 22px; border-top: 1px solid #dde8fb;
   display: flex; justify-content: flex-end; gap: 10px; align-items: center;
 }
+.modal.modal-view {
+  max-width: 760px;
+}
+.view-header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.view-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+.view-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.view-field,
+.view-section {
+  border: 1px solid #dbe6fb;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  padding: 14px 16px;
+}
+.view-label,
+.view-section-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+  color: var(--muted);
+}
+.view-value,
+.view-section-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.view-value .ext-link {
+  font-size: 14px;
+}
+.view-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.view-section.rich {
+  padding: 16px 18px;
+}
+.view-section-body p {
+  margin: 0 0 10px;
+}
+.view-section-body p:last-child {
+  margin-bottom: 0;
+}
+.view-empty {
+  color: var(--muted);
+}
+.view-media img {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #dbe6fb;
+  margin-top: 12px;
+  object-fit: cover;
+}
+.view-inline-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 /* ── Forms ── */
 .form-group { margin-bottom: 14px; }
@@ -627,6 +708,18 @@ body[data-theme="dark"] .asset-preview {
   background: linear-gradient(180deg, #101b2d, #0d1728);
   border-color: #304768;
   color: #b8c8e2;
+}
+body[data-theme="dark"] .view-field,
+body[data-theme="dark"] .view-section {
+  background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+  border-color: #304768;
+}
+body[data-theme="dark"] .view-subtitle,
+body[data-theme="dark"] .view-empty {
+  color: #9bb0d1;
+}
+body[data-theme="dark"] .view-media img {
+  border-color: #304768;
 }
 body[data-theme="dark"] .script-asset-thumb img {
   border-color: #304768;
@@ -929,6 +1022,7 @@ body[data-theme="dark"] .toast {
   .tab-nav { padding: 0 16px; }
   .tab-content { padding: 16px; }
   .form-row { grid-template-columns: 1fr; }
+  .view-grid { grid-template-columns: 1fr; }
   .stats-row { flex-direction: column; }
   .task-item { flex-wrap: wrap; }
   .task-meta { min-width: 0; width: 100%; margin-left: 0; align-items: flex-start; }
@@ -1814,6 +1908,28 @@ body[data-theme="dark"] .toast {
       <button class="btn btn-danger btn-sm" id="scripts-del-btn" style="display:none;margin-right:auto;" onclick="deleteRec('scripts')">Delete</button>
       <button class="btn btn-outline" onclick="closeModal('modal-scripts')">Cancel</button>
       <button class="btn btn-primary" onclick="saveRec('scripts')">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-view">
+  <div class="modal modal-view" id="modal-view-card">
+    <div class="modal-header">
+      <div class="view-header-copy">
+        <h2 id="view-mtitle">View Details</h2>
+        <div class="view-subtitle" id="view-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-view')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-badges" id="view-badges"></div>
+      <div class="view-grid" id="view-grid"></div>
+      <div class="view-sections" id="view-sections"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="view-secondary-btn" style="display:none"></button>
+      <button class="btn btn-outline" onclick="closeModal('modal-view')">Close</button>
+      <button class="btn btn-primary" id="view-edit-btn">Edit</button>
     </div>
   </div>
 </div>
@@ -3755,7 +3871,7 @@ TABLES.creators = {
     { n: d.filter(r => creatorTier(r.followers) === 'Large').length, l: 'Large Creators' },
   ],
   renderRow: (r,i) => `
-    <tr onclick="openModal('creator',${i})">
+    <tr onclick="openViewModal('creator',${i})">
       <td data-label="Creator"><strong>${r.name||'-'}</strong>${normalizeExternalUrl(r.url || r.profileUrl || r.link) ? `<br><a href="${normalizeExternalUrl(r.url || r.profileUrl || r.link)}" target="_blank" rel="noopener noreferrer" class="ext-link" onclick="event.stopPropagation()">View Profile</a>`:''}${r.style?`<br><span style="font-size:12px;color:var(--muted);">${r.style}</span>`:''}</td>
       <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
       <td data-label="Platform">${r.platform||'-'}</td>
@@ -3778,7 +3894,7 @@ TABLES.partners = {
     { n: d.filter(r => normalizeStatus(r.status) === 'Not Reached Yet').length, l: 'Not Reached Yet' },
   ],
   renderRow: (r,i) => `
-    <tr onclick="openModal('partners',${i})">
+    <tr onclick="openViewModal('partners',${i})">
       <td data-label="Partner"><strong>${r.name||'-'}</strong></td>
       <td data-label="Type">${typeBadge(r.kind)}</td>
       <td data-label="Company">${r.company||'-'}</td>
@@ -3803,7 +3919,7 @@ TABLES.orgPartners = {
     { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
   ],
   renderRow: (r,i) => `
-    <tr onclick="openModal('orgPartners',${i})">
+    <tr onclick="openViewModal('orgPartners',${i})">
       <td data-label="Partner"><strong>${r.name||'-'}</strong></td>
       <td data-label="Type">${typeBadge(r.type)}</td>
       <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
@@ -3826,14 +3942,14 @@ TABLES.messages = {
     { n: d.filter(r => normalizeMessageStatus(r.status) === 'Sent').length, l: 'Sent' },
   ],
   renderRow: (r, i) => `
-    <tr onclick="openSavedMessage(${i})">
+    <tr onclick="openViewModal('messages',${i})">
       <td data-label="Recipient"><strong>${r.recipient || '-'}</strong>${r.sourceName ? `<br><span style="font-size:12px;color:var(--muted);">${r.sourceName}</span>` : ''}</td>
       <td data-label="Group">${scriptLabelBadge(r.group)}</td>
       <td data-label="Channel">${r.channel || '-'}</td>
       <td data-label="Status">${messageStatusBadge(r.status)}</td>
       <td data-label="Preview"><div class="script-preview">${r.body || '-'}</div></td>
       <td data-label="Updated">${r.updatedAt || '-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openSavedMessage(${i})">Open</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteMessage(${i})">Delete</button></div></td>
+      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openViewModal('messages',${i})">View</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteMessage(${i})">Delete</button></div></td>
     </tr>`,
   empty: 'No messages saved yet. Generate one from any Message button and it will appear here.',
 };
@@ -3880,7 +3996,7 @@ const SCRIPT_SECTIONS = [
 
 function renderScriptRow(r, i) {
   return `
-    <tr onclick="openModal('scripts',${i})">
+    <tr onclick="openViewModal('scripts',${i})">
       <td data-label="Title"><strong>${r.title||'-'}</strong>${r.cta?`<br><span style="font-size:12px;color:var(--muted);">CTA: ${r.cta}</span>`:''}</td>
       <td data-label="Use">${scriptUseBadge(r.use)}</td>
       <td data-label="Hook">${r.hook||'-'}</td>
@@ -3960,6 +4076,184 @@ delete MODAL_LABELS.artists;
 delete MODAL_LABELS.merch;
 delete MODAL_LABELS.appCreators;
 delete MODAL_LABELS.ambassadors;
+
+let viewContext = null;
+
+function formatViewText(value, empty = '-') {
+  const text = String(value ?? '').trim();
+  if (!text) return `<span class="view-empty">${escapeHtml(empty)}</span>`;
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+function renderViewField(label, valueHtml) {
+  return `
+    <div class="view-field">
+      <span class="view-label">${escapeHtml(label)}</span>
+      <div class="view-value">${valueHtml}</div>
+    </div>`;
+}
+function renderViewSection(label, bodyHtml, extraClass = '') {
+  return `
+    <div class="view-section${extraClass ? ` ${extraClass}` : ''}">
+      <span class="view-section-label">${escapeHtml(label)}</span>
+      <div class="view-section-body">${bodyHtml}</div>
+    </div>`;
+}
+function viewLink(url, label) {
+  const href = normalizeExternalUrl(url);
+  if (!href) return `<span class="view-empty">-</span>`;
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="ext-link">${escapeHtml(label || href)}</a>`;
+}
+function configureViewButton(id, config) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  if (!config) {
+    btn.style.display = 'none';
+    btn.onclick = null;
+    btn.className = 'btn btn-outline';
+    btn.textContent = '';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  btn.className = `btn ${config.className || 'btn-outline'}`;
+  btn.textContent = config.label || 'Open';
+  btn.onclick = config.onClick || null;
+}
+function buildViewModalContent(type, record) {
+  if (type === 'creator') {
+    return {
+      title: record.name || 'Creator',
+      subtitle: [record.platform, record.email || record.phone].filter(Boolean).join(' · '),
+      badges: [creatorTier(record.followers) ? creatorTierBadge(record.followers) : '', badge(record.status)].filter(Boolean),
+      fields: [
+        renderViewField('Platform', formatViewText(record.platform)),
+        renderViewField('Followers', formatViewText(record.followers)),
+        renderViewField('Email', record.email ? `<a href="mailto:${escapeHtml(record.email)}" class="ext-link">${escapeHtml(record.email)}</a>` : `<span class="view-empty">-</span>`),
+        renderViewField('Phone', formatViewText(record.phone)),
+        renderViewField('Offer', formatViewText(record.offer ? `$${record.offer}/video` : '')),
+        renderViewField('Payout Model', formatViewText(record.payout)),
+        renderViewField('Creator Code', formatViewText(record.code)),
+        renderViewField('Target Videos / Week', formatViewText(record.vids)),
+        renderViewField('Last Contact', formatViewText(record.date)),
+        renderViewField('Profile', viewLink(record.url || record.profileUrl || record.link, 'Open Profile')),
+      ],
+      sections: [
+        renderViewSection('Content Style', formatViewText(record.style)),
+        renderViewSection('Notes', formatViewText(record.notes)),
+      ],
+      secondaryAction: { label: 'Message', className: 'btn-outline', onClick: () => { closeModal('modal-view'); openOutreachModal('creators', viewContext.idx); } },
+      primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal('creator', viewContext.idx); } },
+    };
+  }
+  if (type === 'partners') {
+    return {
+      title: record.name || 'Partner',
+      subtitle: [record.kind, record.company].filter(Boolean).join(' · '),
+      badges: [record.kind ? typeBadge(record.kind) : '', creatorTier(record.followers) ? creatorTierBadge(record.followers) : '', badge(record.status)].filter(Boolean),
+      fields: [
+        renderViewField('Company / Label', formatViewText(record.company)),
+        renderViewField('Title / Role', formatViewText(record.title)),
+        renderViewField('Platform / Website', formatViewText(record.platform)),
+        renderViewField('Followers', formatViewText(record.followers)),
+        renderViewField('Email', record.email ? `<a href="mailto:${escapeHtml(record.email)}" class="ext-link">${escapeHtml(record.email)}</a>` : `<span class="view-empty">-</span>`),
+        renderViewField('Phone', formatViewText(record.phone)),
+        renderViewField('Last Contact', formatViewText(record.date)),
+        renderViewField('Adi Reviewed', formatViewText(record.adi)),
+      ],
+      sections: [renderViewSection('Notes', formatViewText(record.notes))],
+      secondaryAction: { label: 'Message', className: 'btn-outline', onClick: () => { closeModal('modal-view'); openOutreachModal('partners', viewContext.idx); } },
+      primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal('partners', viewContext.idx); } },
+    };
+  }
+  if (type === 'orgPartners') {
+    return {
+      title: record.name || 'Partnership',
+      subtitle: [record.type, record.location].filter(Boolean).join(' · '),
+      badges: [record.type ? typeBadge(record.type) : '', badge(record.status)].filter(Boolean),
+      fields: [
+        renderViewField('Location', formatViewText(record.location)),
+        renderViewField('People Reached', formatViewText(record.members)),
+        renderViewField('Partnership Package', formatViewText(record.incentive)),
+        renderViewField('Last Contact', formatViewText(record.date)),
+        renderViewField('Email', record.email ? `<a href="mailto:${escapeHtml(record.email)}" class="ext-link">${escapeHtml(record.email)}</a>` : `<span class="view-empty">-</span>`),
+        renderViewField('Phone', formatViewText(record.phone)),
+      ],
+      sections: [renderViewSection('Notes', formatViewText(record.notes))],
+      secondaryAction: { label: 'Message', className: 'btn-outline', onClick: () => { closeModal('modal-view'); openOutreachModal('orgPartners', viewContext.idx); } },
+      primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal('orgPartners', viewContext.idx); } },
+    };
+  }
+  if (type === 'scripts') {
+    const media = record.assetData
+      ? `<div class="view-media"><img src="${record.assetData}" alt="${escapeHtml(record.assetCaption || record.title || 'Example image')}"></div>`
+      : '';
+    return {
+      title: record.title || 'Script',
+      subtitle: normalizeScriptLabel(record.label),
+      badges: [scriptLabelBadge(record.label), scriptUseBadge(record.use)].filter(Boolean),
+      fields: [
+        renderViewField('Hook / Direction', formatViewText(record.hook)),
+        renderViewField('CTA / Talking Point', formatViewText(record.cta)),
+        renderViewField('Updated', formatViewText(record.updatedAt)),
+        renderViewField('Image Caption', formatViewText(record.assetCaption)),
+      ],
+      sections: [
+        renderViewSection('Script / Brief', formatViewText(record.body), 'rich'),
+        renderViewSection('Notes', formatViewText(record.notes)),
+        media ? renderViewSection('Example Image', media) : '',
+      ].filter(Boolean),
+      primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal('scripts', viewContext.idx); } },
+    };
+  }
+  if (type === 'messages') {
+    return {
+      title: record.recipient || 'Message',
+      subtitle: [normalizeScriptLabel(record.group), record.channel].filter(Boolean).join(' · '),
+      badges: [scriptLabelBadge(record.group), messageStatusBadge(record.status)].filter(Boolean),
+      fields: [
+        renderViewField('Channel', formatViewText(record.channel)),
+        renderViewField('Status', formatViewText(normalizeMessageStatus(record.status))),
+        renderViewField('Email', record.email ? `<a href="mailto:${escapeHtml(record.email)}" class="ext-link">${escapeHtml(record.email)}</a>` : `<span class="view-empty">-</span>`),
+        renderViewField('Updated', formatViewText(record.updatedAt)),
+        renderViewField('Source', formatViewText(record.sourceName)),
+        renderViewField('Subject / Hook', formatViewText(record.subject)),
+      ],
+      sections: [renderViewSection('Message', formatViewText(record.body), 'rich')],
+      secondaryAction: { label: 'Copy Message', className: 'btn-outline', onClick: async () => {
+        try {
+          await navigator.clipboard.writeText(record.body || '');
+          toast('Message copied.', 'ok');
+        } catch (err) {
+          toast('Copy failed. Try again.', 'err');
+        }
+      } },
+      primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openSavedMessage(viewContext.idx); } },
+    };
+  }
+  return {
+    title: MODAL_LABELS[type] || 'Details',
+    fields: [renderViewField('Details', formatViewText(JSON.stringify(record, null, 2)))],
+    primaryAction: { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal(type, viewContext.idx); } },
+  };
+}
+function openViewModal(type, idx) {
+  const key = MODAL_TO_KEY[type] || type;
+  const record = (db[key] || [])[idx];
+  if (!record) return;
+  viewContext = { type, key, idx };
+  const view = buildViewModalContent(type, record);
+  document.getElementById('view-mtitle').textContent = view.title || 'View Details';
+  const subtitleEl = document.getElementById('view-subtitle');
+  subtitleEl.textContent = view.subtitle || '';
+  subtitleEl.style.display = view.subtitle ? 'block' : 'none';
+  const badgesEl = document.getElementById('view-badges');
+  badgesEl.innerHTML = (view.badges || []).join('');
+  badgesEl.style.display = (view.badges || []).length ? 'flex' : 'none';
+  document.getElementById('view-grid').innerHTML = (view.fields || []).join('');
+  document.getElementById('view-sections').innerHTML = (view.sections || []).join('');
+  configureViewButton('view-secondary-btn', view.secondaryAction || null);
+  configureViewButton('view-edit-btn', view.primaryAction || { label: 'Edit', className: 'btn-primary', onClick: () => { closeModal('modal-view'); openModal(type, idx); } });
+  document.getElementById('modal-view').classList.add('active');
+}
 
 function openModal(type, idx) {
   const isNew = idx === -1;
