@@ -2,12 +2,21 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
+const { execFile } = require('child_process');
 
 const PORT = Number.parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 const ROOT_DIR = __dirname;
 const HTML_PATH = path.join(ROOT_DIR, 'Creed_Jax_Dashboard.html');
 const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : ROOT_DIR;
+const AGENT_BATCHES_DIR = process.env.AGENT_BATCHES_DIR
+  ? path.resolve(process.env.AGENT_BATCHES_DIR)
+  : path.join(__dirname, '..', 'creed-agent', 'batches');
+const AGENT_QUEUE_FILE = process.env.AGENT_QUEUE_FILE
+  ? path.resolve(process.env.AGENT_QUEUE_FILE)
+  : path.join(__dirname, '..', 'creed-agent', 'queue.md');
+const AGENT_REPLIES_FILE = path.join(DATA_DIR, 'agent-replies.json');
+const REPLY_CHECKER_SCRIPT = path.join(__dirname, '..', 'creed-agent', 'reply_checker.py');
 const STATE_PATH = path.join(DATA_DIR, 'dashboard-state.json');
 const EMPTY_STATE = {
   version: 1,
@@ -135,6 +144,105 @@ function writeState(state) {
   fs.renameSync(tempPath, STATE_PATH);
   return safeState;
 }
+
+// ── Agent helpers ──────────────────────────────────────────────────────────
+
+function parseBatchFile(filename, content) {
+  const nameMatch = filename.match(/^(?:batch|immediate)-(\d{4}-\d{2}-\d{2})(?:-(.+?))?\.md$/);
+  const date = nameMatch ? nameMatch[1] : '?';
+  const label = nameMatch ? (nameMatch[2] || 'immediate') : 'immediate';
+
+  function extractTarget(section, targetLine) {
+    const summaryMatch = section.match(/RESEARCH SUMMARY:\s*([\s\S]*?)(?=\nCREATOR TYPE:|\n---DRAFT|$)/);
+    const typeMatch    = section.match(/CREATOR TYPE:\s*(.+)/);
+    const emailMatch   = section.match(/FOUND EMAIL:\s*(.+)/);
+    const subjectMatch = section.match(/SUBJECT LINE:\s*(.+)/);
+    const draftMatch   = section.match(/---DRAFT START---\s*([\s\S]*?)\s*---DRAFT END---/);
+    const emailVal     = emailMatch ? emailMatch[1].trim() : 'none';
+    const foundEmail   = ['none', 'n/a', 'not found', 'none found'].includes(emailVal.toLowerCase()) ? null : emailVal;
+    const subjectVal   = subjectMatch ? subjectMatch[1].trim() : null;
+    return {
+      target:      targetLine,
+      summary:     summaryMatch ? summaryMatch[1].trim() : '',
+      creatorType: typeMatch ? typeMatch[1].trim() : 'Unknown',
+      foundEmail:  foundEmail || null,
+      subject:     (!subjectVal || subjectVal.toLowerCase() === 'n/a') ? null : subjectVal,
+      draft:       draftMatch ? draftMatch[1].trim() : '',
+    };
+  }
+
+  const targets = [];
+  const batchSections = content.split(/={10,}\nTARGET \d+:/);
+  if (batchSections.length > 1) {
+    for (let i = 1; i < batchSections.length; i++) {
+      const section = batchSections[i];
+      targets.push(extractTarget(section, section.split('\n')[0].trim()));
+    }
+  } else {
+    const immediateSections = content.split(/\n\nTARGET: /);
+    for (let i = 1; i < immediateSections.length; i++) {
+      const section = immediateSections[i];
+      targets.push(extractTarget(section, section.split('\n')[0].trim()));
+    }
+  }
+
+  return {
+    filename,
+    date,
+    label,
+    totalTargets: targets.length,
+    emailCount:   targets.filter(t => t.foundEmail).length,
+    dmCount:      targets.filter(t => !t.foundEmail).length,
+    targets,
+  };
+}
+
+function readAgentRuns() {
+  try {
+    if (!fs.existsSync(AGENT_BATCHES_DIR)) return [];
+    return fs.readdirSync(AGENT_BATCHES_DIR)
+      .filter(f => f.endsWith('.md'))
+      .sort()
+      .reverse()
+      .map(f => parseBatchFile(f, fs.readFileSync(path.join(AGENT_BATCHES_DIR, f), 'utf8')));
+  } catch (_) {
+    return [];
+  }
+}
+
+function readAgentQueue() {
+  try {
+    if (!fs.existsSync(AGENT_QUEUE_FILE)) return [];
+    const content = fs.readFileSync(AGENT_QUEUE_FILE, 'utf8');
+    if (!content.includes('## Queue')) return [];
+    return content
+      .split('## Queue')[1]
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith('#') && !l.startsWith('```'));
+  } catch (_) {
+    return [];
+  }
+}
+
+function appendAgentQueue(entry) {
+  if (!fs.existsSync(AGENT_QUEUE_FILE)) throw new Error('queue.md not found');
+  const content = fs.readFileSync(AGENT_QUEUE_FILE, 'utf8');
+  if (!content.includes('## Queue')) throw new Error('queue.md format not recognized');
+  fs.writeFileSync(AGENT_QUEUE_FILE, content.trimEnd() + '\n' + entry + '\n');
+}
+
+function readAgentReplies() {
+  try {
+    if (!fs.existsSync(AGENT_REPLIES_FILE)) return [];
+    return JSON.parse(fs.readFileSync(AGENT_REPLIES_FILE, 'utf8'));
+  } catch (_) {
+    return [];
+  }
+}
+
+// ── End agent helpers ──────────────────────────────────────────────────────
 
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, {
@@ -528,6 +636,56 @@ const server = http.createServer(async (req, res) => {
     sendHtml(res);
     return;
   }
+
+  // ── Agent log API ────────────────────────────────────────────────────────
+
+  if (req.method === 'GET' && url.pathname === '/api/agent-runs') {
+    sendJson(res, 200, readAgentRuns());
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/agent-queue') {
+    sendJson(res, 200, { entries: readAgentQueue() });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/agent-queue') {
+    try {
+      const body = await collectBody(req);
+      const { entry } = JSON.parse(body || '{}');
+      if (!entry || typeof entry !== 'string' || !entry.trim()) {
+        sendJson(res, 400, { error: 'entry is required' });
+        return;
+      }
+      appendAgentQueue(entry.trim());
+      sendJson(res, 200, { ok: true, entries: readAgentQueue() });
+    } catch (err) {
+      sendJson(res, 400, { error: err.message || 'Failed to add to queue.' });
+    }
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/agent-replies') {
+    sendJson(res, 200, readAgentReplies());
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/agent-replies/check') {
+    if (!fs.existsSync(REPLY_CHECKER_SCRIPT)) {
+      sendJson(res, 404, { error: 'reply_checker.py not found next to the dashboard.' });
+      return;
+    }
+    execFile('python3', [REPLY_CHECKER_SCRIPT], { timeout: 90000 }, (err, _stdout, stderr) => {
+      if (err) {
+        sendJson(res, 502, { error: (stderr || err.message || 'Reply checker failed.').slice(0, 400) });
+        return;
+      }
+      sendJson(res, 200, { ok: true, replies: readAgentReplies() });
+    });
+    return;
+  }
+
+  // ── End agent log API ────────────────────────────────────────────────────
 
   sendJson(res, 404, { error: 'Not found.' });
 });

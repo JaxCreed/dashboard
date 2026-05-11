@@ -1144,6 +1144,62 @@ body[data-theme="dark"] .toast {
     border-bottom-color: #243955;
   }
 }
+
+/* ── Agent Log ──────────────────────────────────────────────── */
+.agent-stats-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.agent-stat-card {
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:14px 20px; text-align:center; min-width:100px; box-shadow:var(--shadow);
+}
+.agent-stat-card .stat-num { font-size:26px; font-weight:800; color:var(--primary-dark); }
+.agent-stat-card .stat-label { font-size:11px; color:var(--muted); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+.agent-run-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:16px 20px; margin-bottom:10px; box-shadow:var(--shadow);
+}
+.agent-run-header { display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none; }
+.agent-run-date { font-weight:700; color:var(--primary-dark); font-size:14px; }
+.agent-run-label {
+  background:var(--primary-light); color:var(--primary);
+  border-radius:12px; padding:2px 10px; font-size:12px; font-weight:600;
+}
+.agent-run-stats { display:flex; gap:6px; margin-left:auto; }
+.agent-stat-pill { border-radius:12px; padding:2px 10px; font-size:12px; font-weight:600; }
+.agent-stat-email { background:#d4edda; color:#155724; }
+.agent-stat-dm    { background:#fff3cd; color:#856404; }
+.agent-run-chevron { margin-left:6px; color:var(--muted); font-size:18px; transition:transform 0.2s; }
+.agent-run-targets {
+  margin-top:14px; border-top:1px solid var(--border); padding-top:14px; display:none;
+}
+.agent-run-targets.open { display:block; }
+.agent-target-row {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.agent-target-row:last-of-type { border-bottom:none; }
+.agent-target-name { font-weight:600; color:var(--primary-dark); min-width:140px; font-size:13px; }
+.agent-target-meta { flex:1; }
+.agent-target-summary { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5; }
+.agent-target-email { font-size:12px; color:var(--success); font-weight:600; }
+.agent-target-dm    { font-size:12px; color:var(--warning); font-weight:600; }
+.agent-run-import-row { margin-top:12px; padding-top:10px; border-top:1px solid var(--border); }
+.queue-entry {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 14px; background:var(--blue-soft); border-radius:8px;
+  margin-bottom:6px; font-size:13px;
+}
+.queue-entry-text { flex:1; color:var(--primary-dark); font-weight:500; }
+.reply-row {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.reply-row:last-child { border-bottom:none; }
+.reply-from    { font-weight:600; color:var(--primary-dark); min-width:160px; font-size:13px; }
+.reply-snippet { flex:1; font-size:13px; color:var(--muted); line-height:1.5; }
+.reply-date    { font-size:12px; color:var(--muted); white-space:nowrap; }
+body[data-theme="dark"] .agent-run-card { background:#1a2b42; border-color:#243955; }
+body[data-theme="dark"] .agent-stat-card { background:#1a2b42; border-color:#243955; }
+body[data-theme="dark"] .queue-entry { background:#162032; }
 </style>
 </head>
 <body>
@@ -1171,6 +1227,7 @@ body[data-theme="dark"] .toast {
   <button class="tab-btn" onclick="switchTab('orgPartners')">⛪ Partnerships <span class="tab-count" id="cnt-orgPartners">0</span></button>
   <button class="tab-btn" onclick="switchTab('messages')">💬 Messages <span class="tab-count" id="cnt-messages">0</span></button>
   <button class="tab-btn" onclick="switchTab('scripts')">📝 Scripts <span class="tab-count" id="cnt-scripts">0</span></button>
+  <button class="tab-btn" onclick="switchTab('agentLog')">🤖 Agent Log <span class="tab-count" id="cnt-agent-runs">0</span></button>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1485,6 +1542,56 @@ body[data-theme="dark"] .toast {
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     AGENT LOG TAB
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-agentLog">
+  <div class="section-header">
+    <div>
+      <h2>Morning Agent Log</h2>
+      <p>Every outreach run from the Creed morning agent. Manage your queue, view drafts, and track replies.</p>
+    </div>
+    <div class="header-tools">
+      <button class="btn btn-outline" onclick="checkAgentReplies()">Check Replies</button>
+      <button class="btn btn-primary" onclick="openAddQueueModal()">+ Add to Queue</button>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="agent-stats-bar">
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-runs">0</div><div class="stat-label">Runs</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-total">0</div><div class="stat-label">Researched</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-emails">0</div><div class="stat-label">Emails Found</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-dms">0</div><div class="stat-label">DM Only</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-replies">0</div><div class="stat-label">Replies</div></div>
+  </div>
+
+  <!-- Queue -->
+  <div class="section-header" style="margin-top:4px;">
+    <h2 style="font-size:16px;">Queue for Next Run <span class="tab-count" id="cnt-queue">0</span></h2>
+  </div>
+  <div id="agent-queue-list" style="margin-bottom:28px;">
+    <p style="color:var(--muted);font-size:13px;">Loading queue...</p>
+  </div>
+
+  <!-- Replies -->
+  <div class="section-header" style="margin-top:4px;">
+    <h2 style="font-size:16px;">Replies Received <span class="tab-count" id="cnt-replies">0</span></h2>
+  </div>
+  <div id="agent-replies-list" style="margin-bottom:28px;">
+    <p style="color:var(--muted);font-size:13px;">No replies logged. Click "Check Replies" to scan Gmail.</p>
+  </div>
+
+  <!-- Run history -->
+  <div class="section-header" style="margin-top:4px;">
+    <h2 style="font-size:16px;">Run History</h2>
+  </div>
+  <div id="agent-runs-list">
+    <p style="color:var(--muted);font-size:13px;">Loading runs...</p>
   </div>
 </div>
 
@@ -2032,6 +2139,34 @@ body[data-theme="dark"] .toast {
       <button class="btn btn-outline" onclick="clearSyncSettings()">Clear</button>
       <button class="btn btn-outline" onclick="testSyncSettings()">Test</button>
       <button class="btn btn-primary" onclick="saveSyncSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add to Queue Modal -->
+<div class="modal-overlay" id="modal-add-queue">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add to Outreach Queue</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-queue')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Handle or Email *</label>
+        <input type="text" id="queue-handle" placeholder="@handle or name@email.com">
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <input type="text" id="queue-notes" placeholder="platform, niche, anything specific you noticed">
+      </div>
+      <div style="font-size:12px;color:var(--muted);background:var(--blue-soft);padding:10px 14px;border-radius:8px;line-height:1.6;">
+        Format: <strong>@handle — notes</strong> or <strong>email@domain.com — Name, notes</strong><br>
+        The watcher picks this up and processes it before 7pm CT. After 7pm it holds for the morning batch.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-queue')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQueueEntry()">Add to Queue</button>
     </div>
   </div>
 </div>
@@ -2679,6 +2814,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.getAttribute('onclick') === `switchTab('${tab}')`) btn.classList.add('active');
   });
+  if (tab === 'agentLog') loadAgentLog();
 }
 
 
@@ -4612,6 +4748,261 @@ function toast(msg, type='') {
   el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2800);
+}
+
+
+// ══════════════════════════════════════════
+//  AGENT LOG
+// ══════════════════════════════════════════
+let agentRunsCache = [];
+let agentRepliesCache = [];
+let agentLogLoaded = false;
+
+async function loadAgentLog() {
+  if (agentLogLoaded) return;
+  agentLogLoaded = true;
+  await Promise.all([loadAgentRuns(), loadAgentQueue(), loadAgentReplies()]);
+}
+
+async function loadAgentRuns() {
+  try {
+    const res = await fetch('/api/agent-runs', { cache: 'no-store' });
+    if (!res.ok) throw new Error('not ok');
+    agentRunsCache = await res.json();
+    if (!Array.isArray(agentRunsCache)) agentRunsCache = [];
+    renderAgentRuns();
+  } catch (_) {
+    const el = document.getElementById('agent-runs-list');
+    if (el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Could not load runs. Is the server running?</p>';
+  }
+}
+
+function renderAgentRuns() {
+  const runs = agentRunsCache;
+  const countEl = document.getElementById('cnt-agent-runs');
+  if (countEl) countEl.textContent = runs.length;
+
+  const totalTargets = runs.reduce((s, r) => s + (r.totalTargets || 0), 0);
+  const totalEmails  = runs.reduce((s, r) => s + (r.emailCount   || 0), 0);
+  const totalDms     = runs.reduce((s, r) => s + (r.dmCount      || 0), 0);
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setTxt('agent-stat-runs',   runs.length);
+  setTxt('agent-stat-total',  totalTargets);
+  setTxt('agent-stat-emails', totalEmails);
+  setTxt('agent-stat-dms',    totalDms);
+
+  const el = document.getElementById('agent-runs-list');
+  if (!el) return;
+  if (!runs.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;">No runs yet. The morning agent saves a batch file after each run.</p>';
+    return;
+  }
+  el.innerHTML = runs.map((run, idx) => `
+    <div class="agent-run-card">
+      <div class="agent-run-header" onclick="toggleRunCard(${idx})">
+        <span class="agent-run-date">${escapeHtml(run.date)}</span>
+        <span class="agent-run-label">${escapeHtml(run.label)}</span>
+        <div class="agent-run-stats">
+          <span class="agent-stat-pill agent-stat-email">${run.emailCount} email</span>
+          <span class="agent-stat-pill agent-stat-dm">${run.dmCount} DM</span>
+        </div>
+        <span class="agent-run-chevron" id="run-chev-${idx}">›</span>
+      </div>
+      <div class="agent-run-targets" id="run-targets-${idx}">
+        ${run.targets.map((t, ti) => `
+          <div class="agent-target-row">
+            <div class="agent-target-name">${escapeHtml(t.target)}</div>
+            <div class="agent-target-meta">
+              ${t.foundEmail
+                ? `<div class="agent-target-email">✉ ${escapeHtml(t.foundEmail)}</div>`
+                : '<div class="agent-target-dm">DM only</div>'}
+              ${t.subject ? `<div style="font-size:12px;color:var(--muted);">Subject: ${escapeHtml(t.subject)}</div>` : ''}
+              <div class="agent-target-summary">${escapeHtml(t.summary)}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              ${t.draft ? `<button class="btn btn-outline btn-sm" onclick="viewAgentDraft(${idx},${ti})">View Draft</button>` : ''}
+              <button class="btn btn-outline btn-sm" onclick="importAgentTarget(${idx},${ti})">+ Creators</button>
+            </div>
+          </div>
+        `).join('')}
+        <div class="agent-run-import-row">
+          <button class="btn btn-outline btn-sm" onclick="importAgentRun(${idx})">Import All to Creators</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleRunCard(idx) {
+  const targets = document.getElementById(`run-targets-${idx}`);
+  const chev    = document.getElementById(`run-chev-${idx}`);
+  if (!targets) return;
+  const open = targets.classList.toggle('open');
+  if (chev) chev.textContent = open ? '⌄' : '›';
+}
+
+function viewAgentDraft(runIdx, targetIdx) {
+  const run = agentRunsCache[runIdx];
+  if (!run) return;
+  const t = run.targets[targetIdx];
+  if (!t) return;
+  document.getElementById('view-mtitle').textContent = t.target;
+  document.getElementById('view-subtitle').textContent = `${run.date} [${run.label}]`;
+  document.getElementById('view-badges').innerHTML = t.foundEmail
+    ? `<span class="badge badge-accepted">Email: ${escapeHtml(t.foundEmail)}</span>`
+    : '<span class="badge badge-initial">DM Only</span>';
+  document.getElementById('view-grid').innerHTML = '';
+  document.getElementById('view-sections').innerHTML = `
+    <div class="view-section rich">
+      <div class="view-section-label">Research Summary</div>
+      <div class="view-section-body"><p>${escapeHtml(t.summary)}</p></div>
+    </div>
+    <div class="view-section rich">
+      <div class="view-section-label">Draft${t.subject ? ' — ' + escapeHtml(t.subject) : ''}</div>
+      <div class="view-section-body"><pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;">${escapeHtml(t.draft)}</pre></div>
+    </div>
+  `;
+  const editBtn = document.getElementById('view-edit-btn');
+  const secBtn  = document.getElementById('view-secondary-btn');
+  if (editBtn) editBtn.style.display = 'none';
+  if (secBtn)  secBtn.style.display  = 'none';
+  document.getElementById('modal-view').classList.add('active');
+}
+
+function buildCreatorFromTarget(t, runDate) {
+  return {
+    id: `cr-${Date.now()}-${Math.random().toString(16).slice(2,6)}`,
+    name: t.target, platform: 'Instagram', followers: '',
+    style: t.creatorType || '', status: 'Not Reached Yet',
+    offer: '', vids: '', date: runDate || '',
+    url: '', notes: t.summary || '',
+    email: t.foundEmail || '', phone: '', payout: '', code: '',
+  };
+}
+
+function importAgentTarget(runIdx, targetIdx) {
+  const run = agentRunsCache[runIdx];
+  if (!run) return;
+  const t = run.targets[targetIdx];
+  if (!t) return;
+  if (db.creators.find(c => (c.name||'').toLowerCase() === t.target.toLowerCase())) {
+    toast('Already in creators list'); return;
+  }
+  db.creators.push(buildCreatorFromTarget(t, run.date));
+  persistLocalState(); pushSharedState(); renderAll();
+  toast(`${t.target} added to Creators`);
+}
+
+function importAgentRun(runIdx) {
+  const run = agentRunsCache[runIdx];
+  if (!run) return;
+  let added = 0;
+  run.targets.forEach((t, i) => {
+    if (!db.creators.find(c => (c.name||'').toLowerCase() === t.target.toLowerCase())) {
+      const rec = buildCreatorFromTarget(t, run.date);
+      rec.id += `-${i}`;
+      db.creators.push(rec);
+      added++;
+    }
+  });
+  if (added) { persistLocalState(); pushSharedState(); renderAll(); toast(`Imported ${added} creator(s) from this run`); }
+  else toast('All already in creators list');
+}
+
+async function loadAgentQueue() {
+  try {
+    const res = await fetch('/api/agent-queue', { cache: 'no-store' });
+    if (!res.ok) throw new Error('not ok');
+    const data = await res.json();
+    renderAgentQueue(Array.isArray(data.entries) ? data.entries : []);
+  } catch (_) {
+    const el = document.getElementById('agent-queue-list');
+    if (el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Could not load queue.</p>';
+  }
+}
+
+function renderAgentQueue(entries) {
+  const el      = document.getElementById('agent-queue-list');
+  const countEl = document.getElementById('cnt-queue');
+  if (countEl) countEl.textContent = entries.length;
+  if (!el) return;
+  if (!entries.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Queue is empty. The morning agent will auto-find creators to fill slots.</p>';
+    return;
+  }
+  el.innerHTML = entries.map(e => `
+    <div class="queue-entry">
+      <span class="queue-entry-text">${escapeHtml(e)}</span>
+    </div>
+  `).join('');
+}
+
+function openAddQueueModal() {
+  document.getElementById('queue-handle').value = '';
+  document.getElementById('queue-notes').value  = '';
+  document.getElementById('modal-add-queue').classList.add('active');
+}
+
+async function submitQueueEntry() {
+  const handle = (document.getElementById('queue-handle').value || '').trim();
+  const notes  = (document.getElementById('queue-notes').value  || '').trim();
+  if (!handle) { toast('Enter a handle or email', 'danger'); return; }
+  const entry = notes ? `${handle} — ${notes}` : handle;
+  try {
+    const res = await fetch('/api/agent-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entry }),
+    });
+    const data = await res.json();
+    if (!res.ok) { toast(data.error || 'Failed to add', 'danger'); return; }
+    renderAgentQueue(Array.isArray(data.entries) ? data.entries : []);
+    closeModal('modal-add-queue');
+    toast('Added to queue');
+  } catch (_) { toast('Server error', 'danger'); }
+}
+
+async function loadAgentReplies() {
+  try {
+    const res = await fetch('/api/agent-replies', { cache: 'no-store' });
+    if (!res.ok) throw new Error('not ok');
+    agentRepliesCache = await res.json();
+    if (!Array.isArray(agentRepliesCache)) agentRepliesCache = [];
+    renderAgentReplies();
+  } catch (_) { /* silent — replies file may not exist yet */ }
+}
+
+function renderAgentReplies() {
+  const replies = agentRepliesCache;
+  const el      = document.getElementById('agent-replies-list');
+  const cntEl   = document.getElementById('cnt-replies');
+  const statEl  = document.getElementById('agent-stat-replies');
+  if (cntEl)  cntEl.textContent  = replies.length;
+  if (statEl) statEl.textContent = replies.length;
+  if (!el) return;
+  if (!replies.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;">No replies logged yet. Click "Check Replies" to scan your Gmail inbox.</p>';
+    return;
+  }
+  el.innerHTML = replies.slice().reverse().map(r => `
+    <div class="reply-row">
+      <div class="reply-from">${escapeHtml(r.target || r.from || '')}</div>
+      <div class="reply-snippet">${escapeHtml((r.snippet || '').slice(0, 140))}${(r.snippet||'').length > 140 ? '…' : ''}</div>
+      <div class="reply-date">${escapeHtml(r.date || r.logged_at || '')}</div>
+    </div>
+  `).join('');
+}
+
+async function checkAgentReplies() {
+  toast('Scanning Gmail for replies…');
+  try {
+    const res  = await fetch('/api/agent-replies/check', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) { toast(data.error || 'Check failed', 'danger'); return; }
+    agentRepliesCache = Array.isArray(data.replies) ? data.replies : [];
+    renderAgentReplies();
+    toast(`Done — ${agentRepliesCache.length} total replies`);
+  } catch (_) { toast('Could not reach server', 'danger'); }
 }
 
 
