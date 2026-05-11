@@ -1143,7 +1143,100 @@ body[data-theme="dark"] .toast {
   body[data-theme="dark"] table.mobile-cards tbody td {
     border-bottom-color: #243955;
   }
+
+  /* ── Mobile modal improvements ── */
+  .modal-overlay {
+    padding: 12px 10px 0;
+    align-items: flex-end;
+  }
+  .modal {
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    max-height: none;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 18px 16px;
+  }
+  .modal-header { padding: 16px 16px 14px; }
+  .modal-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .modal-footer .btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+    justify-content: center;
+  }
+  /* Ensure all interactive elements meet 44px touch target */
+  .btn { min-height: 40px; }
+  .btn-sm { min-height: 36px; }
+  .tab-btn { min-height: 44px; }
+
+  /* ── Script preview — stop clipping on mobile ── */
+  .script-preview {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+  }
+
+  /* ── Agent log mobile stacking ── */
+  .agent-target-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .agent-target-name { min-width: 0; }
+  .agent-target-row > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .agent-target-row > div:last-child .btn {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+  .reply-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .reply-from  { min-width: 0; }
+  .reply-date  { white-space: normal; }
+  .agent-stats-bar { gap: 8px; }
+  .agent-stat-card { min-width: 72px; padding: 10px 14px; flex: 1 1 auto; }
+  .agent-stat-card .stat-num { font-size: 22px; }
+  .agent-run-stats { flex-wrap: wrap; }
+  .agent-run-header { flex-wrap: wrap; gap: 8px; }
+  .agent-run-chevron { margin-left: 0; }
+
+  /* ── Section headers: don't let long titles overflow ── */
+  .section-header h2 { font-size: 16px; }
+  .section-header p  { font-size: 12px; }
+
+  /* ── Add bottom padding so FAB doesn't cover last row ── */
+  .tab-content { padding-bottom: 80px; }
 }
+
+/* ── Floating Queue Button ──────────────────────────────────── */
+.fab-queue {
+  position: fixed; bottom: 24px; right: 18px; z-index: 900;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 22px 0 16px; height: 52px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: white; font-size: 14px; font-weight: 700;
+  border: none; cursor: pointer; letter-spacing: 0;
+  box-shadow: 0 6px 22px rgba(24,58,115,0.45);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab-queue:active { transform: scale(0.95); box-shadow: 0 3px 12px rgba(24,58,115,0.35); }
+.fab-queue .fab-plus { font-size: 22px; line-height: 1; font-weight: 400; }
 
 /* ── Agent Log ──────────────────────────────────────────────── */
 .agent-stats-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
@@ -5012,5 +5105,9 @@ async function checkAgentReplies() {
 initTheme();
 initDashboard();
 </script>
+
+<button class="fab-queue" onclick="openAddQueueModal()" aria-label="Add creator to outreach queue">
+  <span class="fab-plus">+</span> Queue
+</button>
 </body>
 </html>
