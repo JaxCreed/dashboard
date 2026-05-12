@@ -19,14 +19,16 @@ const AGENT_REPLIES_FILE = path.join(DATA_DIR, 'agent-replies.json');
 const REPLY_CHECKER_SCRIPT = path.join(__dirname, '..', 'creed-agent', 'reply_checker.py');
 const STATE_PATH = path.join(DATA_DIR, 'dashboard-state.json');
 const EMPTY_STATE = {
-  version: 1,
+  version: 2,
   updatedAt: '',
   tasks: [],
-  creators: [],
-  partners: [],
-  orgPartners: [],
-  messages: [],
+  youngAdults: [],
+  family: [],
+  faithLeaders: [],
+  misc: [],
+  pendingApprovals: [],
   scripts: [],
+  weeklyGoal: { videos: 0, statics: 0, target: 60 },
 };
 const PUBLIC_CONFIG = {
   supabaseUrl: process.env.SUPABASE_URL || '',
@@ -107,14 +109,16 @@ const MESSAGE_DRAFT_SCHEMA = {
 
 function sanitizeState(state = {}) {
   return {
-    version: 1,
+    version: 2,
     updatedAt: typeof state.updatedAt === 'string' ? state.updatedAt : '',
     tasks: Array.isArray(state.tasks) ? state.tasks : [],
-    creators: Array.isArray(state.creators) ? state.creators : [],
-    partners: Array.isArray(state.partners) ? state.partners : [],
-    orgPartners: Array.isArray(state.orgPartners) ? state.orgPartners : [],
-    messages: Array.isArray(state.messages) ? state.messages : [],
+    youngAdults: Array.isArray(state.youngAdults) ? state.youngAdults : [],
+    family: Array.isArray(state.family) ? state.family : [],
+    faithLeaders: Array.isArray(state.faithLeaders) ? state.faithLeaders : [],
+    misc: Array.isArray(state.misc) ? state.misc : [],
+    pendingApprovals: Array.isArray(state.pendingApprovals) ? state.pendingApprovals : [],
     scripts: Array.isArray(state.scripts) ? state.scripts : [],
+    weeklyGoal: (state.weeklyGoal && typeof state.weeklyGoal === 'object') ? state.weeklyGoal : { videos: 0, statics: 0, target: 60 },
   };
 }
 

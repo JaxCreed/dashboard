@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jax's Dashboard</title>
 <style>
+/* ══ THEME: Classic (default / no data-theme attribute) ══ */
 :root {
   --primary: #2F5496; --primary-light: #D6E4F0;
   --primary-dark: #183a73; --primary-ink: #244f9e;
@@ -14,6 +15,72 @@
   --bg: #F5F7FA; --card: #FFFFFF; --text: #1A1A2E;
   --muted: #6B7280; --border: #E5E7EB;
   --shadow: 0 12px 28px rgba(30, 60, 114, 0.10);
+}
+
+/* ══ THEME: Slate Pro (default applied on load) ══ */
+[data-theme="slate"] {
+  color-scheme: dark;
+  --primary: #C9A84C;
+  --primary-light: #2a2318;
+  --primary-dark: #f0d98a;
+  --primary-ink: #e0c060;
+  --blue-soft: #1e1c18;
+  --blue-mist: #252218;
+  --blue-line: #3a3424;
+  --accent: #C9A84C;
+  --success: #4caf78;
+  --danger: #e05555;
+  --warning: #d4900a;
+  --bg: #18171a;
+  --card: #211f22;
+  --text: #f0eee8;
+  --muted: #9e9a90;
+  --border: #36332c;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+}
+
+/* ══ THEME: Midnight ══ */
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --primary: #4d7fd5;
+  --primary-light: #173156;
+  --primary-dark: #dbe7ff;
+  --primary-ink: #9fc1ff;
+  --blue-soft: #162235;
+  --blue-mist: #1a2940;
+  --blue-line: #304768;
+  --accent: #4d7fd5;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --bg: #0a1220;
+  --card: #101b2d;
+  --text: #edf3ff;
+  --muted: #9eb0cb;
+  --border: #243955;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+}
+
+/* ══ THEME: Ocean ══ */
+[data-theme="ocean"] {
+  color-scheme: dark;
+  --primary: #00c2c7;
+  --primary-light: #08282e;
+  --primary-dark: #b0f4f8;
+  --primary-ink: #60dfe3;
+  --blue-soft: #091b1e;
+  --blue-mist: #0c2228;
+  --blue-line: #163940;
+  --accent: #00c2c7;
+  --success: #00c878;
+  --danger: #e05555;
+  --warning: #e0a832;
+  --bg: #060e11;
+  --card: #0c1c22;
+  --text: #e8f6f8;
+  --muted: #87aab0;
+  --border: #163940;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.40);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -30,11 +97,12 @@ body {
     radial-gradient(circle at top right, rgba(140, 182, 255, 0.34), transparent 26%),
     linear-gradient(135deg, #0d1f3c, #244f9e 52%, #3a6bc2 100%);
   color: white; padding: 20px 32px;
-  display: flex; justify-content: flex-start; align-items: center;
+  display: flex; justify-content: space-between; align-items: center;
   text-align: left;
   box-shadow: 0 18px 40px rgba(24, 58, 115, 0.24);
+  position: relative;
 }
-.app-header > div {
+.app-header > div:first-child {
   width: min(920px, 100%);
 }
 .app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
@@ -47,6 +115,119 @@ body {
   font-size: 12px; font-weight: 600;
   backdrop-filter: blur(8px);
 }
+
+/* Slate Pro header */
+[data-theme="slate"] .app-header {
+  background:
+    radial-gradient(circle at top right, rgba(201, 168, 76, 0.18), transparent 28%),
+    linear-gradient(135deg, #0f0e10, #1e1b14 52%, #2a2519 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+}
+/* Midnight header */
+[data-theme="midnight"] .app-header {
+  background:
+    radial-gradient(circle at top right, rgba(111, 154, 242, 0.28), transparent 26%),
+    linear-gradient(135deg, #050b15, #112340 52%, #18345d 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+}
+/* Ocean header */
+[data-theme="ocean"] .app-header {
+  background:
+    radial-gradient(circle at top right, rgba(0, 194, 199, 0.22), transparent 26%),
+    linear-gradient(135deg, #020709, #071820 52%, #0a2530 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.50);
+}
+
+/* ── Gear / Settings button ── */
+.settings-gear-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.12);
+  color: white; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: background 0.18s;
+  backdrop-filter: blur(6px);
+  position: relative;
+}
+.settings-gear-btn:hover { background: rgba(255,255,255,0.22); }
+.settings-gear-wrap { position: relative; display: flex; align-items: center; }
+
+/* ── Settings panel ── */
+.settings-panel {
+  display: none;
+  position: absolute; top: 48px; right: 0; z-index: 900;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 24px 56px rgba(10, 24, 50, 0.22);
+  min-width: 260px;
+  padding: 18px;
+  animation: settingsDrop 0.18s ease;
+}
+@keyframes settingsDrop { from { opacity: 0; transform: translateY(8px); } }
+.settings-panel.open { display: block; }
+.settings-panel-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--muted, #6b7280);
+  margin-bottom: 10px;
+}
+.settings-sync-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--blue-soft, #eef4ff);
+  border: 1px solid var(--blue-line, #c7d9fb);
+  margin-bottom: 14px; font-size: 12px; font-weight: 600;
+  color: var(--text, #1a1a2e);
+}
+.settings-sync-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #94a3b8; flex-shrink: 0;
+}
+.settings-sync-dot[data-state="live"] { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.16); }
+.settings-sync-dot[data-state="pending"] { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.16); }
+.settings-panel-divider {
+  height: 1px; background: var(--border, #e5e7eb); margin: 12px 0;
+}
+.settings-theme-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px;
+}
+.theme-swatch {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; padding: 8px 4px; border-radius: 10px;
+  border: 2px solid transparent; transition: all 0.15s;
+}
+.theme-swatch:hover { background: var(--blue-soft, #eef4ff); }
+.theme-swatch.active { border-color: var(--primary, #2f5496); background: var(--blue-soft, #eef4ff); }
+.theme-swatch-color {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: white; font-weight: 700;
+}
+.theme-swatch-label {
+  font-size: 10px; font-weight: 600; color: var(--muted, #6b7280);
+  text-align: center; line-height: 1.2;
+}
+.theme-swatch.active .theme-swatch-label { color: var(--primary-dark, #183a73); }
+.theme-swatch-check {
+  font-size: 11px; color: var(--primary, #2f5496);
+  height: 12px; line-height: 1;
+}
+.settings-action-list {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.settings-action-btn {
+  width: 100%; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--border, #e5e7eb);
+  background: transparent; color: var(--text, #1a1a2e); font-size: 13px; font-weight: 600;
+  cursor: pointer; text-align: left; font-family: inherit; transition: background 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.settings-action-btn:hover { background: var(--blue-soft, #eef4ff); }
+
+/* Overlay to close settings when clicking outside */
+.modal-settings-overlay {
+  display: none; position: fixed; inset: 0; z-index: 890;
+}
+.modal-settings-overlay.open { display: block; }
 
 /* ── Tabs ── */
 .tab-nav {
@@ -618,237 +799,368 @@ tbody tr:last-child td { border-bottom: none; }
   border-radius: 14px; padding: 14px;
 }
 
-body[data-theme="dark"] {
-  color-scheme: dark;
-  --primary-light: #173156;
-  --primary-dark: #dbe7ff;
-  --primary-ink: #9fc1ff;
-  --blue-soft: #162235;
-  --blue-mist: #1a2940;
-  --blue-line: #304768;
-  --bg: #0a1220;
-  --card: #101b2d;
-  --text: #edf3ff;
-  --muted: #9eb0cb;
-  --border: #243955;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+/* ══ Dark theme body backgrounds ══ */
+body[data-theme="midnight"] {
   background:
     radial-gradient(circle at top left, rgba(71, 112, 198, 0.28), transparent 24%),
     linear-gradient(180deg, #09111e 0%, #0f1a2c 100%);
 }
-body[data-theme="dark"] .app-header {
+body[data-theme="slate"] {
   background:
-    radial-gradient(circle at top right, rgba(111, 154, 242, 0.28), transparent 26%),
-    linear-gradient(135deg, #050b15, #112340 52%, #18345d 100%);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+    radial-gradient(circle at top left, rgba(120, 100, 40, 0.18), transparent 26%),
+    linear-gradient(180deg, #111012 0%, #18161a 100%);
 }
-body[data-theme="dark"] .tab-nav,
-body[data-theme="dark"] .tab-content,
-body[data-theme="dark"] .table-container,
-body[data-theme="dark"] .script-section,
-body[data-theme="dark"] .task-item,
-body[data-theme="dark"] .stat-card,
-body[data-theme="dark"] .research-card,
-body[data-theme="dark"] .source-item,
-body[data-theme="dark"] .modal,
-body[data-theme="dark"] .import-helper,
-body[data-theme="dark"] .sync-note,
-body[data-theme="dark"] .empty-state,
-body[data-theme="dark"] .section-header,
-body[data-theme="dark"] .progress-wrap,
-body[data-theme="dark"] .task-status-group,
-body[data-theme="dark"] .cat-chip {
-  border-color: #243955;
+body[data-theme="ocean"] {
+  background:
+    radial-gradient(circle at top left, rgba(0, 120, 130, 0.22), transparent 26%),
+    linear-gradient(180deg, #040a0d 0%, #071218 100%);
 }
-body[data-theme="dark"] .tab-nav {
-  background: rgba(10, 18, 32, 0.9);
-  border-bottom-color: #243955;
+/* ══ Shared dark theme overrides (midnight, slate, ocean) ══ */
+body[data-theme="midnight"] .sync-note,
+body[data-theme="midnight"] .import-helper,
+body[data-theme="midnight"] .source-item,
+body[data-theme="midnight"] .outreach-preview,
+body[data-theme="slate"] .sync-note,
+body[data-theme="slate"] .import-helper,
+body[data-theme="slate"] .source-item,
+body[data-theme="slate"] .outreach-preview,
+body[data-theme="ocean"] .sync-note,
+body[data-theme="ocean"] .import-helper,
+body[data-theme="ocean"] .source-item,
+body[data-theme="ocean"] .outreach-preview {
+  background: var(--card);
+  color: var(--muted);
+  border-color: var(--border);
+}
+body[data-theme="midnight"] .asset-preview,
+body[data-theme="slate"] .asset-preview,
+body[data-theme="ocean"] .asset-preview {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--muted);
+}
+body[data-theme="midnight"] .view-field,
+body[data-theme="midnight"] .view-section,
+body[data-theme="slate"] .view-field,
+body[data-theme="slate"] .view-section,
+body[data-theme="ocean"] .view-field,
+body[data-theme="ocean"] .view-section {
+  background: var(--card);
+  border-color: var(--border);
+}
+body[data-theme="midnight"] .view-subtitle,
+body[data-theme="midnight"] .view-empty,
+body[data-theme="slate"] .view-subtitle,
+body[data-theme="slate"] .view-empty,
+body[data-theme="ocean"] .view-subtitle,
+body[data-theme="ocean"] .view-empty {
+  color: var(--muted);
+}
+body[data-theme="midnight"] .view-media img,
+body[data-theme="midnight"] .script-asset-thumb img,
+body[data-theme="slate"] .view-media img,
+body[data-theme="slate"] .script-asset-thumb img,
+body[data-theme="ocean"] .view-media img,
+body[data-theme="ocean"] .script-asset-thumb img {
+  border-color: var(--border);
+}
+body[data-theme="midnight"] .research-card,
+body[data-theme="midnight"] .script-section,
+body[data-theme="midnight"] .table-container,
+body[data-theme="midnight"] .stat-card,
+body[data-theme="midnight"] .task-item,
+body[data-theme="midnight"] .modal,
+body[data-theme="midnight"] .section-header,
+body[data-theme="midnight"] .progress-wrap,
+body[data-theme="slate"] .research-card,
+body[data-theme="slate"] .script-section,
+body[data-theme="slate"] .table-container,
+body[data-theme="slate"] .stat-card,
+body[data-theme="slate"] .task-item,
+body[data-theme="slate"] .modal,
+body[data-theme="slate"] .section-header,
+body[data-theme="slate"] .progress-wrap,
+body[data-theme="ocean"] .research-card,
+body[data-theme="ocean"] .script-section,
+body[data-theme="ocean"] .table-container,
+body[data-theme="ocean"] .stat-card,
+body[data-theme="ocean"] .task-item,
+body[data-theme="ocean"] .modal,
+body[data-theme="ocean"] .section-header,
+body[data-theme="ocean"] .progress-wrap {
+  background: var(--card);
+  border-color: var(--border);
+}
+body[data-theme="midnight"] .tab-nav,
+body[data-theme="slate"] .tab-nav,
+body[data-theme="ocean"] .tab-nav {
+  background: rgba(0,0,0,0.3);
+  border-bottom-color: var(--border);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
-body[data-theme="dark"] .tab-btn.active {
-  color: #eef4ff;
-  background: linear-gradient(180deg, rgba(26, 41, 64, 0.96), rgba(10, 18, 32, 0));
+body[data-theme="midnight"] .tab-btn.active,
+body[data-theme="slate"] .tab-btn.active,
+body[data-theme="ocean"] .tab-btn.active {
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0));
 }
-body[data-theme="dark"] .tab-btn:hover:not(.active) {
-  color: #eef4ff;
-  background: rgba(23, 35, 53, 0.92);
+body[data-theme="midnight"] .tab-btn:hover:not(.active),
+body[data-theme="slate"] .tab-btn:hover:not(.active),
+body[data-theme="ocean"] .tab-btn:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
 }
-body[data-theme="dark"] .header-tools .btn,
-body[data-theme="dark"] .btn-outline,
-body[data-theme="dark"] .sync-pill,
-body[data-theme="dark"] .search-box,
-body[data-theme="dark"] .form-group input,
-body[data-theme="dark"] .form-group select,
-body[data-theme="dark"] .form-group textarea,
-body[data-theme="dark"] .modal-close {
-  background: rgba(16, 27, 45, 0.96);
-  color: #edf3ff;
-  border-color: #304768;
+body[data-theme="midnight"] .btn-outline,
+body[data-theme="midnight"] .search-box,
+body[data-theme="midnight"] .form-group input,
+body[data-theme="midnight"] .form-group select,
+body[data-theme="midnight"] .form-group textarea,
+body[data-theme="midnight"] .modal-close,
+body[data-theme="slate"] .btn-outline,
+body[data-theme="slate"] .search-box,
+body[data-theme="slate"] .form-group input,
+body[data-theme="slate"] .form-group select,
+body[data-theme="slate"] .form-group textarea,
+body[data-theme="slate"] .modal-close,
+body[data-theme="ocean"] .btn-outline,
+body[data-theme="ocean"] .search-box,
+body[data-theme="ocean"] .form-group input,
+body[data-theme="ocean"] .form-group select,
+body[data-theme="ocean"] .form-group textarea,
+body[data-theme="ocean"] .modal-close {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
   box-shadow: none;
 }
-body[data-theme="dark"] .btn-outline:hover,
-body[data-theme="dark"] .header-tools .btn:hover,
-body[data-theme="dark"] .modal-close:hover {
-  background: #16253a;
+body[data-theme="midnight"] .btn-outline:hover,
+body[data-theme="midnight"] .modal-close:hover,
+body[data-theme="slate"] .btn-outline:hover,
+body[data-theme="slate"] .modal-close:hover,
+body[data-theme="ocean"] .btn-outline:hover,
+body[data-theme="ocean"] .modal-close:hover {
+  background: var(--blue-soft);
 }
-body[data-theme="dark"] .search-box:focus,
-body[data-theme="dark"] .form-group input:focus,
-body[data-theme="dark"] .form-group select:focus,
-body[data-theme="dark"] .form-group textarea:focus {
+body[data-theme="midnight"] .search-box:focus,
+body[data-theme="midnight"] .form-group input:focus,
+body[data-theme="midnight"] .form-group select:focus,
+body[data-theme="midnight"] .form-group textarea:focus,
+body[data-theme="slate"] .search-box:focus,
+body[data-theme="slate"] .form-group input:focus,
+body[data-theme="slate"] .form-group select:focus,
+body[data-theme="slate"] .form-group textarea:focus,
+body[data-theme="ocean"] .search-box:focus,
+body[data-theme="ocean"] .form-group input:focus,
+body[data-theme="ocean"] .form-group select:focus,
+body[data-theme="ocean"] .form-group textarea:focus {
   box-shadow: 0 0 0 4px rgba(125, 165, 241, 0.18);
 }
-body[data-theme="dark"] .sync-note,
-body[data-theme="dark"] .import-helper,
-body[data-theme="dark"] .source-item,
-body[data-theme="dark"] .outreach-preview {
-  background: linear-gradient(180deg, #101b2d, #0d1728);
-  color: #b8c8e2;
-}
-body[data-theme="dark"] .asset-preview {
-  background: linear-gradient(180deg, #101b2d, #0d1728);
-  border-color: #304768;
-  color: #b8c8e2;
-}
-body[data-theme="dark"] .view-field,
-body[data-theme="dark"] .view-section {
-  background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
-  border-color: #304768;
-}
-body[data-theme="dark"] .view-subtitle,
-body[data-theme="dark"] .view-empty {
-  color: #9bb0d1;
-}
-body[data-theme="dark"] .view-media img {
-  border-color: #304768;
-}
-body[data-theme="dark"] .script-asset-thumb img {
-  border-color: #304768;
-}
-body[data-theme="dark"] .research-card,
-body[data-theme="dark"] .script-section,
-body[data-theme="dark"] .table-container,
-body[data-theme="dark"] .stat-card,
-body[data-theme="dark"] .task-item,
-body[data-theme="dark"] .modal,
-body[data-theme="dark"] .section-header,
-body[data-theme="dark"] .progress-wrap {
-  background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
-}
-body[data-theme="dark"] .section-header {
+body[data-theme="midnight"] .section-header,
+body[data-theme="slate"] .section-header,
+body[data-theme="ocean"] .section-header {
   background:
-    radial-gradient(circle at top right, rgba(72, 112, 191, 0.20), transparent 24%),
-    linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+    radial-gradient(circle at top right, rgba(100, 140, 210, 0.14), transparent 24%),
+    var(--card);
 }
-body[data-theme="dark"] .progress-wrap {
+body[data-theme="midnight"] .progress-wrap,
+body[data-theme="slate"] .progress-wrap,
+body[data-theme="ocean"] .progress-wrap {
   background:
-    radial-gradient(circle at top right, rgba(83, 126, 211, 0.22), transparent 26%),
-    linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+    radial-gradient(circle at top right, rgba(100, 140, 210, 0.16), transparent 26%),
+    var(--card);
 }
-body[data-theme="dark"] .progress-bar-bg {
-  background: #1a2a42;
+body[data-theme="midnight"] .progress-bar-bg,
+body[data-theme="slate"] .progress-bar-bg,
+body[data-theme="ocean"] .progress-bar-bg {
+  background: var(--border);
 }
-body[data-theme="dark"] .script-section-head,
-body[data-theme="dark"] thead th {
-  background: linear-gradient(135deg, #142846, #1e3a63);
+body[data-theme="midnight"] .script-section-head,
+body[data-theme="midnight"] thead th,
+body[data-theme="slate"] .script-section-head,
+body[data-theme="slate"] thead th,
+body[data-theme="ocean"] .script-section-head,
+body[data-theme="ocean"] thead th {
+  background: var(--blue-mist);
+  border-color: var(--border);
 }
-body[data-theme="dark"] tbody td,
-body[data-theme="dark"] .modal-header,
-body[data-theme="dark"] .modal-footer,
-body[data-theme="dark"] .script-section-head {
-  border-color: #243955;
+body[data-theme="midnight"] tbody td,
+body[data-theme="midnight"] .modal-header,
+body[data-theme="midnight"] .modal-footer,
+body[data-theme="midnight"] .script-section-head,
+body[data-theme="slate"] tbody td,
+body[data-theme="slate"] .modal-header,
+body[data-theme="slate"] .modal-footer,
+body[data-theme="slate"] .script-section-head,
+body[data-theme="ocean"] tbody td,
+body[data-theme="ocean"] .modal-header,
+body[data-theme="ocean"] .modal-footer,
+body[data-theme="ocean"] .script-section-head {
+  border-color: var(--border);
 }
-body[data-theme="dark"] tbody tr:nth-child(even) {
-  background: rgba(13, 23, 40, 0.76);
+body[data-theme="midnight"] tbody tr:nth-child(even),
+body[data-theme="slate"] tbody tr:nth-child(even),
+body[data-theme="ocean"] tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.03);
 }
-body[data-theme="dark"] tbody tr:hover {
-  background: #172740;
+body[data-theme="midnight"] tbody tr:hover,
+body[data-theme="slate"] tbody tr:hover,
+body[data-theme="ocean"] tbody tr:hover {
+  background: var(--blue-soft);
 }
-body[data-theme="dark"] .section-header p,
-body[data-theme="dark"] .script-section-head p,
-body[data-theme="dark"] .task-sub,
-body[data-theme="dark"] .task-notes-text,
-body[data-theme="dark"] .script-preview,
-body[data-theme="dark"] .status-text,
-body[data-theme="dark"] .source-item,
-body[data-theme="dark"] .research-card p {
-  color: #9eb0cb;
+body[data-theme="midnight"] .section-header p,
+body[data-theme="midnight"] .script-section-head p,
+body[data-theme="midnight"] .task-sub,
+body[data-theme="midnight"] .task-notes-text,
+body[data-theme="midnight"] .script-preview,
+body[data-theme="midnight"] .status-text,
+body[data-theme="midnight"] .research-card p,
+body[data-theme="slate"] .section-header p,
+body[data-theme="slate"] .script-section-head p,
+body[data-theme="slate"] .task-sub,
+body[data-theme="slate"] .task-notes-text,
+body[data-theme="slate"] .script-preview,
+body[data-theme="slate"] .status-text,
+body[data-theme="slate"] .research-card p,
+body[data-theme="ocean"] .section-header p,
+body[data-theme="ocean"] .script-section-head p,
+body[data-theme="ocean"] .task-sub,
+body[data-theme="ocean"] .task-notes-text,
+body[data-theme="ocean"] .script-preview,
+body[data-theme="ocean"] .status-text,
+body[data-theme="ocean"] .research-card p {
+  color: var(--muted);
 }
-body[data-theme="dark"] .section-header h2,
-body[data-theme="dark"] .task-title,
-body[data-theme="dark"] .task-divider,
-body[data-theme="dark"] .progress-wrap {
-  color: #edf3ff;
+body[data-theme="midnight"] .section-header h2,
+body[data-theme="midnight"] .task-title,
+body[data-theme="slate"] .section-header h2,
+body[data-theme="slate"] .task-title,
+body[data-theme="ocean"] .section-header h2,
+body[data-theme="ocean"] .task-title {
+  color: var(--text);
 }
-body[data-theme="dark"] .research-chip,
-body[data-theme="dark"] .tab-count {
-  background: #173156;
-  color: #dce8ff;
-  border-color: #304768;
+body[data-theme="midnight"] .research-chip,
+body[data-theme="midnight"] .tab-count,
+body[data-theme="slate"] .research-chip,
+body[data-theme="slate"] .tab-count,
+body[data-theme="ocean"] .research-chip,
+body[data-theme="ocean"] .tab-count {
+  background: var(--blue-mist);
+  color: var(--text);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .cat-chip {
-  background: linear-gradient(180deg, #16253a, #132133);
-  color: #d7e5ff;
+body[data-theme="midnight"] .cat-chip,
+body[data-theme="slate"] .cat-chip,
+body[data-theme="ocean"] .cat-chip {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .cat-chip:hover:not(.active) {
-  background: #1a2c45;
-  border-color: #3a567f;
+body[data-theme="midnight"] .cat-chip:hover:not(.active),
+body[data-theme="slate"] .cat-chip:hover:not(.active),
+body[data-theme="ocean"] .cat-chip:hover:not(.active) {
+  background: var(--blue-soft);
+  border-color: var(--blue-line);
 }
-body[data-theme="dark"] .cat-chip.active {
-  background: linear-gradient(135deg, #3564b2, #4f87df);
-  border-color: #5a8fe3;
-  color: #ffffff;
-}
-body[data-theme="dark"] .task-status-group {
-  background: linear-gradient(180deg, #132136, #0f1a2b);
+body[data-theme="midnight"] .task-status-group,
+body[data-theme="slate"] .task-status-group,
+body[data-theme="ocean"] .task-status-group {
+  background: var(--card);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .task-status-btn {
-  color: #c2d2ec;
+body[data-theme="midnight"] .task-status-btn,
+body[data-theme="slate"] .task-status-btn,
+body[data-theme="ocean"] .task-status-btn {
+  color: var(--muted);
 }
-body[data-theme="dark"] .task-status-btn + .task-status-btn {
-  border-left-color: #243955;
+body[data-theme="midnight"] .task-status-btn + .task-status-btn,
+body[data-theme="slate"] .task-status-btn + .task-status-btn,
+body[data-theme="ocean"] .task-status-btn + .task-status-btn {
+  border-left-color: var(--border);
 }
-body[data-theme="dark"] .task-status-btn:hover {
-  background: #1a2c45;
-  color: #ffffff;
+body[data-theme="midnight"] .task-status-btn:hover,
+body[data-theme="slate"] .task-status-btn:hover,
+body[data-theme="ocean"] .task-status-btn:hover {
+  background: var(--blue-soft);
+  color: var(--text);
 }
-body[data-theme="dark"] .task-chip {
-  background: linear-gradient(180deg, #16253a, #112033);
-  color: #d7e5ff;
-  border-color: #304768;
+body[data-theme="midnight"] .task-chip,
+body[data-theme="slate"] .task-chip,
+body[data-theme="ocean"] .task-chip {
+  background: var(--blue-soft);
+  color: var(--text);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .task-chip.status {
-  background: linear-gradient(180deg, #193050, #152744);
-  color: #dce8ff;
-  border-color: #355179;
+body[data-theme="midnight"] .task-divider::before,
+body[data-theme="midnight"] .task-divider::after,
+body[data-theme="slate"] .task-divider::before,
+body[data-theme="slate"] .task-divider::after,
+body[data-theme="ocean"] .task-divider::before,
+body[data-theme="ocean"] .task-divider::after {
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
-body[data-theme="dark"] .task-chip.recurring {
-  background: linear-gradient(180deg, #163154, #122946);
-  color: #dce8ff;
-  border-color: #3b5f90;
+body[data-theme="midnight"] .task-checkbox,
+body[data-theme="slate"] .task-checkbox,
+body[data-theme="ocean"] .task-checkbox {
+  background: var(--bg);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .task-divider::before,
-body[data-theme="dark"] .task-divider::after {
-  background: linear-gradient(90deg, rgba(73, 108, 160, 0.10), rgba(73, 108, 160, 0.65), rgba(73, 108, 160, 0.10));
+body[data-theme="midnight"] .task-item.done,
+body[data-theme="midnight"] .task-item.completed,
+body[data-theme="midnight"] .task-item.in-progress,
+body[data-theme="midnight"] .task-item.recurring-task,
+body[data-theme="slate"] .task-item.done,
+body[data-theme="slate"] .task-item.completed,
+body[data-theme="slate"] .task-item.in-progress,
+body[data-theme="slate"] .task-item.recurring-task,
+body[data-theme="ocean"] .task-item.done,
+body[data-theme="ocean"] .task-item.completed,
+body[data-theme="ocean"] .task-item.in-progress,
+body[data-theme="ocean"] .task-item.recurring-task {
+  background: var(--card);
 }
-body[data-theme="dark"] .task-checkbox {
-  background: #0e1829;
-  border-color: #304768;
+body[data-theme="midnight"] .status-toggle,
+body[data-theme="slate"] .status-toggle,
+body[data-theme="ocean"] .status-toggle { color: inherit; }
+body[data-theme="midnight"] .empty-state,
+body[data-theme="slate"] .empty-state,
+body[data-theme="ocean"] .empty-state { background: var(--card); }
+body[data-theme="midnight"] .toast,
+body[data-theme="slate"] .toast,
+body[data-theme="ocean"] .toast { background: var(--blue-mist); }
+
+/* Settings panel dark theme adaptation */
+body[data-theme="midnight"] .settings-panel,
+body[data-theme="slate"] .settings-panel,
+body[data-theme="ocean"] .settings-panel {
+  border-color: var(--border);
 }
-body[data-theme="dark"] .task-item.done,
-body[data-theme="dark"] .task-item.completed,
-body[data-theme="dark"] .task-item.in-progress,
-body[data-theme="dark"] .task-item.recurring-task {
-  background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+body[data-theme="midnight"] .settings-sync-row,
+body[data-theme="slate"] .settings-sync-row,
+body[data-theme="ocean"] .settings-sync-row {
+  background: var(--blue-soft);
+  border-color: var(--border);
 }
-body[data-theme="dark"] .status-toggle {
-  color: inherit;
+body[data-theme="midnight"] .settings-action-btn,
+body[data-theme="slate"] .settings-action-btn,
+body[data-theme="ocean"] .settings-action-btn {
+  border-color: var(--border);
 }
-body[data-theme="dark"] .empty-state {
-  background: linear-gradient(180deg, rgba(16, 27, 45, 0.94), rgba(11, 20, 35, 0.94));
+body[data-theme="midnight"] .settings-action-btn:hover,
+body[data-theme="slate"] .settings-action-btn:hover,
+body[data-theme="ocean"] .settings-action-btn:hover {
+  background: var(--blue-soft);
 }
-body[data-theme="dark"] .toast {
-  background: linear-gradient(135deg, #10213b, #24447a);
+body[data-theme="midnight"] .theme-swatch:hover,
+body[data-theme="slate"] .theme-swatch:hover,
+body[data-theme="ocean"] .theme-swatch:hover {
+  background: var(--blue-soft);
+}
+body[data-theme="midnight"] .theme-swatch.active,
+body[data-theme="slate"] .theme-swatch.active,
+body[data-theme="ocean"] .theme-swatch.active {
+  background: var(--blue-mist);
+  border-color: var(--primary);
 }
 
 @media (min-width: 761px) {
@@ -1008,16 +1320,16 @@ body[data-theme="dark"] .toast {
 @media (max-width: 760px) {
   .app-header {
     padding: 16px 20px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
-  .app-header > div { width: 100%; }
-  .header-tools {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
+  .app-header > div:first-child { flex: 1; min-width: 0; }
+  .settings-gear-wrap { flex-shrink: 0; }
+  .settings-panel {
+    right: 0;
+    min-width: 240px;
   }
   .tab-nav { padding: 0 16px; }
   .tab-content { padding: 16px; }
@@ -1135,13 +1447,17 @@ body[data-theme="dark"] .toast {
     flex: 1 1 120px;
     justify-content: center;
   }
-  body[data-theme="dark"] table.mobile-cards tbody tr {
-    background: linear-gradient(180deg, rgba(16, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
-    border-color: #243955;
+  body[data-theme="midnight"] table.mobile-cards tbody tr,
+  body[data-theme="slate"] table.mobile-cards tbody tr,
+  body[data-theme="ocean"] table.mobile-cards tbody tr {
+    background: var(--card);
+    border-color: var(--border);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
   }
-  body[data-theme="dark"] table.mobile-cards tbody td {
-    border-bottom-color: #243955;
+  body[data-theme="midnight"] table.mobile-cards tbody td,
+  body[data-theme="slate"] table.mobile-cards tbody td,
+  body[data-theme="ocean"] table.mobile-cards tbody td {
+    border-bottom-color: var(--border);
   }
 
   /* ── Mobile modal improvements ── */
@@ -1290,37 +1606,275 @@ body[data-theme="dark"] .toast {
 .reply-from    { font-weight:600; color:var(--primary-dark); min-width:160px; font-size:13px; }
 .reply-snippet { flex:1; font-size:13px; color:var(--muted); line-height:1.5; }
 .reply-date    { font-size:12px; color:var(--muted); white-space:nowrap; }
-body[data-theme="dark"] .agent-run-card { background:#1a2b42; border-color:#243955; }
-body[data-theme="dark"] .agent-stat-card { background:#1a2b42; border-color:#243955; }
-body[data-theme="dark"] .queue-entry { background:#162032; }
+body[data-theme="midnight"] .agent-run-card,
+body[data-theme="slate"] .agent-run-card,
+body[data-theme="ocean"] .agent-run-card { background: var(--card); border-color: var(--border); }
+body[data-theme="midnight"] .agent-stat-card,
+body[data-theme="slate"] .agent-stat-card,
+body[data-theme="ocean"] .agent-stat-card { background: var(--card); border-color: var(--border); }
+body[data-theme="midnight"] .queue-entry,
+body[data-theme="slate"] .queue-entry,
+body[data-theme="ocean"] .queue-entry { background: var(--blue-soft); }
+
+/* ── Creator Avatar ── */
+.creator-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: #fff;
+  flex-shrink: 0; letter-spacing: 0.5px;
+}
+.creator-avatar.large { width: 64px; height: 64px; font-size: 22px; }
+
+/* ── Creator Carousel ── */
+.creator-tab-toolbar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.creator-tab-toolbar .search-box { flex: 1; min-width: 160px; }
+.gender-filter { display: flex; gap: 6px; }
+.gender-btn {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.gender-btn.active { background: var(--primary); border-color: var(--primary); color: var(--bg); }
+.name-jumper { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; min-height: 8px; }
+.name-chip {
+  padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;
+  background: var(--blue-soft); border: 1px solid var(--blue-line); color: var(--primary-ink);
+  cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.name-chip:hover { background: var(--primary); color: var(--bg); }
+.carousel-wrapper { position: relative; }
+.creator-carousel {
+  display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-bottom: 8px; scrollbar-width: none;
+}
+.creator-carousel::-webkit-scrollbar { display: none; }
+.creator-card {
+  scroll-snap-align: start; flex: 0 0 220px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 16px; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow);
+}
+.creator-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.14); }
+.card-avatar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.card-name { font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.3; }
+.card-platform { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.card-type { font-size: 11px; font-weight: 600; color: var(--primary-ink); margin-bottom: 8px; }
+.card-followers { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.card-status-chip {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 600;
+  background: var(--blue-soft); color: var(--muted);
+}
+.card-status-chip.accepted { background: rgba(0,176,80,0.15); color: var(--success); }
+.card-status-chip.pending  { background: rgba(255,152,0,0.15); color: var(--warning); }
+.card-status-chip.declined { background: rgba(255,68,68,0.12); color: var(--danger); }
+.card-status-chip.email { background: rgba(77,127,213,0.15); color: var(--primary-ink); }
+.card-actions { display: flex; gap: 6px; margin-top: 10px; }
+.carousel-nav {
+  display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px;
+}
+.carousel-nav button {
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.carousel-nav button:hover { background: var(--primary); color: var(--bg); }
+.carousel-dots { display: flex; gap: 6px; align-items: center; }
+.carousel-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border); transition: all 0.15s; cursor: pointer;
+}
+.carousel-dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
+.carousel-empty { color: var(--muted); font-size: 14px; padding: 32px 0; text-align: center; }
+
+/* ── Approval Panel ── */
+.approval-panel {
+  position: fixed; top: 72px; right: 0; width: 280px; height: calc(100vh - 72px);
+  background: var(--card); border-left: 1px solid var(--border);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.14); z-index: 90;
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.26s cubic-bezier(0.4,0,0.2,1);
+}
+.approval-panel.open { transform: translateX(0); }
+.ap-toggle-btn {
+  position: absolute; left: -38px; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 56px; border-radius: 8px 0 0 8px;
+  background: var(--card); border: 1px solid var(--border); border-right: none;
+  cursor: pointer; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; color: var(--text); box-shadow: -3px 0 12px rgba(0,0,0,0.12);
+}
+.ap-toggle-arrow { font-size: 18px; line-height: 1; transition: transform 0.22s; }
+.approval-panel.open .ap-toggle-arrow { transform: rotate(180deg); }
+.ap-badge {
+  background: var(--danger); color: #fff;
+  border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 5px; min-width: 16px;
+  text-align: center; line-height: 1.4;
+}
+.ap-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 10px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ap-header-title { font-weight: 700; font-size: 13px; color: var(--text); }
+.ap-body { flex: 1; overflow-y: auto; padding: 10px 12px; }
+.ap-item {
+  background: var(--blue-soft); border: 1px solid var(--blue-line);
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+}
+.ap-item-name { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 2px; }
+.ap-item-meta { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.ap-item-actions { display: flex; gap: 6px; }
+.ap-item-actions button { flex: 1; }
+
+/* ── Approval Tab Items ── */
+.approval-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px;
+}
+.approval-item-info { flex: 1; min-width: 0; }
+.approval-item-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.approval-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.approval-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* ── Segment Picker ── */
+.segment-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.seg-btn {
+  padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 2px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.seg-btn.selected, .seg-btn:hover { background: var(--primary); border-color: var(--primary); color: var(--bg); }
+
+/* ── Creator Card Modal avatar row ── */
+.cc-avatar-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 12px; }
+
+/* ── Weekly Goal Banner ── */
+.weekly-goal-banner {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 20px; margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.wg-main { margin-bottom: 12px; }
+.wg-title { font-weight: 700; font-size: 15px; color: var(--text); margin-bottom: 2px; }
+.wg-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.goal-bar-bg { background: var(--border); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 4px; }
+.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 6px; transition: width 0.5s; }
+.goal-bar-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.wg-inputs { display: flex; gap: 12px; flex-wrap: wrap; }
+.wg-field { display: flex; flex-direction: column; gap: 3px; }
+.wg-field label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.wg-field input { width: 72px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+.wg-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.wg-stat { text-align: center; }
+.wg-stat-num { font-size: 20px; font-weight: 700; color: var(--primary); }
+.wg-stat-label { font-size: 11px; color: var(--muted); }
+
+/* ── Category task cards ── */
+.task-categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.task-cat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+}
+.task-cat-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.task-cat-title { font-weight: 700; font-size: 14px; color: var(--text); }
+.task-cat-count { font-size: 12px; color: var(--muted); }
+.task-cat-body { padding: 10px 12px; }
+.task-cat-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.task-cat-item:last-child { border-bottom: none; }
+.task-cat-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; }
+.task-cat-item-text { flex: 1; font-size: 13px; color: var(--text); }
+.task-cat-item-text.done { text-decoration: line-through; color: var(--muted); }
+.task-cat-add { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 12px; color: var(--muted); background: transparent; border: none; cursor: pointer; }
+.task-cat-add:hover { color: var(--primary); }
+
+/* ── Approval panel body scrollbar ── */
+.ap-body::-webkit-scrollbar { width: 4px; }
+.ap-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Stats row for carousels ── */
+.stats-row-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.stat-chip { background: var(--blue-soft); border: 1px solid var(--blue-line); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--text); }
+.stat-chip strong { color: var(--primary-ink); }
 </style>
 </head>
 <body>
 
 <!-- ══ HEADER ══ -->
+<div class="modal-settings-overlay" id="settings-overlay" onclick="closeSettingsPanel()"></div>
 <div class="app-header">
   <div>
     <h1>✝ Jax's Dashboard</h1>
     <div class="subtitle">Month 1 Tracker · April 2026</div>
   </div>
-  <div class="header-tools">
-    <span class="sync-pill" id="sync-pill" data-state="pending">Local Only</span>
-    <button class="btn btn-outline" id="theme-toggle" onclick="toggleTheme()">Dark Mode</button>
-    <button class="btn btn-outline" onclick="exportDashboardBackup()">Export Backup</button>
-    <button class="btn btn-outline" onclick="document.getElementById('backup-import').click()">Import Backup</button>
+  <div class="settings-gear-wrap">
+    <button class="settings-gear-btn" id="settings-gear-btn" onclick="toggleSettingsPanel()" aria-label="Open settings" title="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-panel-title">Sync Status</div>
+      <div class="settings-sync-row">
+        <span class="settings-sync-dot" id="settings-sync-dot" data-state="pending"></span>
+        <span id="settings-sync-label">Local Only</span>
+      </div>
+      <div class="settings-panel-title">Theme</div>
+      <div class="settings-theme-grid" id="settings-theme-grid">
+        <div class="theme-swatch" data-theme-pick="slate" onclick="pickTheme('slate')">
+          <div class="theme-swatch-color" style="background: linear-gradient(135deg, #1e1b14, #2a2519);"><span style="color:#C9A84C;">S</span></div>
+          <div class="theme-swatch-label">Slate Pro</div>
+          <div class="theme-swatch-check" id="tc-slate"></div>
+        </div>
+        <div class="theme-swatch" data-theme-pick="midnight" onclick="pickTheme('midnight')">
+          <div class="theme-swatch-color" style="background: linear-gradient(135deg, #0d1f3c, #244f9e);">M</div>
+          <div class="theme-swatch-label">Midnight</div>
+          <div class="theme-swatch-check" id="tc-midnight"></div>
+        </div>
+        <div class="theme-swatch" data-theme-pick="ocean" onclick="pickTheme('ocean')">
+          <div class="theme-swatch-color" style="background: linear-gradient(135deg, #061418, #0a2a32);"><span style="color:#00c2c7;">O</span></div>
+          <div class="theme-swatch-label">Ocean</div>
+          <div class="theme-swatch-check" id="tc-ocean"></div>
+        </div>
+        <div class="theme-swatch" data-theme-pick="classic" onclick="pickTheme('classic')">
+          <div class="theme-swatch-color" style="background: linear-gradient(135deg, #2f5496, #4979d1);">C</div>
+          <div class="theme-swatch-label">Classic</div>
+          <div class="theme-swatch-check" id="tc-classic"></div>
+        </div>
+      </div>
+      <div class="settings-panel-divider"></div>
+      <div class="settings-action-list">
+        <button class="settings-action-btn" onclick="exportDashboardBackup(); closeSettingsPanel();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export Backup
+        </button>
+        <button class="settings-action-btn" onclick="document.getElementById('backup-import').click(); closeSettingsPanel();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Import Backup
+        </button>
+        <button class="settings-action-btn" onclick="openSyncModal(); closeSettingsPanel();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Sync Settings
+        </button>
+      </div>
+    </div>
     <input type="file" id="backup-import" accept="application/json" style="display:none" onchange="importDashboardBackup(event)">
   </div>
 </div>
 
 <!-- ══ TAB NAV ══ -->
 <div class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('overview')">✅ Task Checklist</button>
-  <button class="tab-btn" onclick="switchTab('creators')">📱 Creator Outreach <span class="tab-count" id="cnt-creators">0</span></button>
-  <button class="tab-btn" onclick="switchTab('partners')">🎵 Artists &amp; Brands <span class="tab-count" id="cnt-partners">0</span></button>
-  <button class="tab-btn" onclick="switchTab('orgPartners')">⛪ Partnerships <span class="tab-count" id="cnt-orgPartners">0</span></button>
-  <button class="tab-btn" onclick="switchTab('messages')">💬 Messages <span class="tab-count" id="cnt-messages">0</span></button>
+  <button class="tab-btn active" onclick="switchTab('overview')">✅ Tasks</button>
+  <button class="tab-btn" onclick="switchTab('youngAdults')">🧑 Young Adults <span class="tab-count" id="cnt-youngAdults">0</span></button>
+  <button class="tab-btn" onclick="switchTab('family')">👨‍👩‍👧 Moms &amp; Family <span class="tab-count" id="cnt-family">0</span></button>
+  <button class="tab-btn" onclick="switchTab('faithLeaders')">✝️ Faith Leaders <span class="tab-count" id="cnt-faithLeaders">0</span></button>
+  <button class="tab-btn" onclick="switchTab('misc')">🌐 Misc <span class="tab-count" id="cnt-misc">0</span></button>
   <button class="tab-btn" onclick="switchTab('scripts')">📝 Scripts <span class="tab-count" id="cnt-scripts">0</span></button>
-  <button class="tab-btn" onclick="switchTab('agentLog')">🤖 Agent Log <span class="tab-count" id="cnt-agent-runs">0</span></button>
+  <button class="tab-btn" onclick="switchTab('approval')">🔔 Approval <span class="tab-count" id="cnt-approval">0</span></button>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1329,10 +1883,47 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
 <div class="tab-content active" id="tab-overview">
   <div class="section-header">
     <div>
-      <h2>Month 1 Task Checklist</h2>
-      <p>All onboarding next steps in one place. Check them off as you finish.</p>
+      <h2>Creative Goals &amp; Tasks</h2>
+      <p>Weekly creative targets and production tasks. Track your progress toward 50-70 creatives per week.</p>
     </div>
     <button class="btn btn-primary" onclick="openTaskModal(-1)">+ Add Task</button>
+  </div>
+
+  <div class="weekly-goal-banner" id="weekly-goal-banner">
+    <div class="wg-main">
+      <div class="wg-title">Weekly Creative Goal</div>
+      <div class="wg-subtitle">Target: 50-70 creatives per week · 70% video, 30% static</div>
+      <div class="goal-bar-bg"><div class="goal-bar-fill" id="wg-bar-fill" style="width:0%"></div></div>
+      <div class="goal-bar-label" id="wg-bar-label">0 / 60 creatives this week</div>
+      <div class="wg-inputs">
+        <div class="wg-input-group">
+          <div class="wg-input-label">Videos</div>
+          <input class="wg-input" id="wg-input-videos" type="number" min="0" value="0" onchange="weeklyGoalUpdate()">
+        </div>
+        <div class="wg-input-group">
+          <div class="wg-input-label">Statics</div>
+          <input class="wg-input" id="wg-input-statics" type="number" min="0" value="0" onchange="weeklyGoalUpdate()">
+        </div>
+        <div class="wg-input-group">
+          <div class="wg-input-label">Target</div>
+          <input class="wg-input" id="wg-input-target" type="number" min="1" value="60" onchange="weeklyGoalUpdate()">
+        </div>
+      </div>
+    </div>
+    <div class="wg-stats">
+      <div class="wg-stat">
+        <div class="wg-stat-num" id="wg-total-num">0</div>
+        <div class="wg-stat-label">Total</div>
+      </div>
+      <div class="wg-stat">
+        <div class="wg-stat-num" id="wg-video-num">0</div>
+        <div class="wg-stat-label">Videos</div>
+      </div>
+      <div class="wg-stat">
+        <div class="wg-stat-num" id="wg-pct">0%</div>
+        <div class="wg-stat-label">Of Goal</div>
+      </div>
+    </div>
   </div>
 
   <div class="progress-wrap">
@@ -1348,220 +1939,142 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
 
   <div class="cat-chips" id="catChips">
     <div class="cat-chip active" data-cat="All" onclick="filterTasks(this)">All</div>
-    <div class="cat-chip" data-cat="Instagram" onclick="filterTasks(this)">📸 Instagram</div>
-    <div class="cat-chip" data-cat="Paid Ads" onclick="filterTasks(this)">🎬 Paid Ads</div>
-    <div class="cat-chip" data-cat="Creator Outreach" onclick="filterTasks(this)">📱 Creator Outreach</div>
-    <div class="cat-chip" data-cat="Partnerships" onclick="filterTasks(this)">🤝 Partnerships</div>
-  </div>
-  <div class="cat-chips" id="taskSectionChips">
-    <div class="cat-chip active" data-section="All" onclick="filterTaskSection(this)">All Sections</div>
-    <div class="cat-chip" data-section="Recurring" onclick="filterTaskSection(this)">Recurring</div>
-    <div class="cat-chip" data-section="One Time" onclick="filterTaskSection(this)">One Time</div>
-    <div class="cat-chip" data-section="Completed" onclick="filterTaskSection(this)">Completed</div>
+    <div class="cat-chip" data-cat="iPad Videos" onclick="filterTasks(this)">📱 iPad Videos</div>
+    <div class="cat-chip" data-cat="Speaking Videos" onclick="filterTasks(this)">🎤 Speaking</div>
+    <div class="cat-chip" data-cat="AI Videos" onclick="filterTasks(this)">🤖 AI Videos</div>
+    <div class="cat-chip" data-cat="Statics" onclick="filterTasks(this)">🖼️ Statics</div>
+    <div class="cat-chip" data-cat="Competitor Research" onclick="filterTasks(this)">🔍 Competitor</div>
   </div>
 
   <div class="task-list" id="taskList"></div>
 </div>
 
 <!-- ══════════════════════════════════════════
-     TAB 2 — CREATOR OUTREACH
+     TAB 2 — YOUNG ADULTS
 ══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-creators">
+<div class="tab-content" id="tab-youngAdults">
   <div class="section-header">
     <div>
-      <h2>📱 Creator Outreach</h2>
-      <p>Track creator outreach and app creator partnerships in one place. Creator size is labeled automatically from follower count.</p>
+      <h2>🧑 Young Adults</h2>
+      <p>Christian creators ages 18-29. Filter by gender below.</p>
     </div>
     <div class="import-actions">
-      <button class="btn btn-outline" onclick="openLeadResearchModal('creators')">Research with Gemini</button>
-      <button class="btn btn-primary" onclick="openModal('creator',-1)">+ Add Creator</button>
+      <button class="btn btn-outline" onclick="openLeadResearchModal('youngAdults')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openCreatorCardModal('youngAdults',-1)">+ Add Creator</button>
     </div>
   </div>
-  <div class="stats-row" id="stats-creators"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-creators" placeholder="Search name, style, notes…" oninput="renderTable('creators')">
-    <select class="btn btn-outline" id="flt-creators-status" onchange="renderTable('creators')">
-      <option value="">Status: All</option>
-      <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
-    </select>
+  <div class="stats-row" id="stats-youngAdults"></div>
+  <div class="creator-tab-toolbar">
+    <input type="text" class="search-box" id="srch-youngAdults" placeholder="Search name, platform, notes…" oninput="renderCarousel('youngAdults')">
+    <div class="gender-filter">
+      <button class="gender-chip active" onclick="setGenderFilter('youngAdults','all',this)">All</button>
+      <button class="gender-chip" onclick="setGenderFilter('youngAdults','M',this)">Male</button>
+      <button class="gender-chip" onclick="setGenderFilter('youngAdults','F',this)">Female</button>
+    </div>
   </div>
-  <div class="table-container">
-    <table class="mobile-cards">
-      <thead><tr>
-        <th>Creator / Handle</th><th>Email / Phone</th><th>Platform</th><th>Followers</th><th>Tag</th>
-        <th>Status</th><th>Terms</th><th>Last Contact</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-creators"></tbody>
-    </table>
+  <div class="name-jumper" id="jumper-youngAdults"></div>
+  <div class="carousel-wrapper">
+    <div class="creator-carousel" id="carousel-youngAdults"></div>
+    <div class="carousel-nav">
+      <button class="carousel-arrow" onclick="carouselPrev('youngAdults')">&#8249;</button>
+      <div class="carousel-dots" id="dots-youngAdults"></div>
+      <button class="carousel-arrow" onclick="carouselNext('youngAdults')">&#8250;</button>
+    </div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════
-     TAB 3 — ARTIST PARTNERSHIPS
+     TAB 3 — MOMS AND FAMILY
 ══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-partners">
+<div class="tab-content" id="tab-family">
   <div class="section-header">
     <div>
-      <h2>🎵 Artists &amp; Brands</h2>
-      <p>Combine artist and brand outreach in one tracker. Each record is labeled as an artist or brand when you add it.</p>
+      <h2>👨‍👩‍👧 Moms &amp; Family</h2>
+      <p>Parent and family-focused creators, typically 30+.</p>
     </div>
     <div class="import-actions">
-      <button class="btn btn-outline" onclick="openLeadResearchModal('partners')">Research with Gemini</button>
-      <button class="btn btn-primary" onclick="openModal('partners',-1)">+ Add Partner</button>
+      <button class="btn btn-outline" onclick="openLeadResearchModal('family')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openCreatorCardModal('family',-1)">+ Add Creator</button>
     </div>
   </div>
-  <div class="stats-row" id="stats-partners"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-partners" placeholder="Search name, phone, email, notes…" oninput="renderTable('partners')">
-    <select class="btn btn-outline" id="flt-partners-status" onchange="renderTable('partners')">
-      <option value="">Status: All</option>
-      <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
-    </select>
+  <div class="stats-row" id="stats-family"></div>
+  <div class="creator-tab-toolbar">
+    <input type="text" class="search-box" id="srch-family" placeholder="Search name, platform, notes…" oninput="renderCarousel('family')">
+    <div class="gender-filter">
+      <button class="gender-chip active" onclick="setGenderFilter('family','all',this)">All</button>
+      <button class="gender-chip" onclick="setGenderFilter('family','M',this)">Dads</button>
+      <button class="gender-chip" onclick="setGenderFilter('family','F',this)">Moms</button>
+    </div>
   </div>
-  <div class="table-container">
-    <table class="mobile-cards">
-      <thead><tr>
-        <th>Partner</th><th>Type</th><th>Company / Label</th><th>Email / Phone</th>
-        <th>Channel / Website</th><th>Followers</th><th>Tag</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-partners"></tbody>
-    </table>
+  <div class="name-jumper" id="jumper-family"></div>
+  <div class="carousel-wrapper">
+    <div class="creator-carousel" id="carousel-family"></div>
+    <div class="carousel-nav">
+      <button class="carousel-arrow" onclick="carouselPrev('family')">&#8249;</button>
+      <div class="carousel-dots" id="dots-family"></div>
+      <button class="carousel-arrow" onclick="carouselNext('family')">&#8250;</button>
+    </div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════
-     TAB 4 — MERCH BRANDS
+     TAB 4 — FAITH LEADERS
 ══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-merch">
+<div class="tab-content" id="tab-faithLeaders">
   <div class="section-header">
     <div>
-      <h2>📖 Bible Merch Brand Partnerships</h2>
-      <p>Outreach to premium Christian brands — Alabaster, Byble, journals, clothing, rosaries, etc.</p>
-    </div>
-    <button class="btn btn-primary" onclick="openModal('merch',-1)">+ Add Brand</button>
-  </div>
-  <div class="stats-row" id="stats-merch"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-merch" placeholder="Search brand, contact, notes…" oninput="renderTable('merch')">
-    <select class="btn btn-outline" id="flt-merch-status" onchange="renderTable('merch')">
-      <option value="">Status: All</option>
-      <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
-    </select>
-    <select class="btn btn-outline" id="flt-merch-type" onchange="renderTable('merch')">
-      <option value="">Type: All</option>
-      <option>Bible Study</option><option>Journal</option><option>Clothing</option>
-      <option>Rosary / Jewelry</option><option>Books</option><option>Other</option>
-    </select>
-  </div>
-  <div class="table-container">
-    <table class="mobile-cards">
-      <thead><tr>
-        <th>Brand Name</th><th>Contact</th><th>Email</th><th>Title</th>
-        <th>Type</th><th>Status</th><th>Last Contact</th><th>Adi Reviewed?</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-merch"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     TAB 5 — APP CREATORS
-══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-appCreators">
-  <div class="section-header">
-    <div>
-      <h2>🎥 App Creator Partnerships</h2>
-      <p>DM creators (50K+ followers) to make devotionals and content inside Creed. Mixed payout model.</p>
-    </div>
-    <button class="btn btn-primary" onclick="openModal('appCreators',-1)">+ Add Creator</button>
-  </div>
-  <div class="stats-row" id="stats-appCreators"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-appCreators" placeholder="Search creator, platform, notes…" oninput="renderTable('appCreators')">
-    <select class="btn btn-outline" id="flt-appCreators-status" onchange="renderTable('appCreators')">
-      <option value="">Status: All</option>
-      <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
-    </select>
-  </div>
-  <div class="table-container">
-      <table class="mobile-cards">
-      <thead><tr>
-        <th>Creator</th><th>Platform</th><th>Followers</th><th>Content Type</th>
-        <th>Status</th><th>Payout Model</th><th>Creator Code</th><th>Last Contact</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-appCreators"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     TAB 6 — AMBASSADORS
-══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-orgPartners">
-  <div class="section-header">
-    <div>
-      <h2>⛪ Partnerships</h2>
-      <p>Track churches and church camps like Pine Cove or Sky Ranch for broader Creed partnerships and outreach.</p>
+      <h2>✝️ Faith Leaders</h2>
+      <p>Pastors, worship leaders, and ministry creators with personal accounts.</p>
     </div>
     <div class="import-actions">
-      <button class="btn btn-outline" onclick="openLeadResearchModal('orgPartners')">Research with Gemini</button>
-      <button class="btn btn-primary" onclick="openModal('orgPartners',-1)">+ Add Partnership</button>
+      <button class="btn btn-outline" onclick="openLeadResearchModal('faithLeaders')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openCreatorCardModal('faithLeaders',-1)">+ Add Creator</button>
     </div>
   </div>
-  <div class="stats-row" id="stats-orgPartners"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-orgPartners" placeholder="Search partner, email, phone, location, notes…" oninput="renderTable('orgPartners')">
-    <select class="btn btn-outline" id="flt-orgPartners-status" onchange="renderTable('orgPartners')">
-      <option value="">Status: All</option>
-      <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
-    </select>
+  <div class="stats-row" id="stats-faithLeaders"></div>
+  <div class="creator-tab-toolbar">
+    <input type="text" class="search-box" id="srch-faithLeaders" placeholder="Search name, platform, notes…" oninput="renderCarousel('faithLeaders')">
   </div>
-  <div class="table-container">
-      <table class="mobile-cards">
-      <thead><tr>
-        <th>Partner</th><th>Type</th><th>Email / Phone</th><th>Location</th><th>Status</th>
-        <th>People Reached</th><th>Last Contact</th><th>Partnership Package</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-orgPartners"></tbody>
-    </table>
+  <div class="name-jumper" id="jumper-faithLeaders"></div>
+  <div class="carousel-wrapper">
+    <div class="creator-carousel" id="carousel-faithLeaders"></div>
+    <div class="carousel-nav">
+      <button class="carousel-arrow" onclick="carouselPrev('faithLeaders')">&#8249;</button>
+      <div class="carousel-dots" id="dots-faithLeaders"></div>
+      <button class="carousel-arrow" onclick="carouselNext('faithLeaders')">&#8250;</button>
+    </div>
   </div>
 </div>
 
-<div class="tab-content" id="tab-messages">
+<!-- ══════════════════════════════════════════
+     TAB 5 — MISC
+══════════════════════════════════════════ -->
+<div class="tab-content" id="tab-misc">
   <div class="section-header">
     <div>
-      <h2>💬 Messages</h2>
-      <p>Keep your generated outreach drafts and sent-message history in one place. Use this like a lightweight CRM for creator, brand, and partnership follow-up.</p>
+      <h2>🌐 Misc</h2>
+      <p>Creators that don't fit the other categories.</p>
+    </div>
+    <div class="import-actions">
+      <button class="btn btn-outline" onclick="openLeadResearchModal('misc')">Research with Gemini</button>
+      <button class="btn btn-primary" onclick="openCreatorCardModal('misc',-1)">+ Add Creator</button>
     </div>
   </div>
-  <div class="stats-row" id="stats-messages"></div>
-  <div class="toolbar">
-    <input type="text" class="search-box" id="srch-messages" placeholder="Search recipient, group, channel, or message…" oninput="renderTable('messages')">
-    <select class="btn btn-outline" id="flt-messages-status" onchange="renderTable('messages')">
-      <option value="">Status: All</option>
-      <option>Draft</option>
-      <option>Ready</option>
-      <option>Sent</option>
-    </select>
+  <div class="stats-row" id="stats-misc"></div>
+  <div class="creator-tab-toolbar">
+    <input type="text" class="search-box" id="srch-misc" placeholder="Search name, platform, notes…" oninput="renderCarousel('misc')">
   </div>
-  <div class="table-container">
-    <table class="mobile-cards messages-table">
-      <colgroup>
-        <col style="width:18%">
-        <col style="width:12%">
-        <col style="width:12%">
-        <col style="width:12%">
-        <col style="width:28%">
-        <col style="width:8%">
-        <col style="width:10%">
-      </colgroup>
-      <thead><tr>
-        <th>Recipient</th><th>Group</th><th>Channel</th><th>Status</th><th>Preview</th><th>Updated</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="tbl-messages"></tbody>
-    </table>
+  <div class="name-jumper" id="jumper-misc"></div>
+  <div class="carousel-wrapper">
+    <div class="creator-carousel" id="carousel-misc"></div>
+    <div class="carousel-nav">
+      <button class="carousel-arrow" onclick="carouselPrev('misc')">&#8249;</button>
+      <div class="carousel-dots" id="dots-misc"></div>
+      <button class="carousel-arrow" onclick="carouselNext('misc')">&#8250;</button>
+    </div>
   </div>
 </div>
+
 
 <div class="tab-content" id="tab-scripts">
   <div class="section-header">
@@ -1640,30 +2153,36 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
 
 
 <!-- ══════════════════════════════════════════
-     AGENT LOG TAB
+     TAB — APPROVAL
 ══════════════════════════════════════════ -->
-<div class="tab-content" id="tab-agentLog">
+<div class="tab-content" id="tab-approval">
   <div class="section-header">
     <div>
-      <h2>Morning Agent Log</h2>
-      <p>Every outreach run from the Creed morning agent. Manage your queue, view drafts, and track replies.</p>
+      <h2>🔔 Approval Queue</h2>
+      <p>Creators pulled by the Creed agent. Approve each one to a segment or reject to dismiss.</p>
     </div>
     <div class="header-tools">
       <button class="btn btn-outline" onclick="checkAgentReplies()">Check Replies</button>
+      <button class="btn btn-outline" onclick="loadApprovalData(true)">Refresh</button>
       <button class="btn btn-primary" onclick="openAddQueueModal()">+ Add to Queue</button>
     </div>
   </div>
 
-  <!-- Stats bar -->
   <div class="agent-stats-bar">
     <div class="agent-stat-card"><div class="stat-num" id="agent-stat-runs">0</div><div class="stat-label">Runs</div></div>
     <div class="agent-stat-card"><div class="stat-num" id="agent-stat-total">0</div><div class="stat-label">Researched</div></div>
     <div class="agent-stat-card"><div class="stat-num" id="agent-stat-emails">0</div><div class="stat-label">Emails Found</div></div>
-    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-dms">0</div><div class="stat-label">DM Only</div></div>
-    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-replies">0</div><div class="stat-label">Replies</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-pending">0</div><div class="stat-label">Pending</div></div>
+    <div class="agent-stat-card"><div class="stat-num" id="agent-stat-approved">0</div><div class="stat-label">Approved</div></div>
   </div>
 
-  <!-- Queue -->
+  <div class="section-header" style="margin-top:4px;">
+    <h2 style="font-size:16px;">Pending Approval <span class="tab-count" id="cnt-approval-pending">0</span></h2>
+  </div>
+  <div id="approval-pending-list" style="margin-bottom:28px;">
+    <p style="color:var(--muted);font-size:13px;">No creators pending. Click Refresh to check for new agent batches.</p>
+  </div>
+
   <div class="section-header" style="margin-top:4px;">
     <h2 style="font-size:16px;">Queue for Next Run <span class="tab-count" id="cnt-queue">0</span></h2>
   </div>
@@ -1671,7 +2190,6 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
     <p style="color:var(--muted);font-size:13px;">Loading queue...</p>
   </div>
 
-  <!-- Replies -->
   <div class="section-header" style="margin-top:4px;">
     <h2 style="font-size:16px;">Replies Received <span class="tab-count" id="cnt-replies">0</span></h2>
   </div>
@@ -1679,7 +2197,6 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
     <p style="color:var(--muted);font-size:13px;">No replies logged. Click "Check Replies" to scan Gmail.</p>
   </div>
 
-  <!-- Run history -->
   <div class="section-header" style="margin-top:4px;">
     <h2 style="font-size:16px;">Run History</h2>
   </div>
@@ -1689,9 +2206,104 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
 </div>
 
 
+<!-- ══ RIGHT APPROVAL PANEL ══ -->
+<div class="approval-panel" id="approval-panel">
+  <button class="ap-toggle-btn" id="ap-toggle" onclick="toggleApprovalPanel()" title="Pending creators">
+    <span class="ap-toggle-arrow" id="ap-arrow">&#8250;</span>
+    <span class="ap-badge" id="ap-badge" style="display:none">0</span>
+  </button>
+  <div class="ap-header">
+    <div class="ap-header-title">Pending Review</div>
+    <span class="tab-count" id="ap-count">0</span>
+  </div>
+  <div class="ap-body" id="ap-body">
+    <p style="color:var(--muted);font-size:12px;padding:8px 0;">No creators pending.</p>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      MODALS
 ══════════════════════════════════════════ -->
+
+<!-- Creator Card Modal -->
+<div class="modal-overlay" id="modal-creatorCard">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 id="cc-modal-name">Creator</h2>
+      <button class="modal-close" onclick="closeModal('modal-creatorCard')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cc-segment" value="">
+      <input type="hidden" id="cc-idx" value="-1">
+      <div class="cc-avatar-row">
+        <div class="creator-avatar large" id="cc-avatar"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="form-group"><label>Name / Handle</label><input type="text" id="cc-name" placeholder="@handle or full name"></div>
+          <div class="form-group"><label>Platform</label>
+            <select id="cc-platform"><option>TikTok</option><option>Instagram</option><option>YouTube</option><option>TikTok + IG</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gender</label>
+          <select id="cc-gender"><option value="">Unknown</option><option value="M">Male</option><option value="F">Female</option></select>
+        </div>
+        <div class="form-group"><label>Creator Type</label>
+          <input type="text" id="cc-type" placeholder="e.g. iPad Video, Speaking">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Followers</label><input type="text" id="cc-followers" placeholder="e.g. 8,500"></div>
+        <div class="form-group"><label>Offer ($/video)</label><input type="number" id="cc-offer" placeholder="15" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="text" id="cc-email" placeholder="email@example.com"></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="cc-phone" placeholder="Optional"></div>
+      </div>
+      <div class="form-group"><label>Profile URL</label><input type="text" id="cc-url" placeholder="https://tiktok.com/@..."></div>
+      <div class="form-group"><label>Summary / Notes</label><textarea id="cc-summary" rows="3" placeholder="AI-generated or manual summary..."></textarea></div>
+      <div class="form-group"><label>Status</label>
+        <select id="cc-status">
+          <option>Not Reached Yet</option><option>Pending</option><option>Accepted</option><option>Declined</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="cc-del-btn" style="display:none;margin-right:auto;" onclick="deleteCreatorCard()">Delete</button>
+      <button class="btn btn-outline" onclick="viewCreatorDraft()">View Draft</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-creatorCard')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCreatorCard()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Approval Segment Picker Modal -->
+<div class="modal-overlay" id="modal-approve">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Approve Creator</h2>
+      <button class="modal-close" onclick="closeModal('modal-approve')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ap-modal-creator" id="ap-modal-creator"></div>
+      <input type="hidden" id="ap-modal-id" value="">
+      <div class="form-group" style="margin-top:16px;">
+        <label>Add to Segment</label>
+        <div class="segment-picker" id="segment-picker">
+          <button class="seg-btn" data-seg="youngAdults" onclick="selectApprovalSegment('youngAdults')">Young Adults</button>
+          <button class="seg-btn" data-seg="family" onclick="selectApprovalSegment('family')">Moms &amp; Family</button>
+          <button class="seg-btn" data-seg="faithLeaders" onclick="selectApprovalSegment('faithLeaders')">Faith Leaders</button>
+          <button class="seg-btn" data-seg="misc" onclick="selectApprovalSegment('misc')">Misc</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" style="margin-right:auto;" onclick="rejectFromModal()">Reject</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-approve')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmApprove()">Approve</button>
+    </div>
+  </div>
+</div>
 
 <!-- Task Modal -->
 <div class="modal-overlay" id="modal-task">
@@ -1710,8 +2322,8 @@ body[data-theme="dark"] .queue-entry { background:#162032; }
         <div class="form-group">
           <label>Category</label>
           <select id="t-category">
-            <option>Instagram</option><option>Paid Ads</option><option>Creator Outreach</option>
-            <option>Partnerships</option><option>Other</option>
+            <option>iPad Videos</option><option>Speaking Videos</option><option>AI Videos</option>
+            <option>Statics</option><option>Competitor Research</option><option>Other</option>
           </select>
         </div>
       </div>
@@ -2279,15 +2891,19 @@ const LEGACY_STORE = {
 };
 
 const STORE = {
-  tasks:        'creed_tasks_v1',
-  creators:     'creed_creators_current',
-  partners:     'creed_partners_current',
-  orgPartners:  'creed_org_partners_current',
-  messages:     'creed_messages_current',
-  scripts:      'creed_scripts_current',
+  tasks:           'creed_tasks_v1',
+  youngAdults:     'creed_young_adults_v1',
+  family:          'creed_family_v1',
+  faithLeaders:    'creed_faith_leaders_v1',
+  misc:            'creed_misc_v1',
+  pendingApprovals:'creed_pending_approvals_v1',
+  scripts:         'creed_scripts_current',
+  weeklyGoal:      'creed_weekly_goal_v1',
 };
 const SYNC_STORE = 'creed_sync_config_v1';
-const THEME_STORE = 'creed_theme_v1';
+const THEME_STORE = 'creed_theme_v2';
+const VALID_THEMES = ['slate', 'midnight', 'ocean', 'classic'];
+const DEFAULT_THEME = 'slate';
 const DEFAULT_SYNC_CONFIG = {
   supabaseUrl: '',
   supabaseAnonKey: '',
@@ -2296,17 +2912,17 @@ const DEFAULT_SYNC_CONFIG = {
 };
 
 const DEFAULT_TASKS = [
-  { id:1,  title:'Create new Instagram account for Creed Bible App', category:'Instagram',        priority:'High',   done:false, due:'', notes:'Warm up for 3 days on Christian content before any branded posts.' },
-  { id:2,  title:'Warm up Instagram account (3 days on Christian content)', category:'Instagram', priority:'High',   done:false, due:'', notes:'Like, comment, follow Christian accounts; post from existing Christian content.' },
-  { id:3,  title:'Post 1 video/day — Matthaios Levy format', category:'Instagram',               priority:'High',   done:false, due:'', notes:'Ref: @matthaioslevy — same format/content, swap your face + change music.' },
-  { id:4,  title:'Write paid ad scripts (hook → Creed intro in ≤15 sec → demo)', category:'Paid Ads', priority:'High', done:false, due:'', notes:'Reference Anna\'s top TikToks. Scripts should start with catchy hook, then app demo/overlays.' },
-  { id:5,  title:'Create shared Google Doc with ad scripts for creators', category:'Paid Ads',    priority:'High',   done:false, due:'', notes:'Catchy hook → Creed app intro → iPad / overlay demo format.' },
-  { id:6,  title:'Get Crux platform walkthrough from Adi', category:'Paid Ads',                  priority:'Medium', done:false, due:'', notes:'Crux = monitor and copy competitor ads. Adi will schedule walkthrough.' },
-  { id:7,  title:'Start TikTok creator outreach tracker (goal: 3–5 signed)', category:'Creator Outreach', priority:'High', done:false, due:'', notes:'Target <10K–20K followers, Christian inspirational speaking style. DM template provided.' },
-  { id:8,  title:'Start artist partnership tracker', category:'Partnerships',                     priority:'Medium', done:false, due:'', notes:'Columns: Name, Email, Company, Title, Status. Run first draft by Adi before sending.' },
-  { id:9,  title:'Start Bible merch brand partnership tracker', category:'Partnerships',           priority:'Medium', done:false, due:'', notes:'Alabaster, Byble, Christian journals, clothing, rosaries — focus on premium brands.' },
-  { id:10, title:'Start app creator partnership tracker (devotionals)', category:'Creator Outreach', priority:'Medium', done:false, due:'', notes:'Target creators with 50K+ followers. Mixed payout: base + per signup + code for followers.' },
-  { id:11, title:'Draft church and camp partnership document', category:'Partnerships',            priority:'Medium', done:false, due:'', notes:'Think through churches and camps like Pine Cove or Sky Ranch, plus incentives, events, and effort vs. cost.' },
+  { id:1,  title:'Film Kylie iPad video (overlay + hook)',        category:'iPad Videos',          priority:'High',   done:false, due:'', notes:'Kylie: @kylie.blessed — hook should open within 2 seconds. iPad demo overlay format.' },
+  { id:2,  title:'Film Kenzie iPad video',                        category:'iPad Videos',          priority:'High',   done:false, due:'', notes:'Kenzie: @kenzie.prayss — ask her to use the same format as the Kylie reference.' },
+  { id:3,  title:'Recruit a guy creator for iPad video format',   category:'iPad Videos',          priority:'Medium', done:false, due:'', notes:'Need a male voice for the iPad format. Look for Christian guys with 10K-50K followers.' },
+  { id:4,  title:'Recruit an older mom (30+) for iPad format',    category:'iPad Videos',          priority:'Medium', done:false, due:'', notes:'Mom-demographic content converts well for family segment. Target 30-45 age range.' },
+  { id:5,  title:'Film Nate speaking video',                      category:'Speaking Videos',      priority:'High',   done:false, due:'', notes:'Nate: @natespsalms — ref his top video at tiktok.com/@natespsalms/video/7637172943142866206.' },
+  { id:6,  title:'Reach out to Anna for speaking video',          category:'Speaking Videos',      priority:'High',   done:false, due:'', notes:'Anna TBD — Jax to add her handle. Can also use Kenzie for speaking format.' },
+  { id:7,  title:'Have Chris make one AI-edit style video',       category:'AI Videos',            priority:'Medium', done:false, due:'', notes:'Chris makes the motion-graphics AI editor style. Reference: drive.google.com/file/d/1YKu_3tF8HXuJfVQvp3Ge0jLoeaOx5CgJ/view' },
+  { id:8,  title:'Make AI-generated style video (Jax)',           category:'AI Videos',            priority:'Medium', done:false, due:'', notes:'Jax makes the fully AI-generated style. Reference: drive.google.com/file/d/1GA0g41dODWYnyZScMmDjHXDtpNh20mzO/view' },
+  { id:9,  title:'Create 5 static image ads on GetCrux',         category:'Statics',              priority:'High',   done:false, due:'', notes:'Use GetCrux platform. Target 30% of weekly creative output as statics. See example images in Drive.' },
+  { id:10, title:'Download 3 competitor videos from sstik.io',   category:'Competitor Research',  priority:'Medium', done:false, due:'', notes:'Download via sstik.io. Study BibleBFF and similar apps. Ask Kenzie to copy BibleBFF video format.' },
+  { id:11, title:'Analyze competitor ad hooks and messaging',     category:'Competitor Research',  priority:'Medium', done:false, due:'', notes:'Key hooks: Duolingo for the Bible, I\'m addicted to this Christian game, Bible therapist / Bible coach.' },
 ];
 
 const REMOTE_STATE_URL = '/api/state';
@@ -2338,27 +2954,57 @@ function persistSyncConfig() {
   localStorage.setItem(SYNC_STORE, JSON.stringify(syncConfig));
 }
 function currentTheme() {
-  return document.body.dataset.theme === 'dark' ? 'dark' : 'light';
-}
-function updateThemeToggleLabel() {
-  const btn = document.getElementById('theme-toggle');
-  if (!btn) return;
-  const nextTheme = currentTheme() === 'dark' ? 'Light Mode' : 'Dark Mode';
-  btn.textContent = nextTheme;
-  btn.setAttribute('aria-label', `Switch to ${nextTheme.toLowerCase()}`);
+  return document.body.dataset.theme || DEFAULT_THEME;
 }
 function applyTheme(theme) {
-  document.body.dataset.theme = theme === 'dark' ? 'dark' : 'light';
-  updateThemeToggleLabel();
+  const t = VALID_THEMES.includes(theme) ? theme : DEFAULT_THEME;
+  if (t === 'classic') {
+    delete document.body.dataset.theme;
+  } else {
+    document.body.dataset.theme = t;
+  }
+  updateThemeSwatches(t);
+  updateSettingsSyncDot();
+}
+function updateThemeSwatches(active) {
+  VALID_THEMES.forEach(name => {
+    const swatch = document.querySelector(`[data-theme-pick="${name}"]`);
+    const check = document.getElementById(`tc-${name}`);
+    if (!swatch) return;
+    const isActive = name === active;
+    swatch.classList.toggle('active', isActive);
+    if (check) check.textContent = isActive ? '✓' : '';
+  });
 }
 function initTheme() {
-  const storedTheme = localStorage.getItem(THEME_STORE);
-  applyTheme(storedTheme === 'dark' ? 'dark' : 'light');
+  const stored = localStorage.getItem(THEME_STORE);
+  const theme = VALID_THEMES.includes(stored) ? stored : DEFAULT_THEME;
+  applyTheme(theme);
 }
-function toggleTheme() {
-  const nextTheme = currentTheme() === 'dark' ? 'light' : 'dark';
-  localStorage.setItem(THEME_STORE, nextTheme);
-  applyTheme(nextTheme);
+function pickTheme(theme) {
+  localStorage.setItem(THEME_STORE, theme);
+  applyTheme(theme);
+}
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settings-panel');
+  const overlay = document.getElementById('settings-overlay');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+}
+function closeSettingsPanel() {
+  const panel = document.getElementById('settings-panel');
+  const overlay = document.getElementById('settings-overlay');
+  if (panel) panel.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+}
+function updateSettingsSyncDot() {
+  const meta = syncStatusMeta();
+  const dot = document.getElementById('settings-sync-dot');
+  const label = document.getElementById('settings-sync-label');
+  if (dot) dot.dataset.state = meta.state;
+  if (label) label.textContent = meta.label;
 }
 function deepClone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -2406,9 +3052,14 @@ function firstStored(keys) {
   return null;
 }
 function normalizeTaskCategory(val) {
-  if (val === 'App Creators') return 'Creator Outreach';
-  if (val === 'Ambassadors') return 'Partnerships';
-  return val || 'Other';
+  const map = {
+    'Instagram': 'Other', 'Paid Ads': 'Other',
+    'Creator Outreach': 'Other', 'Partnerships': 'Other',
+    'App Creators': 'Other', 'Ambassadors': 'Other',
+  };
+  const valid = ['iPad Videos','Speaking Videos','AI Videos','Statics','Competitor Research','Other'];
+  if (valid.includes(val)) return val;
+  return map[val] || val || 'Other';
 }
 function normalizeStatus(val) {
   if (!val) return 'Not Reached Yet';
@@ -2462,52 +3113,52 @@ function normalizeMessageItem(message = {}) {
 }
 function normalizeCreatorItem(record = {}) {
   return {
-    ...record,
+    id: record.id || (Date.now() + Math.random()).toString(36),
+    name: record.name || '',
+    platform: record.platform || 'TikTok',
+    gender: record.gender || '',
+    segment: record.segment || 'misc',
+    creatorType: record.creatorType || record.style || '',
+    followers: record.followers || '',
+    email: record.email || '',
+    phone: record.phone || '',
     url: normalizeExternalUrl(record.url || record.profileUrl || record.link || ''),
-    email: record.email || '',
-    phone: record.phone || '',
     status: normalizeStatus(record.status),
-  };
-}
-function normalizePartnerItem(record = {}) {
-  return {
-    ...record,
-    phone: record.phone || record.contact || '',
-    followers: record.followers || '',
-    status: normalizeStatus(record.status),
-  };
-}
-function normalizeOrgPartnerItem(record = {}) {
-  return {
-    ...record,
-    email: record.email || '',
-    phone: record.phone || '',
-    followers: record.followers || '',
-    status: normalizeStatus(record.status),
+    offer: record.offer || '',
+    summary: record.summary || record.notes || '',
+    draft: record.draft || '',
+    subject: record.subject || '',
+    batchDate: record.batchDate || '',
+    addedAt: record.addedAt || new Date().toISOString(),
   };
 }
 function normalizeDbState(state = {}) {
+  const norm = arr => (Array.isArray(arr) ? arr : []).map(normalizeCreatorItem);
   return {
-    version: 1,
+    version: 2,
     updatedAt: state.updatedAt || '',
     tasks: (Array.isArray(state.tasks) ? state.tasks : []).map(t => normalizeTaskItem({ ...t, category: normalizeTaskCategory(t.category) })),
-    creators: (Array.isArray(state.creators) ? state.creators : []).map(normalizeCreatorItem),
-    partners: (Array.isArray(state.partners) ? state.partners : []).map(normalizePartnerItem),
-    orgPartners: (Array.isArray(state.orgPartners) ? state.orgPartners : []).map(normalizeOrgPartnerItem),
-    messages: (Array.isArray(state.messages) ? state.messages : []).map(normalizeMessageItem),
-    scripts: (Array.isArray(state.scripts) ? state.scripts : []).map(normalizeScriptItem),
+    youngAdults:     norm(state.youngAdults),
+    family:          norm(state.family),
+    faithLeaders:    norm(state.faithLeaders),
+    misc:            norm(state.misc),
+    pendingApprovals: Array.isArray(state.pendingApprovals) ? state.pendingApprovals : [],
+    scripts:         (Array.isArray(state.scripts) ? state.scripts : []).map(normalizeScriptItem),
+    weeklyGoal:      state.weeklyGoal || { videos: 0, statics: 0, target: 60 },
   };
 }
 function snapshotDbState() {
   return {
-    version: 1,
+    version: 2,
     updatedAt: new Date().toISOString(),
-    tasks: db.tasks.map(normalizeTaskItem),
-    creators: db.creators.map(normalizeCreatorItem),
-    partners: db.partners.map(normalizePartnerItem),
-    orgPartners: db.orgPartners.map(normalizeOrgPartnerItem),
-    messages: db.messages.map(normalizeMessageItem),
-    scripts: db.scripts.map(normalizeScriptItem),
+    tasks:            db.tasks.map(normalizeTaskItem),
+    youngAdults:      (db.youngAdults || []).map(normalizeCreatorItem),
+    family:           (db.family || []).map(normalizeCreatorItem),
+    faithLeaders:     (db.faithLeaders || []).map(normalizeCreatorItem),
+    misc:             (db.misc || []).map(normalizeCreatorItem),
+    pendingApprovals: db.pendingApprovals || [],
+    scripts:          db.scripts.map(normalizeScriptItem),
+    weeklyGoal:       db.weeklyGoal || { videos: 0, statics: 0, target: 60 },
   };
 }
 function downloadTextFile(filename, content, mimeType = 'application/json') {
@@ -2541,11 +3192,11 @@ function syncStatusMeta() {
   return { label: 'Local Only', state: 'pending' };
 }
 function updateSyncStatus() {
-  const pill = document.getElementById('sync-pill');
-  if (!pill) return;
   const meta = syncStatusMeta();
-  pill.textContent = meta.label;
-  pill.dataset.state = meta.state;
+  const dot = document.getElementById('settings-sync-dot');
+  const label = document.getElementById('settings-sync-label');
+  if (dot) { dot.dataset.state = meta.state; }
+  if (label) { label.textContent = meta.label; }
 }
 function fillSyncFields() {
   document.getElementById('sync-url').value = syncConfig.supabaseUrl || '';
@@ -2583,23 +3234,28 @@ async function fetchServerSyncDefaults() {
 }
 function applyDbState(state = {}) {
   const normalized = normalizeDbState(state);
-  db.tasks = normalized.tasks;
-  db.creators = normalized.creators;
-  db.partners = normalized.partners;
-  db.orgPartners = normalized.orgPartners;
-  db.messages = normalized.messages;
-  db.scripts = normalized.scripts;
+  db.tasks           = normalized.tasks;
+  db.youngAdults     = normalized.youngAdults;
+  db.family          = normalized.family;
+  db.faithLeaders    = normalized.faithLeaders;
+  db.misc            = normalized.misc;
+  db.pendingApprovals= normalized.pendingApprovals;
+  db.scripts         = normalized.scripts;
+  db.weeklyGoal      = normalized.weeklyGoal;
 }
 function persistLocalState() {
-  localStorage.setItem(STORE.tasks, JSON.stringify(db.tasks));
-  localStorage.setItem(STORE.creators, JSON.stringify(db.creators));
-  localStorage.setItem(STORE.partners, JSON.stringify(db.partners));
-  localStorage.setItem(STORE.orgPartners, JSON.stringify(db.orgPartners));
-  localStorage.setItem(STORE.messages, JSON.stringify(db.messages));
-  localStorage.setItem(STORE.scripts, JSON.stringify(db.scripts));
+  localStorage.setItem(STORE.tasks,            JSON.stringify(db.tasks));
+  localStorage.setItem(STORE.youngAdults,      JSON.stringify(db.youngAdults || []));
+  localStorage.setItem(STORE.family,           JSON.stringify(db.family || []));
+  localStorage.setItem(STORE.faithLeaders,     JSON.stringify(db.faithLeaders || []));
+  localStorage.setItem(STORE.misc,             JSON.stringify(db.misc || []));
+  localStorage.setItem(STORE.pendingApprovals, JSON.stringify(db.pendingApprovals || []));
+  localStorage.setItem(STORE.scripts,          JSON.stringify(db.scripts));
+  localStorage.setItem(STORE.weeklyGoal,       JSON.stringify(db.weeklyGoal || { videos:0, statics:0, target:60 }));
 }
 function isRemoteStateEmpty(state = {}) {
-  return ['tasks', 'creators', 'partners', 'orgPartners', 'messages', 'scripts'].every(key => !Array.isArray(state[key]) || state[key].length === 0);
+  const segs = ['youngAdults','family','faithLeaders','misc','scripts'];
+  return ['tasks', ...segs].every(key => !Array.isArray(state[key]) || state[key].length === 0);
 }
 function exportDashboardBackup() {
   const stamp = new Date().toISOString().slice(0, 10);
@@ -2761,12 +3417,18 @@ function migrateOrgPartners() {
 }
 function load() {
   const storedTasks = parseStore(STORE.tasks) || JSON.parse(JSON.stringify(DEFAULT_TASKS));
-  db.tasks = storedTasks.map(t => normalizeTaskItem({ ...t, category: normalizeTaskCategory(t.category) }));
-  db.creators = (firstStored([STORE.creators, 'creed_creators_v2']) || migrateCreators()).map(normalizeCreatorItem);
-  db.partners = (firstStored([STORE.partners, 'creed_partners_v2']) || migratePartners()).map(normalizePartnerItem);
-  db.orgPartners = (firstStored([STORE.orgPartners, 'creed_org_partners_v2']) || migrateOrgPartners()).map(normalizeOrgPartnerItem);
-  db.messages = (firstStored([STORE.messages, 'creed_messages_v1']) || []).map(normalizeMessageItem);
-  db.scripts = (firstStored([STORE.scripts, 'creed_scripts_v1']) || []).map(normalizeScriptItem);
+  db.tasks            = storedTasks.map(t => normalizeTaskItem({ ...t, category: normalizeTaskCategory(t.category) }));
+  db.youngAdults      = (parseStore(STORE.youngAdults)   || []).map(normalizeCreatorItem);
+  db.family           = (parseStore(STORE.family)        || []).map(normalizeCreatorItem);
+  db.faithLeaders     = (parseStore(STORE.faithLeaders)  || []).map(normalizeCreatorItem);
+  db.misc             = (parseStore(STORE.misc)          || []).map(normalizeCreatorItem);
+  db.pendingApprovals = parseStore(STORE.pendingApprovals) || [];
+  db.scripts          = (firstStored([STORE.scripts, 'creed_scripts_v1']) || []).map(normalizeScriptItem);
+  db.weeklyGoal       = parseStore(STORE.weeklyGoal) || { videos: 0, statics: 0, target: 60 };
+  db.creators         = (firstStored(['creed_creators_current', 'creed_creators_v2']) || []).map(normalizeCreatorItem);
+  db.partners         = (firstStored(['creed_partners_current', 'creed_partners_v2']) || []).map(normalizePartnerItem);
+  db.orgPartners      = (firstStored(['creed_org_partners_current', 'creed_org_partners_v2']) || []).map(normalizeOrgPartnerItem);
+  db.messages         = (firstStored(['creed_messages_current', 'creed_messages_v1']) || []).map(normalizeMessageItem);
 }
 async function fetchSharedState() {
   if (activeSyncProvider() === 'supabase') {
@@ -2903,11 +3565,14 @@ async function initDashboard() {
 function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.getAttribute('onclick') === `switchTab('${tab}')`) btn.classList.add('active');
   });
-  if (tab === 'agentLog') loadAgentLog();
+  const carouselSegments = ['youngAdults','family','faithLeaders','misc'];
+  if (carouselSegments.includes(tab)) renderCarousel(tab);
+  if (tab === 'approval') loadApprovalData(false);
 }
 
 
@@ -3906,134 +4571,7 @@ function saveTask() {
 // ══════════════════════════════════════════
 //  GENERIC TABLE CONFIG
 // ══════════════════════════════════════════
-const TABLES = {
-  creators: {
-    search: ['name','style','notes','platform','url'],
-    statsEl: 'stats-creators', countEl: 'cnt-creators',
-    stats: d => [
-      { n: d.length,                                                              l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Reached Yet').length,      l: 'Not Reached Yet' },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,            l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,           l: 'Accepted'    },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,           l: 'Declined'    },
-    ],
-    renderRow: (r,i) => `
-      <tr onclick="openModal('creator',${i})">
-        <td><strong>${r.name||'—'}</strong>${r.url?`<br><a href="${r.url}" target="_blank" class="ext-link" onclick="event.stopPropagation()">View Profile ↗</a>`:''}
-        </td>
-        <td>${r.platform||'—'}</td>
-        <td>${r.followers||'—'}</td>
-        <td>${r.style||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${r.offer?'$'+r.offer:'—'}</td>
-        <td>${r.vids||'—'}</td>
-        <td>${r.date||'—'}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('creator',${i})">Edit</button></td>
-      </tr>`,
-    empty: 'No creators yet. Start your outreach — goal is 3–5 signed this month!',
-  },
-  artists: {
-    search: ['name','email','company','title','notes','platform'],
-    statsEl: 'stats-artists', countEl: 'cnt-artists',
-    stats: d => [
-      { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Reached Yet').length, l: 'Not Reached Yet' },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,     l: 'Accepted'    },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
-    ],
-    renderRow: (r,i) => `
-      <tr onclick="openModal('artists',${i})">
-        <td><strong>${r.name||'—'}</strong></td>
-        <td>${r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'—'}</td>
-        <td>${r.company||'—'}</td>
-        <td>${r.title||'—'}</td>
-        <td>${r.platform||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${r.date||'—'}</td>
-        <td>${r.adi==='Yes'?'✅ Yes':r.adi==='No'?'❌ No':'—'}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('artists',${i})">Edit</button></td>
-      </tr>`,
-    empty: 'No artists tracked yet. Find Christian artists to partner with!',
-  },
-  merch: {
-    search: ['brand','contact','email','title','notes'],
-    extraFilter: (r) => {
-      const t = document.getElementById('flt-merch-type').value;
-      return !t || r.type === t;
-    },
-    statsEl: 'stats-merch', countEl: 'cnt-merch',
-    stats: d => [
-      { n: d.length,                                                        l: 'Total'       },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Reached Yet').length, l: 'Not Reached Yet' },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,      l: 'Pending'     },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length,     l: 'Accepted'    },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length,     l: 'Declined'    },
-    ],
-    renderRow: (r,i) => `
-      <tr onclick="openModal('merch',${i})">
-        <td><strong>${r.brand||'—'}</strong>${r.website?`<br><a href="${r.website.startsWith('http')?r.website:'https://'+r.website}" target="_blank" class="ext-link" onclick="event.stopPropagation()">Website ↗</a>`:''}
-        </td>
-        <td>${r.contact||'—'}</td>
-        <td>${r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'—'}</td>
-        <td>${r.title||'—'}</td>
-        <td>${r.type||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${r.date||'—'}</td>
-        <td>${r.adi==='Yes'?'✅ Yes':r.adi==='No'?'❌ No':'—'}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('merch',${i})">Edit</button></td>
-      </tr>`,
-    empty: 'No brands tracked yet. Start with Alabaster, Byble, and other premium Christian brands!',
-  },
-  appCreators: {
-    search: ['name','platform','content','notes','code'],
-    statsEl: 'stats-appCreators', countEl: 'cnt-appCreators',
-    stats: d => [
-      { n: d.length,                                                    l: 'Total'           },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Not Reached Yet').length, l: 'Not Reached Yet' },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Pending').length,  l: 'Pending'         },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length, l: 'Accepted'        },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Declined').length, l: 'Declined'        },
-    ],
-    renderRow: (r,i) => `
-      <tr onclick="openModal('appCreators',${i})">
-        <td><strong>${r.name||'—'}</strong></td>
-        <td>${r.platform||'—'}</td>
-        <td>${r.followers||'—'}</td>
-        <td>${r.content||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${r.payout||'—'}</td>
-        <td>${r.code?`<code style="font-size:12px;background:#f0f0f0;padding:2px 6px;border-radius:4px;">${r.code}</code>`:'—'}</td>
-        <td>${r.date||'—'}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('appCreators',${i})">Edit</button></td>
-      </tr>`,
-    empty: 'No app creators yet. Target creators with 50K+ followers for devotionals!',
-  },
-  ambassadors: {
-    search: ['name','church','location','notes','email'],
-    statsEl: 'stats-ambassadors', countEl: 'cnt-ambassadors',
-    stats: d => [
-      { n: d.length,                                                  l: 'Total'           },
-      { n: d.filter(r=>normalizeStatus(r.status)==='Accepted').length, l: 'Accepted'      },
-      { n: d.reduce((s,r)=>s+(parseInt(r.members)||0),0),           l: 'Members Reached' },
-      { n: d.filter(r=>r.status==='Prospect').length,                l: 'Prospects'       },
-    ],
-    renderRow: (r,i) => `
-      <tr onclick="openModal('ambassadors',${i})">
-        <td><strong>${r.name||'—'}</strong>${r.email?`<br><a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:''}
-        </td>
-        <td>${r.church||'—'}</td>
-        <td>${r.location||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${r.members||'—'}</td>
-        <td>${r.date||'—'}</td>
-        <td>${r.incentive||'—'}</td>
-        <td style="max-width:150px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes||'—'}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('ambassadors',${i})">Edit</button></td>
-      </tr>`,
-    empty: 'No ambassadors tracked yet. Start logging the current ~15 ambassadors!',
-  },
-};
+const TABLES = {};
 
 function renderTable(key) {
   if (key === 'scripts') {
@@ -4041,6 +4579,7 @@ function renderTable(key) {
     return;
   }
   const cfg = TABLES[key];
+  if (!cfg) return;
   const srch   = (document.getElementById('srch-'+key)||{}).value?.toLowerCase() || '';
   const statF  = (document.getElementById('flt-'+key+'-status')||{}).value || '';
   const filterField = cfg.filterField || 'status';
@@ -4069,7 +4608,10 @@ function renderTable(key) {
 
 function renderAll() {
   renderTasks();
-  Object.keys(TABLES).forEach(k => renderTable(k));
+  renderWeeklyGoal();
+  ['youngAdults','family','faithLeaders','misc'].forEach(seg => renderCarousel(seg));
+  renderTable('scripts');
+  updatePanelCounts();
 }
 
 
@@ -4090,98 +4632,6 @@ const MODAL_LABELS = {
   creator:'Creator', artists:'Artist', merch:'Brand', appCreators:'App Creator', ambassadors:'Ambassador',
 };
 
-TABLES.creators = {
-  search: ['name','style','notes','platform','url','payout','code','email','phone'],
-  statsEl: 'stats-creators', countEl: 'cnt-creators',
-  stats: d => [
-    { n: d.length, l: 'Total' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Not Reached Yet').length, l: 'Not Reached Yet' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
-    { n: d.filter(r => creatorTier(r.followers) === 'Large').length, l: 'Large Creators' },
-  ],
-  renderRow: (r,i) => `
-    <tr onclick="openViewModal('creator',${i})">
-      <td data-label="Creator"><strong>${r.name||'-'}</strong>${normalizeExternalUrl(r.url || r.profileUrl || r.link) ? `<br><a href="${normalizeExternalUrl(r.url || r.profileUrl || r.link)}" target="_blank" rel="noopener noreferrer" class="ext-link" onclick="event.stopPropagation()">View Profile</a>`:''}${r.style?`<br><span style="font-size:12px;color:var(--muted);">${r.style}</span>`:''}</td>
-      <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
-      <td data-label="Platform">${r.platform||'-'}</td>
-      <td data-label="Followers">${r.followers||'-'}</td>
-      <td data-label="Tag">${creatorTierBadge(r.followers)}</td>
-      <td data-label="Status" class="status-cell">${statusControl('creators', i, r.status)}</td>
-      <td data-label="Terms">${creatorTerms(r)}</td>
-      <td data-label="Last Contact">${r.date||'-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('creators',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('creator',${i})">Edit</button></div></td>
-    </tr>`,
-  empty: 'No creators yet. Add creator outreach or app creator partnerships here.',
-};
-TABLES.partners = {
-  search: ['kind','name','email','company','phone','title','platform','notes','followers'],
-  statsEl: 'stats-partners', countEl: 'cnt-partners',
-  stats: d => [
-    { n: d.length, l: 'Total' },
-    { n: d.filter(r => r.kind === 'Artist').length, l: 'Artists' },
-    { n: d.filter(r => r.kind === 'Brand').length, l: 'Brands' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Not Reached Yet').length, l: 'Not Reached Yet' },
-  ],
-  renderRow: (r,i) => `
-    <tr onclick="openViewModal('partners',${i})">
-      <td data-label="Partner"><strong>${r.name||'-'}</strong></td>
-      <td data-label="Type">${typeBadge(r.kind)}</td>
-      <td data-label="Company">${r.company||'-'}</td>
-      <td data-label="Contact">${[r.email ? `<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>` : '', r.phone].filter(Boolean).join('<br>') || '-'}</td>
-      <td data-label="Channel">${r.platform||'-'}</td>
-      <td data-label="Followers">${r.followers||'-'}</td>
-      <td data-label="Tag">${creatorTierBadge(r.followers)}</td>
-      <td data-label="Status" class="status-cell">${statusControl('partners', i, r.status)}</td>
-      <td data-label="Last Contact">${r.date||'-'}</td>
-      <td data-label="Adi Reviewed">${r.adi=='Yes'?'Yes':r.adi=='No'?'No':'-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('partners',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('partners',${i})">Edit</button></div></td>
-    </tr>`,
-  empty: 'No artist or brand partnerships tracked yet.',
-};
-TABLES.orgPartners = {
-  search: ['name','type','location','notes','email','phone','incentive','followers'],
-  statsEl: 'stats-orgPartners', countEl: 'cnt-orgPartners',
-  stats: d => [
-    { n: d.length, l: 'Total' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Not Reached Yet').length, l: 'Not Reached Yet' },
-    { n: d.reduce((sum, r) => sum + (parseInt(r.members, 10) || 0), 0), l: 'People Reached' },
-    { n: d.filter(r => normalizeStatus(r.status) === 'Pending').length, l: 'Pending' },
-  ],
-  renderRow: (r,i) => `
-    <tr onclick="openViewModal('orgPartners',${i})">
-      <td data-label="Partner"><strong>${r.name||'-'}</strong></td>
-      <td data-label="Type">${typeBadge(r.type)}</td>
-      <td data-label="Contact">${[r.email?`<a href="mailto:${r.email}" class="ext-link" onclick="event.stopPropagation()">${r.email}</a>`:'', r.phone].filter(Boolean).join('<br>') || '-'}</td>
-      <td data-label="Location">${r.location||'-'}</td>
-      <td data-label="Status" class="status-cell">${statusControl('orgPartners', i, r.status)}</td>
-      <td data-label="People Reached">${r.members||'-'}</td>
-      <td data-label="Last Contact">${r.date||'-'}</td>
-      <td data-label="Package">${r.incentive||'-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openOutreachModal('orgPartners',${i})">Message</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openModal('orgPartners',${i})">Edit</button></div></td>
-    </tr>`,
-  empty: 'No church or camp partnerships tracked yet.',
-};
-TABLES.messages = {
-  search: ['recipient','group','channel','status','body','subject','sourceName'],
-  statsEl: 'stats-messages', countEl: 'cnt-messages',
-  stats: d => [
-    { n: d.length, l: 'Total' },
-    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Draft').length, l: 'Drafts' },
-    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Ready').length, l: 'Ready' },
-    { n: d.filter(r => normalizeMessageStatus(r.status) === 'Sent').length, l: 'Sent' },
-  ],
-  renderRow: (r, i) => `
-    <tr onclick="openViewModal('messages',${i})">
-      <td data-label="Recipient"><strong>${r.recipient || '-'}</strong>${r.sourceName ? `<br><span style="font-size:12px;color:var(--muted);">${r.sourceName}</span>` : ''}</td>
-      <td data-label="Group">${scriptLabelBadge(r.group)}</td>
-      <td data-label="Channel">${r.channel || '-'}</td>
-      <td data-label="Status">${messageStatusBadge(r.status)}</td>
-      <td data-label="Preview"><div class="script-preview">${r.body || '-'}</div></td>
-      <td data-label="Updated">${r.updatedAt || '-'}</td>
-      <td data-label="Actions"><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openViewModal('messages',${i})">View</button><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteMessage(${i})">Delete</button></div></td>
-    </tr>`,
-  empty: 'No messages saved yet. Generate one from any Message button and it will appear here.',
-};
 TABLES.scripts = {
   search: ['title','label','use','hook','body','cta','notes','assetCaption'],
   extraFilter: (r) => {
@@ -5098,6 +5548,421 @@ async function checkAgentReplies() {
   } catch (_) { toast('Could not reach server', 'danger'); }
 }
 
+
+// ══════════════════════════════════════════
+//  AVATAR HELPERS
+// ══════════════════════════════════════════
+const AVATAR_COLORS = ['#C9A84C','#4d7fd5','#00c2c7','#e05555','#4caf78','#d4900a','#9b59b6','#e67e22'];
+function avatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < (name||'').length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function avatarInitials(name) {
+  const parts = (name || '?').trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || '?').toUpperCase();
+}
+function detectSegment(creator) {
+  const t = (creator.creatorType || creator.style || '').toLowerCase();
+  if (/mom|family|parent|kid|child|famill/i.test(t)) return 'family';
+  if (/pastor|minister|faith\s*lead|church|bishop|preach/i.test(t)) return 'faithLeaders';
+  return creator.segment || 'misc';
+}
+
+// ══════════════════════════════════════════
+//  CAROUSEL RENDERING
+// ══════════════════════════════════════════
+const carouselState = { youngAdults:{idx:0,gender:''}, family:{idx:0,gender:''}, faithLeaders:{idx:0,gender:''}, misc:{idx:0,gender:''} };
+
+function setGenderFilter(seg, g, btn) {
+  carouselState[seg].gender = (g === 'all') ? '' : g;
+  const tab = document.getElementById('tab-' + seg);
+  if (tab) tab.querySelectorAll('.gender-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCarousel(seg);
+}
+
+function renderCreatorCard(r, seg, idx) {
+  const initials = avatarInitials(r.name);
+  const color    = avatarColor(r.name);
+  const st       = normalizeStatus(r.status);
+  const stCls    = { 'Accepted':'accepted','Pending':'pending','Declined':'declined','Not Reached Yet':'' }[st] || '';
+  const url      = r.url ? `<a href="${r.url}" target="_blank" rel="noopener noreferrer" class="ext-link" onclick="event.stopPropagation()">Profile</a>` : '';
+  return `
+  <div class="creator-card" onclick="openCreatorCardModal('${seg}',${idx})">
+    <div class="card-avatar-row">
+      <div class="creator-avatar" style="background:${color}">${initials}</div>
+      <div>
+        <div class="card-name">${r.name || '—'}</div>
+        <div class="card-platform">${r.platform || '—'} ${r.followers ? '· ' + r.followers : ''}</div>
+      </div>
+    </div>
+    ${r.creatorType ? `<div class="card-type">${r.creatorType}</div>` : ''}
+    ${r.email ? `<div class="card-followers" style="font-size:11px;">${r.email}</div>` : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+      <span class="card-status-chip ${stCls}">${st}</span>
+      ${url}
+    </div>
+  </div>`;
+}
+
+function renderCarousel(seg) {
+  const srch = (document.getElementById('srch-' + seg) || {}).value?.toLowerCase() || '';
+  const gf   = carouselState[seg]?.gender || '';
+  let data   = (db[seg] || []).filter(r => {
+    const ms = !srch || ['name','platform','creatorType','email','summary'].some(f => (r[f]||'').toLowerCase().includes(srch));
+    const mg = !gf || r.gender === gf;
+    return ms && mg;
+  });
+
+  const carousel = document.getElementById('carousel-' + seg);
+  if (!carousel) return;
+  if (data.length === 0) {
+    carousel.innerHTML = `<div class="carousel-empty">No creators yet. Add one or approve from the Approval tab.</div>`;
+    updateCarouselDots(seg, 0, 0);
+    updateCarouselStats(seg);
+    updateNameChips(seg, []);
+    return;
+  }
+
+  carousel.innerHTML = data.map((r, i) => {
+    const origIdx = (db[seg] || []).indexOf(r);
+    return renderCreatorCard(r, seg, origIdx);
+  }).join('');
+  updateCarouselDots(seg, 0, data.length);
+  updateCarouselStats(seg);
+  updateNameChips(seg, data);
+}
+
+function updateNameChips(seg, data) {
+  const jumper = document.getElementById('jumper-' + seg);
+  if (!jumper) return;
+  jumper.innerHTML = data.map((r, i) =>
+    `<span class="name-chip" onclick="scrollCarouselToIdx('${seg}',${i})">${r.name || '?'}</span>`
+  ).join('');
+}
+
+function updateCarouselStats(seg) {
+  const el = document.getElementById('stats-' + seg);
+  if (!el) return;
+  const d = db[seg] || [];
+  const total    = d.length;
+  const accepted = d.filter(r => normalizeStatus(r.status) === 'Accepted').length;
+  const pending  = d.filter(r => normalizeStatus(r.status) === 'Pending').length;
+  el.innerHTML = `
+    <div class="stat-chip"><strong>${total}</strong> Total</div>
+    <div class="stat-chip"><strong>${accepted}</strong> Accepted</div>
+    <div class="stat-chip"><strong>${pending}</strong> Pending</div>`;
+  const cnt = document.getElementById('cnt-' + seg);
+  if (cnt) cnt.textContent = total;
+}
+
+function updateCarouselDots(seg, activeIdx, total) {
+  const dotsEl = document.getElementById('dots-' + seg);
+  if (!dotsEl) return;
+  const shown = Math.min(total, 12);
+  dotsEl.innerHTML = Array.from({ length: shown }, (_, i) =>
+    `<div class="carousel-dot${i === activeIdx ? ' active' : ''}" onclick="scrollCarouselToIdx('${seg}',${i})"></div>`
+  ).join('');
+}
+
+function scrollCarouselToIdx(seg, idx) {
+  const carousel = document.getElementById('carousel-' + seg);
+  if (!carousel) return;
+  const cards = carousel.querySelectorAll('.creator-card');
+  if (cards[idx]) {
+    cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    updateCarouselDots(seg, idx, cards.length);
+  }
+}
+
+function carouselPrev(seg) {
+  const carousel = document.getElementById('carousel-' + seg);
+  if (!carousel) return;
+  const cards = carousel.querySelectorAll('.creator-card');
+  const w     = cards[0] ? cards[0].offsetWidth + 14 : 234;
+  carousel.scrollBy({ left: -w, behavior: 'smooth' });
+}
+function carouselNext(seg) {
+  const carousel = document.getElementById('carousel-' + seg);
+  if (!carousel) return;
+  const cards = carousel.querySelectorAll('.creator-card');
+  const w     = cards[0] ? cards[0].offsetWidth + 14 : 234;
+  carousel.scrollBy({ left: w, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════
+//  CREATOR CARD MODAL
+// ══════════════════════════════════════════
+function openCreatorCardModal(seg, idx) {
+  const r = (db[seg] || [])[idx];
+  if (!r) return;
+  document.getElementById('cc-segment').value   = seg;
+  document.getElementById('cc-idx').value       = idx;
+  document.getElementById('cc-modal-name').textContent = r.name || 'Creator';
+  document.getElementById('cc-name').value      = r.name || '';
+  document.getElementById('cc-platform').value  = r.platform || 'TikTok';
+  document.getElementById('cc-gender').value    = r.gender || '';
+  document.getElementById('cc-type').value      = r.creatorType || '';
+  document.getElementById('cc-followers').value = r.followers || '';
+  document.getElementById('cc-offer').value     = r.offer || '';
+  document.getElementById('cc-email').value     = r.email || '';
+  document.getElementById('cc-phone').value     = r.phone || '';
+  document.getElementById('cc-url').value       = r.url || '';
+  document.getElementById('cc-summary').value   = r.summary || '';
+  document.getElementById('cc-status').value    = normalizeStatus(r.status);
+  const avEl = document.getElementById('cc-avatar');
+  avEl.textContent  = avatarInitials(r.name);
+  avEl.style.background = avatarColor(r.name);
+  document.getElementById('cc-del-btn').style.display = 'inline-flex';
+  document.getElementById('modal-creatorCard').classList.add('active');
+}
+
+function saveCreatorCard() {
+  const seg = document.getElementById('cc-segment').value;
+  const idx = parseInt(document.getElementById('cc-idx').value, 10);
+  if (!db[seg]) return;
+  const record = db[seg][idx];
+  if (!record) return;
+  record.name        = document.getElementById('cc-name').value.trim();
+  record.platform    = document.getElementById('cc-platform').value;
+  record.gender      = document.getElementById('cc-gender').value;
+  record.creatorType = document.getElementById('cc-type').value.trim();
+  record.followers   = document.getElementById('cc-followers').value.trim();
+  record.offer       = document.getElementById('cc-offer').value;
+  record.email       = document.getElementById('cc-email').value.trim();
+  record.phone       = document.getElementById('cc-phone').value.trim();
+  record.url         = normalizeExternalUrl(document.getElementById('cc-url').value.trim());
+  record.summary     = document.getElementById('cc-summary').value.trim();
+  record.status      = document.getElementById('cc-status').value;
+  persistLocalState();
+  renderCarousel(seg);
+  updatePanelCounts();
+  closeModal('modal-creatorCard');
+  toast('Creator saved.');
+  queueSharedSync();
+}
+
+function deleteCreatorCard() {
+  const seg = document.getElementById('cc-segment').value;
+  const idx = parseInt(document.getElementById('cc-idx').value, 10);
+  if (!db[seg] || idx < 0) return;
+  db[seg].splice(idx, 1);
+  persistLocalState();
+  renderCarousel(seg);
+  updatePanelCounts();
+  closeModal('modal-creatorCard');
+  toast('Creator deleted.', 'warn');
+  queueSharedSync();
+}
+
+function viewCreatorDraft() {
+  const seg = document.getElementById('cc-segment').value;
+  const idx = parseInt(document.getElementById('cc-idx').value, 10);
+  const r   = (db[seg] || [])[idx];
+  if (!r || !r.draft) { toast('No draft saved for this creator.', 'warn'); return; }
+  const w = window.open('', '_blank');
+  w.document.write(`<pre style="font-family:sans-serif;padding:24px;max-width:640px;white-space:pre-wrap;">${r.draft}</pre>`);
+}
+
+// ══════════════════════════════════════════
+//  APPROVAL FLOW
+// ══════════════════════════════════════════
+function approvalItemId(batchFile, targetIdx) {
+  return `${batchFile}::${targetIdx}`;
+}
+function getApprovedIds() {
+  return new Set((db.pendingApprovals || []).filter(p => p.status !== 'pending').map(p => p.id));
+}
+function getPendingItems() {
+  const approvedIds = getApprovedIds();
+  const all = [];
+  (agentRunsCache || []).forEach(run => {
+    (run.targets || []).forEach((t, i) => {
+      const id = approvalItemId(run.batchFile || run.id || run.date, i);
+      if (!approvedIds.has(id)) all.push({ id, run, target: t, idx: i });
+    });
+  });
+  return all;
+}
+
+async function loadApprovalData(forceRefresh) {
+  if (forceRefresh || !agentRunsCache) await loadAgentLog();
+  renderApprovalTab();
+  updatePanelCounts();
+}
+
+function renderApprovalTab() {
+  const items   = getPendingItems();
+  const listEl  = document.getElementById('approval-pending-list');
+  const cntEl   = document.getElementById('cnt-approval-pending');
+  const statP   = document.getElementById('agent-stat-pending');
+  const statA   = document.getElementById('agent-stat-approved');
+  if (cntEl)  cntEl.textContent  = items.length;
+  if (statP)  statP.textContent  = items.length;
+  const approved = (db.pendingApprovals || []).filter(p => p.status === 'approved').length;
+  if (statA)  statA.textContent  = approved;
+  if (!listEl) return;
+  if (items.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--muted);font-size:13px;">All caught up — no pending creators.</p>';
+    return;
+  }
+  listEl.innerHTML = items.map(({ id, target }) => {
+    const name = target.name || target.handle || 'Unknown';
+    const meta = [target.platform, target.followers, target.creatorType].filter(Boolean).join(' · ');
+    return `
+    <div class="approval-item">
+      <div class="creator-avatar" style="background:${avatarColor(name)};flex-shrink:0;">${avatarInitials(name)}</div>
+      <div class="approval-item-info">
+        <div class="approval-item-name">${name}</div>
+        <div class="approval-item-meta">${meta || 'No metadata'}</div>
+      </div>
+      <div class="approval-item-actions">
+        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${id.replace(/'/g,"\\'")}', ${JSON.stringify(target).replace(/"/g,'&quot;')})">Approve</button>
+        <button class="btn btn-outline btn-sm" onclick="rejectTarget('${id.replace(/'/g,"\\'")}')">Reject</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openApproveModal(id, target) {
+  const name = target.name || target.handle || 'Unknown';
+  const meta = [target.platform, target.followers, target.creatorType].filter(Boolean).join(' · ');
+  document.getElementById('ap-modal-id').value = id;
+  document.getElementById('ap-modal-creator').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+      <div class="creator-avatar" style="background:${avatarColor(name)}">${avatarInitials(name)}</div>
+      <div>
+        <div style="font-weight:700;font-size:14px;">${name}</div>
+        <div style="font-size:12px;color:var(--muted);">${meta}</div>
+      </div>
+    </div>`;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('selected'));
+  const autoSeg = detectSegment(target);
+  const autoBtn = document.querySelector(`.seg-btn[data-seg="${autoSeg}"]`);
+  if (autoBtn) autoBtn.classList.add('selected');
+  document.getElementById('modal-approve').classList.add('active');
+}
+
+function selectApprovalSegment(seg) {
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.seg === seg));
+}
+
+function confirmApprove() {
+  const id  = document.getElementById('ap-modal-id').value;
+  const seg = document.querySelector('.seg-btn.selected')?.dataset.seg;
+  if (!seg) { toast('Pick a segment first.', 'warn'); return; }
+  const item = getPendingItems().find(p => p.id === id);
+  if (!item) { closeModal('modal-approve'); return; }
+  const creator = normalizeCreatorItem({ ...item.target, segment: seg });
+  if (!db[seg]) db[seg] = [];
+  db[seg].push(creator);
+  db.pendingApprovals = db.pendingApprovals || [];
+  db.pendingApprovals.push({ id, status: 'approved', segment: seg, decidedAt: new Date().toISOString() });
+  persistLocalState();
+  renderCarousel(seg);
+  updatePanelCounts();
+  renderApprovalTab();
+  closeModal('modal-approve');
+  toast(`Added to ${seg === 'youngAdults' ? 'Young Adults' : seg === 'faithLeaders' ? 'Faith Leaders' : seg === 'family' ? 'Moms & Family' : 'Misc'}.`);
+  queueSharedSync();
+}
+
+function rejectTarget(id) {
+  db.pendingApprovals = db.pendingApprovals || [];
+  db.pendingApprovals.push({ id, status: 'rejected', decidedAt: new Date().toISOString() });
+  persistLocalState();
+  updatePanelCounts();
+  renderApprovalTab();
+  renderPanel();
+  toast('Creator rejected.', 'warn');
+}
+
+function rejectFromModal() {
+  const id = document.getElementById('ap-modal-id').value;
+  rejectTarget(id);
+  closeModal('modal-approve');
+}
+
+// ══════════════════════════════════════════
+//  RIGHT APPROVAL PANEL
+// ══════════════════════════════════════════
+let panelOpen = false;
+
+function toggleApprovalPanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('approval-panel').classList.toggle('open', panelOpen);
+  if (panelOpen) renderPanel();
+}
+
+function updatePanelCounts() {
+  const items = getPendingItems();
+  const n     = items.length;
+  const badge = document.getElementById('ap-badge');
+  const count = document.getElementById('ap-count');
+  const cnt   = document.getElementById('cnt-approval');
+  if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'block' : 'none'; }
+  if (count) count.textContent = n;
+  if (cnt)   cnt.textContent   = n;
+  if (panelOpen) renderPanel();
+}
+
+function renderPanel() {
+  const body  = document.getElementById('ap-body');
+  if (!body) return;
+  const items = getPendingItems();
+  if (items.length === 0) {
+    body.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:8px 0;">No creators pending.</p>';
+    return;
+  }
+  body.innerHTML = items.map(({ id, target }) => {
+    const name = target.name || target.handle || 'Unknown';
+    const meta = [target.platform, target.followers].filter(Boolean).join(' · ');
+    return `
+    <div class="ap-item">
+      <div class="ap-item-name">${name}</div>
+      <div class="ap-item-meta">${meta || 'No metadata'}</div>
+      <div class="ap-item-actions">
+        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${id.replace(/'/g,"\\'")}', ${JSON.stringify(target).replace(/"/g,'&quot;')})">Approve</button>
+        <button class="btn btn-outline btn-sm" onclick="rejectTarget('${id.replace(/'/g,"\\'")}')">Reject</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  WEEKLY GOAL BANNER
+// ══════════════════════════════════════════
+function renderWeeklyGoal() {
+  const g     = db.weeklyGoal || { videos: 0, statics: 0, target: 60 };
+  const total = (g.videos || 0) + (g.statics || 0);
+  const pct   = Math.min(100, Math.round((total / (g.target || 60)) * 100));
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el[typeof el.value !== 'undefined' && el.tagName === 'INPUT' ? 'value' : 'textContent'] = val; };
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const fill = document.getElementById('wg-bar-fill');
+  if (fill) fill.style.width = pct + '%';
+  setTxt('wg-bar-label', `${total} / ${g.target || 60} creatives this week`);
+  const vi = document.getElementById('wg-input-videos');
+  const si = document.getElementById('wg-input-statics');
+  const ti = document.getElementById('wg-input-target');
+  if (vi) vi.value = g.videos  || 0;
+  if (si) si.value = g.statics || 0;
+  if (ti) ti.value = g.target  || 60;
+  setTxt('wg-total-num', total);
+  setTxt('wg-video-num', g.videos || 0);
+  setTxt('wg-pct', pct + '%');
+}
+
+function weeklyGoalUpdate() {
+  const g = db.weeklyGoal || { videos: 0, statics: 0, target: 60 };
+  g.videos  = parseInt(document.getElementById('wg-input-videos')?.value  || 0, 10);
+  g.statics = parseInt(document.getElementById('wg-input-statics')?.value || 0, 10);
+  g.target  = parseInt(document.getElementById('wg-input-target')?.value  || 60, 10);
+  db.weeklyGoal = g;
+  persistLocalState();
+  renderWeeklyGoal();
+  queueSharedSync();
+}
 
 // ══════════════════════════════════════════
 //  INIT
