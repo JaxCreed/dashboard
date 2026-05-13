@@ -5695,11 +5695,12 @@ function carouselNext(seg) {
 //  CREATOR CARD MODAL
 // ══════════════════════════════════════════
 function openCreatorCardModal(seg, idx) {
-  const r = (db[seg] || [])[idx];
-  if (!r) return;
+  const isNew = idx < 0;
+  const r = isNew ? {} : (db[seg] || [])[idx];
+  if (!isNew && !r) return;
   document.getElementById('cc-segment').value   = seg;
   document.getElementById('cc-idx').value       = idx;
-  document.getElementById('cc-modal-name').textContent = r.name || 'Creator';
+  document.getElementById('cc-modal-name').textContent = isNew ? 'Add Creator' : (r.name || 'Creator');
   document.getElementById('cc-name').value      = r.name || '';
   document.getElementById('cc-platform').value  = r.platform || 'TikTok';
   document.getElementById('cc-gender').value    = r.gender || '';
@@ -5712,9 +5713,9 @@ function openCreatorCardModal(seg, idx) {
   document.getElementById('cc-summary').value   = r.summary || '';
   document.getElementById('cc-status').value    = normalizeStatus(r.status);
   const avEl = document.getElementById('cc-avatar');
-  avEl.textContent  = avatarInitials(r.name);
-  avEl.style.background = avatarColor(r.name);
-  document.getElementById('cc-del-btn').style.display = 'inline-flex';
+  avEl.textContent  = isNew ? '+' : avatarInitials(r.name);
+  avEl.style.background = isNew ? 'var(--primary)' : avatarColor(r.name);
+  document.getElementById('cc-del-btn').style.display = isNew ? 'none' : 'inline-flex';
   document.getElementById('modal-creatorCard').classList.add('active');
 }
 
@@ -5722,8 +5723,9 @@ function saveCreatorCard() {
   const seg = document.getElementById('cc-segment').value;
   const idx = parseInt(document.getElementById('cc-idx').value, 10);
   if (!db[seg]) return;
-  const record = db[seg][idx];
-  if (!record) return;
+  const isNew = idx < 0;
+  const record = isNew ? {} : db[seg][idx];
+  if (!isNew && !record) return;
   record.name        = document.getElementById('cc-name').value.trim();
   record.platform    = document.getElementById('cc-platform').value;
   record.gender      = document.getElementById('cc-gender').value;
@@ -5735,11 +5737,15 @@ function saveCreatorCard() {
   record.url         = normalizeExternalUrl(document.getElementById('cc-url').value.trim());
   record.summary     = document.getElementById('cc-summary').value.trim();
   record.status      = document.getElementById('cc-status').value;
+  if (isNew) {
+    record.addedAt = new Date().toISOString();
+    db[seg].push(record);
+  }
   persistLocalState();
   renderCarousel(seg);
   updatePanelCounts();
   closeModal('modal-creatorCard');
-  toast('Creator saved.');
+  toast(isNew ? 'Creator added.' : 'Creator saved.');
   queueSharedSync();
 }
 
@@ -5768,22 +5774,8 @@ function viewCreatorDraft() {
 // ══════════════════════════════════════════
 //  APPROVAL FLOW
 // ══════════════════════════════════════════
-function approvalItemId(batchFile, targetIdx) {
-  return `${batchFile}::${targetIdx}`;
-}
-function getApprovedIds() {
-  return new Set((db.pendingApprovals || []).filter(p => p.status !== 'pending').map(p => p.id));
-}
 function getPendingItems() {
-  const approvedIds = getApprovedIds();
-  const all = [];
-  (agentRunsCache || []).forEach(run => {
-    (run.targets || []).forEach((t, i) => {
-      const id = approvalItemId(run.batchFile || run.id || run.date, i);
-      if (!approvedIds.has(id)) all.push({ id, run, target: t, idx: i });
-    });
-  });
-  return all;
+  return (db.pendingApprovals || []).filter(p => p.status === 'pending' && p.target);
 }
 
 async function loadApprovalData(forceRefresh) {
@@ -5807,9 +5799,12 @@ function renderApprovalTab() {
     listEl.innerHTML = '<p style="color:var(--muted);font-size:13px;">All caught up — no pending creators.</p>';
     return;
   }
-  listEl.innerHTML = items.map(({ id, target }) => {
-    const name = target.name || target.handle || 'Unknown';
-    const meta = [target.platform, target.followers, target.creatorType].filter(Boolean).join(' · ');
+  listEl.innerHTML = items.map(item => {
+    const t    = item.target;
+    const name = t.name || 'Unknown';
+    const meta = [t.platform, t.followers, t.creatorType].filter(Boolean).join(' · ');
+    const id   = item.id;
+    const tJson = JSON.stringify(t).replace(/"/g,'&quot;');
     return `
     <div class="approval-item">
       <div class="creator-avatar" style="background:${avatarColor(name)};flex-shrink:0;">${avatarInitials(name)}</div>
@@ -5818,7 +5813,7 @@ function renderApprovalTab() {
         <div class="approval-item-meta">${meta || 'No metadata'}</div>
       </div>
       <div class="approval-item-actions">
-        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${id.replace(/'/g,"\\'")}', ${JSON.stringify(target).replace(/"/g,'&quot;')})">Approve</button>
+        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${id.replace(/'/g,"\\'")}', ${tJson})">Approve</button>
         <button class="btn btn-outline btn-sm" onclick="rejectTarget('${id.replace(/'/g,"\\'")}')">Reject</button>
       </div>
     </div>`;
@@ -5852,30 +5847,35 @@ function confirmApprove() {
   const id  = document.getElementById('ap-modal-id').value;
   const seg = document.querySelector('.seg-btn.selected')?.dataset.seg;
   if (!seg) { toast('Pick a segment first.', 'warn'); return; }
-  const item = getPendingItems().find(p => p.id === id);
-  if (!item) { closeModal('modal-approve'); return; }
+  const itemIdx = (db.pendingApprovals || []).findIndex(p => p.id === id);
+  if (itemIdx < 0) { closeModal('modal-approve'); return; }
+  const item = db.pendingApprovals[itemIdx];
   const creator = normalizeCreatorItem({ ...item.target, segment: seg });
   if (!db[seg]) db[seg] = [];
   db[seg].push(creator);
-  db.pendingApprovals = db.pendingApprovals || [];
-  db.pendingApprovals.push({ id, status: 'approved', segment: seg, decidedAt: new Date().toISOString() });
+  db.pendingApprovals[itemIdx] = { ...item, status: 'approved', segment: seg, decidedAt: new Date().toISOString() };
   persistLocalState();
   renderCarousel(seg);
   updatePanelCounts();
   renderApprovalTab();
   closeModal('modal-approve');
-  toast(`Added to ${seg === 'youngAdults' ? 'Young Adults' : seg === 'faithLeaders' ? 'Faith Leaders' : seg === 'family' ? 'Moms & Family' : 'Misc'}.`);
+  const label = { youngAdults:'Young Adults', family:'Moms & Family', faithLeaders:'Faith Leaders', misc:'Misc' }[seg] || seg;
+  toast(`Added to ${label}.`);
   queueSharedSync();
 }
 
 function rejectTarget(id) {
   db.pendingApprovals = db.pendingApprovals || [];
-  db.pendingApprovals.push({ id, status: 'rejected', decidedAt: new Date().toISOString() });
+  const itemIdx = db.pendingApprovals.findIndex(p => p.id === id);
+  if (itemIdx >= 0) {
+    db.pendingApprovals[itemIdx] = { ...db.pendingApprovals[itemIdx], status: 'rejected', decidedAt: new Date().toISOString() };
+  }
   persistLocalState();
   updatePanelCounts();
   renderApprovalTab();
   renderPanel();
   toast('Creator rejected.', 'warn');
+  queueSharedSync();
 }
 
 function rejectFromModal() {

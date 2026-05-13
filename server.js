@@ -648,6 +648,44 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Agent pushes its batch results here so they appear in the Approval panel
+  if (req.method === 'POST' && url.pathname === '/api/agent-run') {
+    try {
+      const body = await collectBody(req);
+      const payload = JSON.parse(body || '{}');
+      const targets = Array.isArray(payload.targets) ? payload.targets : [];
+      if (targets.length === 0) {
+        sendJson(res, 400, { error: 'targets array is required and must not be empty' });
+        return;
+      }
+      const batchLabel = (typeof payload.batchName === 'string' && payload.batchName.trim()) || new Date().toISOString().slice(0, 10);
+      const now = new Date().toISOString();
+      const state = readState();
+      const newItems = targets.map((t, i) => ({
+        id: `${batchLabel}::${i}::${Math.random().toString(36).slice(2, 7)}`,
+        status: 'pending',
+        addedAt: now,
+        target: {
+          name:        (t.name || t.target || '').trim(),
+          platform:    t.platform || 'TikTok',
+          followers:   t.followers || '',
+          email:       t.found_email || t.email || '',
+          creatorType: t.creator_type || t.creatorType || 'Unknown',
+          summary:     t.summary || '',
+          subject:     t.subject || '',
+          draft:       t.draft || '',
+        },
+      }));
+      state.pendingApprovals = [...(state.pendingApprovals || []), ...newItems];
+      writeState(state);
+      console.log(`[agent-run] Added ${newItems.length} pending creator(s) from batch "${batchLabel}"`);
+      sendJson(res, 200, { ok: true, added: newItems.length, batchLabel });
+    } catch (err) {
+      sendJson(res, 400, { error: err.message || 'Failed to push agent run.' });
+    }
+    return;
+  }
+
   if (req.method === 'GET' && url.pathname === '/api/agent-queue') {
     sendJson(res, 200, { entries: readAgentQueue() });
     return;
