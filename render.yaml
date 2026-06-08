@@ -10,16 +10,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22
-      # Google Sheet (source of truth). Service account JSON, base64-encoded.
-      - key: GOOGLE_SA_JSON_B64
-        sync: false
-      - key: ORG_SHEET_ID
-        sync: false
-      # Gmail send + IMAP reply scan (Google Workspace app password).
-      - key: ORG_GMAIL_ADDRESS
-        sync: false
-      - key: ORG_GMAIL_APP_PASSWORD
-        sync: false
+      # Secrets + sheet ID live in this Render environment group:
+      #   GOOGLE_SA_JSON_B64, ORG_SHEET_ID, ORG_GMAIL_ADDRESS, ORG_GMAIL_APP_PASSWORD
+      - fromGroup: Jax Creed Variables
       - key: REPLY_TO
         value: Jax@usecreed.com
       - key: IMAP_HOST
