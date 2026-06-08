@@ -1,9 +1,14 @@
 {
   "name": "jax-dashboard-shared",
   "private": true,
-  "version": "1.0.0",
-  "description": "Shared dashboard server for Jax's Dashboard",
+  "version": "2.0.0",
+  "description": "Creed church/brand outreach CRM dashboard (Google Sheet + Gmail)",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "googleapis": "^144.0.0",
+    "nodemailer": "^6.9.16",
+    "imapflow": "^1.0.181"
   }
 }

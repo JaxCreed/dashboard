@@ -10,15 +10,20 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22
-      - key: SUPABASE_URL
+      # Google Sheet (source of truth). Service account JSON, base64-encoded.
+      - key: GOOGLE_SA_JSON_B64
         sync: false
-      - key: SUPABASE_ANON_KEY
+      - key: ORG_SHEET_ID
         sync: false
-      - key: SUPABASE_TABLE
-        value: dashboard_state
-      - key: SUPABASE_WORKSPACE_ID
-        value: main
-      - key: GEMINI_API_KEY
+      # Gmail send + IMAP reply scan (Google Workspace app password).
+      - key: ORG_GMAIL_ADDRESS
         sync: false
-      - key: GEMINI_MODEL
-        value: gemini-2.5-pro
+      - key: ORG_GMAIL_APP_PASSWORD
+        sync: false
+      - key: REPLY_TO
+        value: Jax@usecreed.com
+      - key: IMAP_HOST
+        value: imap.gmail.com
+      # Days after last touch before a contact is flagged "needs follow-up".
+      - key: FOLLOWUP_DAYS
+        value: 5
