@@ -312,6 +312,23 @@ async function sendFollowUp(pipeline, tab, rowNumber, templateId, customSubject,
   return { org: shaped.org, to, subject };
 }
 
+// Manually mark a row as followed up: no email, no Follow Up Count increment.
+// Records today's date so the row leaves the "needs follow-up" queue.
+async function markFollowedUp(tab, rowNumber) {
+  const data = cache[tab] || await getTab(tab);
+  const r = data.rows.find(x => x._row === rowNumber);
+  if (!r) throw new Error('row not found');
+  const shaped = shapeRow(r);
+  const today = new Date().toISOString().slice(0, 10);
+  const next = new Date(Date.now() + FOLLOWUP_DAYS * 86400000).toISOString().slice(0, 10);
+  await writeCells(tab, rowNumber, {
+    [COLS.lastFollowUp]: today,
+    [COLS.nextFollowUp]: next,
+    [COLS.followStatus]: `Marked followed up ${today}`,
+  });
+  return { org: shaped.org, markedAt: today };
+}
+
 async function scanReplies(pipelines, sinceDays = 30) {
   if (!GMAIL_ADDRESS || !GMAIL_APP_PASSWORD) throw new Error('Gmail is not configured.');
   const index = new Map(); // email -> {pipeline, tab, rowNumber, org}
@@ -493,6 +510,14 @@ const server = http.createServer(async (req, res) => {
       const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
       const { tab } = await getPipelineTab(pipeline);
       const result = await sendFollowUp(pipeline, tab, Number.parseInt(body.rowId, 10), body.templateId, body.subject, body.body);
+      return sendJson(res, 200, { ok: true, ...result });
+    }
+
+    if (req.method === 'POST' && pathname === '/api/mark-followed-up') {
+      const body = JSON.parse((await collectBody(req)) || '{}');
+      const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
+      const { tab } = await getPipelineTab(pipeline);
+      const result = await markFollowedUp(tab, Number.parseInt(body.rowId, 10));
       return sendJson(res, 200, { ok: true, ...result });
     }
 

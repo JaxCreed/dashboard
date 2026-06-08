@@ -280,6 +280,7 @@ function openDrawer(rowId) {
     <div class="field"><label>Notes</label><textarea id="dNotes">${esc(r.notes)}</textarea></div>
     <div class="row-actions">
       <button class="btn" onclick="saveRow(${rowId})">Save notes</button>
+      <button class="btn" onclick="markFollowedUp(${rowId})">Mark followed up</button>
       <button class="btn primary" onclick="openFollowUp(${rowId})">Send follow-up</button>
     </div>
     <div id="fuPanel"></div>
@@ -314,6 +315,15 @@ async function sendFollowUp(rowId) {
   const body = { pipeline: state.pipeline, rowId, subject: $('#fuSubject').value, body: $('#fuBody').value };
   try { const r = await api('/api/follow-up', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
     toast('Sent to ' + r.to); closeDrawer(); load(); } catch(e){ toast('Error: '+e.message); }
+}
+
+async function markFollowedUp(rowId) {
+  if (!confirm('Mark as followed up? This records today’s date but sends NO email and does NOT change the follow-up count.')) return;
+  try {
+    const r = await api('/api/mark-followed-up', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ pipeline: state.pipeline, rowId }) });
+    toast('Marked followed up: ' + r.org); closeDrawer(); load();
+  } catch(e){ toast('Error: '+e.message); }
 }
 
 // Bulk follow-up
