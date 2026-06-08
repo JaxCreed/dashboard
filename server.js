@@ -290,20 +290,25 @@ function fillTemplate(str, row) {
     .replace(/\{person\}/g, row.person || 'there');
 }
 
-async function sendFollowUp(pipeline, tab, rowNumber, templateId, customSubject, customBody) {
+async function sendFollowUp(pipeline, tab, rowNumber, templateId, customSubject, customBody, testTo) {
   const data = cache[tab] || await getTab(tab);
   const r = data.rows.find(x => x._row === rowNumber);
   if (!r) throw new Error('row not found');
   const shaped = shapeRow(r);
-  const to = String(shaped.email || '').trim();
+  const realTo = String(shaped.email || '').trim();
+  const test = String(testTo || '').trim();
+  const to = test || realTo;
   if (!to || !to.includes('@')) throw new Error(`no valid email for ${shaped.org}`);
 
   const templates = FOLLOWUP_TEMPLATES[pipeline] || FOLLOWUP_TEMPLATES.churches;
   const tpl = templates.find(t => t.id === templateId) || templates[0];
-  const subject = customSubject || fillTemplate(tpl.subject, shaped);
+  const subject = (test ? '[TEST] ' : '') + (customSubject || fillTemplate(tpl.subject, shaped));
   const body = customBody || fillTemplate(tpl.body, shaped);
 
   await mailer().sendMail({ from: GMAIL_ADDRESS, to, replyTo: REPLY_TO, subject, text: body });
+
+  // Test sends go to your own inbox: never write to the sheet or bump the count.
+  if (test) return { org: shaped.org, to, subject, test: true };
 
   const today = new Date().toISOString().slice(0, 10);
   const next = new Date(Date.now() + FOLLOWUP_DAYS * 86400000).toISOString().slice(0, 10);
@@ -513,7 +518,7 @@ const server = http.createServer(async (req, res) => {
       const body = JSON.parse((await collectBody(req)) || '{}');
       const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
       const { tab } = await getPipelineTab(pipeline);
-      const result = await sendFollowUp(pipeline, tab, Number.parseInt(body.rowId, 10), body.templateId, body.subject, body.body);
+      const result = await sendFollowUp(pipeline, tab, Number.parseInt(body.rowId, 10), body.templateId, body.subject, body.body, body.testTo);
       return sendJson(res, 200, { ok: true, ...result });
     }
 
