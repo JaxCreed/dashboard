@@ -2,3 +2,4 @@ node_modules/
 render-data/
 __dashboard_check.js
 .env
+_GOOGLE_SA_JSON_B64.txt
