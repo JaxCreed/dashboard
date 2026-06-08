@@ -272,6 +272,27 @@ async function writeCells(tab, rowNumber, updates) {
   if (row) Object.assign(row.values, updates);
 }
 
+// Append a brand new contact row to a pipeline tab, mapped onto the tab header.
+async function appendRow(tab, fields) {
+  const data = await getTab(tab, true); // refresh so we have the live header
+  const header = data.header;
+  if (!header.length) throw new Error('sheet header missing');
+  const row = header.map(col => {
+    const v = fields[col];
+    return v === undefined || v === null ? '' : String(v);
+  });
+  const sheets = sheetsClient();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: tab,
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [row] },
+  });
+  await getTab(tab, true); // refresh cache so the new row shows immediately
+  return { org: fields[COLS.org] || '' };
+}
+
 // ── Email send / reply scan ──────────────────────────────────────────────────
 
 function mailer() {
@@ -505,7 +526,8 @@ const server = http.createServer(async (req, res) => {
       const pipeline = pipelineOf(url);
       const { tab } = await getPipelineTab(pipeline);
       const map = {
-        notes: COLS.notes, followStatus: COLS.followStatus, area: COLS.area,
+        org: COLS.org, person: COLS.person, position: COLS.position, email: COLS.email,
+        reachOut: COLS.reachOut, notes: COLS.notes, followStatus: COLS.followStatus, area: COLS.area,
         userCount: COLS.userCount, bounced: COLS.bounced, replied: COLS.replied, type: COLS.type,
       };
       const allowed = {};
@@ -519,6 +541,32 @@ const server = http.createServer(async (req, res) => {
       const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
       const { tab } = await getPipelineTab(pipeline);
       const result = await sendFollowUp(pipeline, tab, Number.parseInt(body.rowId, 10), body.templateId, body.subject, body.body, body.testTo);
+      return sendJson(res, 200, { ok: true, ...result });
+    }
+
+    if (req.method === 'POST' && pathname === '/api/orgs') {
+      const body = JSON.parse((await collectBody(req)) || '{}');
+      const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
+      const org = String(body.org || '').trim();
+      if (!org) return sendJson(res, 400, { error: 'Org name is required.' });
+      const { tab } = await getPipelineTab(pipeline);
+      const today = new Date().toISOString().slice(0, 10);
+      const fields = {
+        [COLS.org]: org,
+        [COLS.person]: String(body.person || '').trim(),
+        [COLS.position]: String(body.position || '').trim(),
+        [COLS.email]: String(body.email || '').trim(),
+        [COLS.area]: String(body.area || body.city || '').trim(),
+        [COLS.type]: String(body.type || (pipeline === 'brands' ? 'Brand' : 'Church')).trim(),
+        [COLS.notes]: String(body.notes || '').trim(),
+        [COLS.followStatus]: 'Not contacted',
+        [COLS.reachOut]: typeof body.reachOut === 'string' ? body.reachOut.trim()
+          : (body.reachOut ? today : ''),
+      };
+      if (pipeline === 'top' && body.userCount !== undefined && body.userCount !== '') {
+        fields[COLS.userCount] = body.userCount;
+      }
+      const result = await appendRow(tab, fields);
       return sendJson(res, 200, { ok: true, ...result });
     }
 

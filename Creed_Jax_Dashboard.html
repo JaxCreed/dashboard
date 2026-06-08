@@ -99,6 +99,7 @@
   </div>
   <div class="spacer"></div>
   <span class="muted" id="syncInfo"></span>
+  <button class="btn primary" id="addBtn">+ Add contact</button>
   <button class="btn" id="scanBtn">Scan replies</button>
   <button class="btn" id="syncBtn">Sync sheet</button>
 </header>
@@ -168,6 +169,7 @@ async function api(path, opts) {
 }
 
 const STATUS_LABEL = { not_contacted:'Not contacted', emailed:'Emailed', needs_followup:'Needs follow-up', replied:'Replied', bounced:'Bounced' };
+const PIPE_LABEL = { churches:'Churches', brands:'Brands', top:'Top Churches' };
 
 function renderStats(s) {
   const order = ['total','not_contacted','emailed','needs_followup','replied','bounced'];
@@ -272,14 +274,14 @@ function openDrawer(rowId) {
     <div class="field"><label>Area</label><div class="v">${esc(r.area)||'<span class="muted">-</span>'}</div></div>
     <div class="field"><label>Reach out date</label><div class="v">${esc(r.reachOut)||'-'}</div></div>
     <div class="field"><label>Follow-ups sent</label><div class="v">${r.followCount||0}${r.lastFollowUp?(' (last '+esc(r.lastFollowUp)+')'):''}${r.nextFollowUp?(' &middot; next due '+esc(r.nextFollowUp)):''}</div></div>
-    ${state.pipeline==='top' ? `<div class="field"><label>User count</label><input id="dUserCount" value="${esc(r.userCount)}"></div>` : ''}
+    ${state.pipeline==='top' ? `<div class="field"><label>User count</label><div class="v">${esc(r.userCount)||'-'}</div></div>` : ''}
     <div class="field"><label>Replies received (${replies.length})</label>
       ${replies.length ? replies.map(rp=>`<div class="reply"><div class="meta">${esc(rp.subject)} &middot; ${rp.date?new Date(rp.date).toLocaleDateString():''}</div><div class="snip">${esc(rp.snippet||'')}</div></div>`).join('')
         : '<div class="muted">No replies matched yet. Run "Scan replies".</div>'}
     </div>
-    <div class="field"><label>Notes</label><textarea id="dNotes">${esc(r.notes)}</textarea></div>
+    <div class="field"><label>Notes</label><div class="v" style="white-space:pre-wrap">${esc(r.notes)||'<span class="muted">-</span>'}</div></div>
     <div class="row-actions">
-      <button class="btn" onclick="saveRow(${rowId})">Save notes</button>
+      <button class="btn" onclick="editContact(${rowId})">Edit contact</button>
       <button class="btn" onclick="markFollowedUp(${rowId})">Mark followed up</button>
       <button class="btn primary" onclick="openFollowUp(${rowId})">Send follow-up</button>
     </div>
@@ -289,11 +291,60 @@ function openDrawer(rowId) {
 }
 function closeDrawer() { $('#drawer').classList.remove('open'); $('#drawerBg').classList.remove('open'); }
 
-async function saveRow(rowId) {
-  const body = { notes: $('#dNotes').value };
-  if ($('#dUserCount')) body.userCount = $('#dUserCount').value;
-  try { await api('/api/orgs/' + rowId + '?pipeline=' + state.pipeline, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    toast('Saved to sheet'); load(); } catch(e){ toast('Error: '+e.message); }
+// Shared Add/Edit form. rowId null => add new contact.
+function renderContactForm(rowId) {
+  const r = (rowId != null) ? state.rows.find(x => x.rowId === rowId) : {};
+  const isTop = state.pipeline === 'top';
+  const drawer = $('#drawer');
+  const field = (id, label, val, type) =>
+    `<div class="field"><label>${label}</label><input id="${id}" ${type==='date'?'type="date"':''} value="${esc(val||'')}"></div>`;
+  drawer.innerHTML = `
+    <button class="btn sm" style="float:right" onclick="closeDrawer()">Close</button>
+    <h2>${rowId != null ? 'Edit contact' : 'Add contact'}</h2>
+    <div class="muted">${esc(PIPE_LABEL[state.pipeline] || state.pipeline)} pipeline</div>
+    ${field('eOrg', 'Org name *', r.org)}
+    ${field('ePerson', 'Person name', r.person)}
+    ${field('ePosition', 'Person position', r.position)}
+    ${field('eEmail', 'Email', r.email)}
+    ${field('eArea', isTop ? 'City / Area' : 'Area', r.area)}
+    ${isTop ? field('eUserCount', 'User count', r.userCount) : ''}
+    ${field('eReachOut', 'Reach out date', r.reachOut, 'date')}
+    <div class="field"><label>Notes</label><textarea id="eNotes">${esc(r.notes||'')}</textarea></div>
+    <div class="row-actions">
+      ${rowId != null
+        ? `<button class="btn primary" onclick="saveContact(${rowId})">Save changes</button>
+           <button class="btn" onclick="openDrawer(${rowId})">Cancel</button>`
+        : `<button class="btn primary" onclick="saveContact(null)">Add contact</button>
+           <button class="btn" onclick="closeDrawer()">Cancel</button>`}
+    </div>`;
+  $('#drawerBg').classList.add('open'); drawer.classList.add('open');
+}
+function editContact(rowId) { renderContactForm(rowId); }
+function openAddContact() { renderContactForm(null); }
+
+async function saveContact(rowId) {
+  const body = {
+    pipeline: state.pipeline,
+    org: $('#eOrg').value.trim(),
+    person: $('#ePerson').value.trim(),
+    position: $('#ePosition').value.trim(),
+    email: $('#eEmail').value.trim(),
+    area: $('#eArea').value.trim(),
+    notes: $('#eNotes').value,
+  };
+  if ($('#eUserCount')) body.userCount = $('#eUserCount').value.trim();
+  if ($('#eReachOut')) body.reachOut = $('#eReachOut').value;
+  if (!body.org) return toast('Org name is required.');
+  try {
+    if (rowId != null) {
+      await api('/api/orgs/' + rowId + '?pipeline=' + state.pipeline, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      toast('Saved to sheet');
+    } else {
+      await api('/api/orgs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      toast('Contact added');
+    }
+    closeDrawer(); load();
+  } catch(e){ toast('Error: '+e.message); }
 }
 
 function openFollowUp(rowId) {
@@ -342,6 +393,9 @@ $('#bulkSend').onclick = async () => {
 };
 $('#bulkClear').onclick = () => { state.selected.clear(); updateBulk();
   $('#tbody').querySelectorAll('.rowchk').forEach(cb=>cb.checked=false); const s=$('#selAll'); if(s)s.checked=false; };
+
+// Add contact
+$('#addBtn').onclick = openAddContact;
 
 // Sync + scan
 $('#syncBtn').onclick = async () => {
