@@ -52,16 +52,20 @@ const FOLLOWUP_TEMPLATES = {
   churches: [
     {
       id: 'church-1',
-      label: 'Follow-up 1 (placeholder)',
-      subject: 'Following up - Creed for {org}',
+      label: 'Follow-up 1',
+      subject: 'Follow-Up with Creed Bible App',
       body:
         'Hi {person},\n\n' +
-        'Just circling back on my note about Creed and {org}. ' +
-        'We help churches reach and disciple their people through a free Bible app, ' +
-        'and I would love to find a few minutes to show you how it could serve your congregation.\n\n' +
-        'Would you be open to a quick call this week or next?\n\n' +
-        'Happy creating,\nJax J\nJax@usecreed.com\nInstagram.com/J.xjohnson\n\n' +
-        '[PLACEHOLDER COPY - update before real sends]',
+        'Circling back on my earlier note about Creed and {org}. ' +
+        'My name is Jax, and I lead church partnerships for Creed (https://usecreed.com), ' +
+        'a free Bible app built to help churches attract new congregants, retain the ones they have, ' +
+        'and open up new revenue streams, all at no cost to your church.\n\n' +
+        'Many of your members are very likely already using Creed as part of their daily walk with God, ' +
+        'and we would love to help you reach and disciple them directly through the app. ' +
+        'It is a simple way to stay connected with your congregation between Sundays and keep your people in the Word all week long.\n\n' +
+        'Would you be open to a quick call this week or next? I would love to understand your current pain points, ' +
+        'show you how our products work, and see how we can start adding value to {org}.\n\n' +
+        'God Bless,\nJax\nCreed Labs\nJax@usecreed.com',
     },
   ],
   brands: [
