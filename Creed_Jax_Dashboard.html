@@ -53,6 +53,7 @@
   .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
   .pill.not_contacted { background: #2a2f3a; color: var(--muted); }
   .pill.emailed { background: rgba(74,163,255,.15); color: var(--blue); }
+  .pill.dmd { background: rgba(191,90,242,.16); color: #bf5af2; }
   .pill.needs_followup { background: rgba(255,176,32,.15); color: var(--amber); }
   .pill.replied { background: rgba(52,199,89,.16); color: var(--green); }
   .pill.bounced { background: rgba(255,92,92,.16); color: var(--red); }
@@ -113,6 +114,7 @@
     <option value="">All statuses</option>
     <option value="not_contacted">Not contacted</option>
     <option value="emailed">Emailed</option>
+    <option value="dmd">DM'd</option>
     <option value="needs_followup">Needs follow-up</option>
     <option value="replied">Replied</option>
     <option value="bounced">Bounced</option>
@@ -168,11 +170,11 @@ async function api(path, opts) {
   return j;
 }
 
-const STATUS_LABEL = { not_contacted:'Not contacted', emailed:'Emailed', needs_followup:'Needs follow-up', replied:'Replied', bounced:'Bounced' };
+const STATUS_LABEL = { not_contacted:'Not contacted', emailed:'Emailed', dmd:"DM'd", needs_followup:'Needs follow-up', replied:'Replied', bounced:'Bounced' };
 const PIPE_LABEL = { churches:'Churches', brands:'Brands', top:'Top Churches' };
 
 function renderStats(s) {
-  const order = ['total','not_contacted','emailed','needs_followup','replied','bounced'];
+  const order = ['total','not_contacted','emailed','dmd','needs_followup','replied','bounced'];
   let html = order.map(k => {
     const sel = (k !== 'total' && state.status === k) ? ' sel' : '';
     const click = k === 'total' ? '' : ` data-status="${k}"`;
@@ -282,6 +284,7 @@ function openDrawer(rowId) {
     <div class="field"><label>Notes</label><div class="v" style="white-space:pre-wrap">${esc(r.notes)||'<span class="muted">-</span>'}</div></div>
     <div class="row-actions">
       <button class="btn" onclick="editContact(${rowId})">Edit contact</button>
+      <button class="btn" onclick="markDmd(${rowId})">Mark DM'd</button>
       <button class="btn" onclick="markFollowedUp(${rowId})">Mark followed up</button>
       <button class="btn primary" onclick="openFollowUp(${rowId})">Send follow-up</button>
     </div>
@@ -302,6 +305,16 @@ function renderContactForm(rowId) {
     <button class="btn sm" style="float:right" onclick="closeDrawer()">Close</button>
     <h2>${rowId != null ? 'Edit contact' : 'Add contact'}</h2>
     <div class="muted">${esc(PIPE_LABEL[state.pipeline] || state.pipeline)} pipeline</div>
+    ${rowId == null ? `
+    <details style="margin:12px 0">
+      <summary style="cursor:pointer;color:var(--blue)">Add multiple at once (paste a list)</summary>
+      <div class="placeholder-note">One contact per line. Separate fields with commas or tabs, in this order:<br>
+        <b>Org${isTop?', User count':''}, Person, Position, Email, ${isTop?'City':'Area'}</b><br>
+        Only Org is required; leave later fields blank or omit them.</div>
+      <textarea id="bulkText" placeholder="Grace Community Church, Pastor John, Lead Pastor, john@grace.org, Dallas&#10;Hope Chapel,,,info@hopechapel.org,Austin" style="min-height:120px;font-family:monospace;font-size:12px"></textarea>
+      <div class="row-actions"><button class="btn primary" onclick="saveBulk()">Add all from list</button></div>
+      <div class="muted" style="margin:6px 0 14px">Or add a single contact below.</div>
+    </details>` : ''}
     ${field('eOrg', 'Org name *', r.org)}
     ${field('ePerson', 'Person name', r.person)}
     ${field('ePosition', 'Person position', r.position)}
@@ -321,6 +334,32 @@ function renderContactForm(rowId) {
 }
 function editContact(rowId) { renderContactForm(rowId); }
 function openAddContact() { renderContactForm(null); }
+
+function parseBulk(text, isTop) {
+  const contacts = [];
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    const parts = line.split(line.includes('\t') ? '\t' : ',').map(s => s.trim());
+    const c = isTop
+      ? { org: parts[0], userCount: parts[1] || '', person: parts[2] || '', position: parts[3] || '', email: parts[4] || '', area: parts[5] || '' }
+      : { org: parts[0], person: parts[1] || '', position: parts[2] || '', email: parts[3] || '', area: parts[4] || '' };
+    if (c.org) contacts.push(c);
+  }
+  return contacts;
+}
+
+async function saveBulk() {
+  const text = $('#bulkText') ? $('#bulkText').value : '';
+  const contacts = parseBulk(text, state.pipeline === 'top');
+  if (!contacts.length) return toast('No valid lines (each needs an org name).');
+  if (!confirm(`Add ${contacts.length} contact${contacts.length===1?'':'s'} to ${PIPE_LABEL[state.pipeline]}?`)) return;
+  try {
+    const r = await api('/api/orgs/bulk', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ pipeline: state.pipeline, contacts }) });
+    toast(`Added ${r.added}${r.skipped?`, skipped ${r.skipped}`:''}`); closeDrawer(); load();
+  } catch(e){ toast('Error: '+e.message); }
+}
 
 async function saveContact(rowId) {
   const body = {
@@ -374,6 +413,15 @@ async function markFollowedUp(rowId) {
     const r = await api('/api/mark-followed-up', { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ pipeline: state.pipeline, rowId }) });
     toast('Marked followed up: ' + r.org); closeDrawer(); load();
+  } catch(e){ toast('Error: '+e.message); }
+}
+
+async function markDmd(rowId) {
+  if (!confirm("Mark as DM'd? Records today as the reach-out date. Use this for contacts you messaged directly (e.g. Instagram) instead of email.")) return;
+  try {
+    await api('/api/mark-dmd', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ pipeline: state.pipeline, rowId }) });
+    toast("Marked DM'd"); closeDrawer(); load();
   } catch(e){ toast('Error: '+e.message); }
 }
 

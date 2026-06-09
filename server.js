@@ -201,6 +201,7 @@ function deriveStatus(v) {
   if (truthy(v[COLS.replied])) return 'replied';
   const reach = v[COLS.reachOut];
   const followStatus = String(v[COLS.followStatus] || '').toLowerCase();
+  if (followStatus.includes("dm'd") || followStatus.startsWith('dm ') || followStatus === 'dm') return 'dmd';
   const contacted = (reach && String(reach).trim()) || followStatus.includes('email');
   if (!contacted) return 'not_contacted';
   const lastTouch = v[COLS.lastFollowUp] || v[COLS.reachOut];
@@ -291,6 +292,29 @@ async function appendRow(tab, fields) {
   });
   await getTab(tab, true); // refresh cache so the new row shows immediately
   return { org: fields[COLS.org] || '' };
+}
+
+// Append many contacts in a single sheet write.
+async function appendRows(tab, fieldsList) {
+  const data = await getTab(tab, true);
+  const header = data.header;
+  if (!header.length) throw new Error('sheet header missing');
+  const values = fieldsList.map(fields =>
+    header.map(col => {
+      const v = fields[col];
+      return v === undefined || v === null ? '' : String(v);
+    }));
+  if (!values.length) return { added: 0 };
+  const sheets = sheetsClient();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: tab,
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values },
+  });
+  await getTab(tab, true);
+  return { added: values.length };
 }
 
 // ── Email send / reply scan ──────────────────────────────────────────────────
@@ -502,7 +526,7 @@ const server = http.createServer(async (req, res) => {
       const pipeline = pipelineOf(url);
       const { data } = await getPipelineTab(pipeline);
       const all = data.rows.map(shapeRow);
-      const stats = { total: all.length, not_contacted: 0, emailed: 0, replied: 0, bounced: 0, needs_followup: 0 };
+      const stats = { total: all.length, not_contacted: 0, emailed: 0, dmd: 0, replied: 0, bounced: 0, needs_followup: 0 };
       all.forEach(r => { stats[r.status] = (stats[r.status] || 0) + 1; });
       if (pipeline === 'top') stats.totalUsers = all.reduce((s, r) => s + (Number(r.userCount) || 0), 0);
       return sendJson(res, 200, stats);
@@ -568,6 +592,46 @@ const server = http.createServer(async (req, res) => {
       }
       const result = await appendRow(tab, fields);
       return sendJson(res, 200, { ok: true, ...result });
+    }
+
+    if (req.method === 'POST' && pathname === '/api/orgs/bulk') {
+      const body = JSON.parse((await collectBody(req)) || '{}');
+      const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
+      const { tab } = await getPipelineTab(pipeline);
+      const list = Array.isArray(body.contacts) ? body.contacts : [];
+      const fieldsList = [];
+      for (const c of list) {
+        const org = String(c.org || '').trim();
+        if (!org) continue;
+        const f = {
+          [COLS.org]: org,
+          [COLS.person]: String(c.person || '').trim(),
+          [COLS.position]: String(c.position || '').trim(),
+          [COLS.email]: String(c.email || '').trim(),
+          [COLS.area]: String(c.area || c.city || '').trim(),
+          [COLS.type]: pipeline === 'brands' ? 'Brand' : 'Church',
+          [COLS.notes]: String(c.notes || '').trim(),
+          [COLS.followStatus]: 'Not contacted',
+        };
+        if (pipeline === 'top' && c.userCount) f[COLS.userCount] = c.userCount;
+        fieldsList.push(f);
+      }
+      if (!fieldsList.length) return sendJson(res, 400, { error: 'No valid contacts (org name required on each line).' });
+      const result = await appendRows(tab, fieldsList);
+      return sendJson(res, 200, { ok: true, ...result, skipped: list.length - fieldsList.length });
+    }
+
+    if (req.method === 'POST' && pathname === '/api/mark-dmd') {
+      const body = JSON.parse((await collectBody(req)) || '{}');
+      const pipeline = (body.pipeline && TABS[body.pipeline]) ? body.pipeline : 'churches';
+      const { tab } = await getPipelineTab(pipeline);
+      const rowNumber = Number.parseInt(body.rowId, 10);
+      const today = new Date().toISOString().slice(0, 10);
+      await writeCells(tab, rowNumber, {
+        [COLS.reachOut]: today,
+        [COLS.followStatus]: `DM'd ${today}`,
+      });
+      return sendJson(res, 200, { ok: true, markedAt: today });
     }
 
     if (req.method === 'POST' && pathname === '/api/mark-followed-up') {
